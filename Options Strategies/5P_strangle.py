@@ -2,10 +2,12 @@
 # Update scripmaster file every week
 import numpy as np
 import pandas as pd
-from time import sleep
+from time import sleep, strftime
 from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from cred import *
+from datetime import datetime 
+now=datetime.now()
 main_str="BANKNIFTY 02 SEP 2021 "
 main_str_format = "BANKNIFTY 02 Sep 2021 "
 main_str_pe = main_str+"PE "
@@ -168,7 +170,7 @@ while True:
         if Total_value_new<Total_value_old:
             Stop_loss=Total_value_new*1.15
             Total_value_old=Total_value_new
-        if Total_value_new>Stop_loss:
+        if Total_value_new>Stop_loss or now.strftime('%H %M')=='15 15':
             #square off all positions
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00'])), quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
