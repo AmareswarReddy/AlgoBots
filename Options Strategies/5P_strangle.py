@@ -22,14 +22,14 @@ if day!=0:
     Current_PE_strikeprice=input('enter the holding pe strike price (eg:34100) :')
 script=pd.read_csv('scripmaster-csv-format.csv')
 cred={
-    "APP_NAME":"5P56936208",
-    "APP_SOURCE":"2179",
-    "USER_ID":"w6MJ1dw5Yd0",
-    "PASSWORD":"V7JkGTUudjt",
-    "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
-    "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
+    "APP_NAME":,
+    "APP_SOURCE":,
+    "USER_ID":,
+    "PASSWORD":,
+    "USER_KEY":,
+    "ENCRYPTION_KEY":
     }
-Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwarvinay1@A',dob='19700701', cred=cred)
+Client = FivePaisaClient(email='@gmail.com', passwd='Password',dob='YYYYMMDD', cred=cred)
 Client.login()
 #%%
 #NOTE : Symbol has to be in the same format as specified in the example below.
