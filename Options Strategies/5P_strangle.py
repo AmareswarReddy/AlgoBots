@@ -92,12 +92,12 @@ PE_req=req_list_PE[PE_index_strikeprice]
 #%%
 if day!=0:
     for i in range(0,len(req_list_CE)):
-        if req_list_CE[i]==Current_CE_strikeprice:
-            CE_req=req_list_CE
+        if req_list_CE[i]['StrikePrice']==str(Current_CE_strikeprice):
+            CE_req=req_list_CE[i]
             break
     for j in range(0,len(req_list_PE)):
-        if req_list_PE[j]==Current_PE_strikeprice:
-            PE_req=req_list_PE
+        if req_list_PE[j]['StrikePrice']==str(Current_PE_strikeprice):
+            PE_req=req_list_PE[j]
             break
 
 Total_value_old=float('inf')
@@ -130,7 +130,7 @@ while True:
                 Client.place_order(test_order)
                 
                 #sell pe which is 80 to 95% of ce
-                scripcode_=str(int(script[script['Expiry']==expiry_format+' 14:30:00'][script['StrikeRate']==live_PE_lastrate[PE_index_strikeprice]][script['CpType']=='PE']['Scripcode']))
+                scripcode_=str(int(script[script['Expiry']==expiry_format+' 14:30:00'][script['StrikeRate']==req_list_PE_strikeprice[PE_index_strikeprice]][script['CpType']=='PE']['Scripcode']))
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=25,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 PE_req = req_list_PE[PE_index_strikeprice]
@@ -160,12 +160,12 @@ while True:
                 Client.place_order(test_order)
                 
                 #sell pe which is 80 to 95% of ce
-                scripcode_=str(int(script[script['Expiry']==expiry_format+' 14:30:00'][script['StrikeRate']==live_CE_lastrate[CE_index_strikeprice]][script['CpType']=='CE']['Scripcode']))
+                scripcode_=str(int(script[script['Expiry']==expiry_format+' 14:30:00'][script['StrikeRate']==req_list_CE_strikeprice[CE_index_strikeprice]][script['CpType']=='CE']['Scripcode']))
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=25,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 CE_req = req_list_CE[CE_index_strikeprice]
                 break
-    if CE_req['StrikePrice']==PE_req['StrikePrice']:
+    if CE_req['StrikePrice']==PE_req['StrikePrice'] or (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] )<=100):
         Total_value_new=ce_lastrate+pe_lastrate
         if Total_value_new<Total_value_old:
             Stop_loss=Total_value_new*1.15
