@@ -14,6 +14,8 @@ main_str_pe = main_str+"PE "
 main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
+money_in_account = input('enter the amount of money in the account in lakhs(Eg: 2)')
+lots = int(np.floor(money_in_account/1.5)*25)
 expiry = "20210902"
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
@@ -84,7 +86,7 @@ strategy=strategies(user="@gmail.com", passw="PASSWORD", dob="YYYYMMDD",cred=cre
 #short_strangle(<symbol>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
 #strategy.short_strangle('banknifty',[str(PE_lower),str(CE_upper)],'25','20210902','D')
 #iron_condor(<symbol>,<List of buy strike prices>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
-strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],'25',expiry,'D')
+strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
 positions= Client.positions()
 
 CE_req=req_list_CE[CE_index_strikeprice]
@@ -126,12 +128,12 @@ while True:
                     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
                 PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-0.89*ce_lastrate))
                 #exit pe
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=25,price=0,is_intraday=False,atmarket=True)
+                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
                 
                 #sell pe which is 80 to 95% of ce
                 scripcode_=str(int(script[script['Expiry']==expiry_format+' 14:30:00'][script['StrikeRate']==req_list_PE_strikeprice[PE_index_strikeprice]][script['CpType']=='PE']['Scripcode']))
-                test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=25,price=0,is_intraday=False,atmarket=True)
+                test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 PE_req = req_list_PE[PE_index_strikeprice]
                 break
@@ -156,12 +158,12 @@ while True:
                     live_CE_lastrate=live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
                 CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-0.89*pe_lastrate))
                 #exit pe
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=25,price=0,is_intraday=False,atmarket=True)
+                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
                 
                 #sell pe which is 80 to 95% of ce
                 scripcode_=str(int(script[script['Expiry']==expiry_format+' 14:30:00'][script['StrikeRate']==req_list_CE_strikeprice[CE_index_strikeprice]][script['CpType']=='CE']['Scripcode']))
-                test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=25,price=0,is_intraday=False,atmarket=True)
+                test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 CE_req = req_list_CE[CE_index_strikeprice]
                 break
@@ -173,13 +175,13 @@ while True:
         if Total_value_new>Stop_loss or now.strftime('%H %M')=='15 15':
             brk=1
             #square off all positions
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(CE_hedge)+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(CE_hedge)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
     if brk==1:
         break
