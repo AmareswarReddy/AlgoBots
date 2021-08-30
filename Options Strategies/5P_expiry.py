@@ -73,11 +73,13 @@ for i in range(0,len(awesome)):
     elif awesome[i]['ScripCode'] == int(on_scripcode):
         on_lastrate=awesome[i]['LTP']
 # if all orders are placed we should not get error in the next 2 lines
-lower_breakeven=strategy_lower_strikeprice+(lower_lastrate+upper_lastrate-2*on_lastrate)
-upper_breakeven=strategy_upper_strikeprice-(lower_lastrate+upper_lastrate-2*on_lastrate)
+lower_breakeven = strategy_lower_strikeprice+(lower_lastrate+upper_lastrate-2*on_lastrate)
+upper_breakeven = strategy_upper_strikeprice-(lower_lastrate+upper_lastrate-2*on_lastrate)
+SL_criteria_lower = (lower_breakeven+int(strategy_on_strikeprice))/2
+SL_criteria_upper = (upper_breakeven+int(strategy_on_strikeprice))/2
 #%%
 if hole==0:
-    scripcode_ce=str(int(script[script['FullName']==main_str_format+'CE '+strategy_on_strikeprice+'.00']['Scripcode']))
+    scripcode_ce = str(int(script[script['FullName']==main_str_format+'CE '+strategy_on_strikeprice+'.00']['Scripcode']))
     while True:
         req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]
         a=Client.fetch_market_feed(req_list_)
@@ -86,26 +88,68 @@ if hole==0:
             #adjustment begins with a sell order at (on_strikeprice pe)
             test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
+            while True:
+                req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]
+                a=Client.fetch_market_feed(req_list_)
+                x=a['Data'][0]['LastRate']
+                if x<=SL_criteria_lower:
+                    brk=1
+                    #square off all the positions
+                    
+                    break
+        if brk==1:
+            break
 
         elif x<=lower_breakeven+5:
             #adjustment begins with a sell order at (on_strikeprice ce)
             test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_ce, quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
+            while True:
+                req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]
+                a=Client.fetch_market_feed(req_list_)
+                x=a['Data'][0]['LastRate']
+                if x>=SL_criteria_upper:
+                    brk=1
+                    #square off all the positions
+                    break
+        if brk==1:
+            break
 elif hole==1:
-    scripcode_pe=str(int(script[script['FullName']==main_str_format+'PE '+strategy_on_strikeprice+'.00']['Scripcode']))
+    scripcode_pe = str(int(script[script['FullName']==main_str_format+'PE '+strategy_on_strikeprice+'.00']['Scripcode']))
     while True:
         req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]
         a=Client.fetch_market_feed(req_list_)
         x=a['Data'][0]['LastRate']
         if x >=upper_breakeven-5:
             #adjustment begins with a sell order at (on_strikeprice pe)
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=, quantity=25,price=0,is_intraday=False,atmarket=True)
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_pe, quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
+            while True:
+                req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]
+                a=Client.fetch_market_feed(req_list_)
+                x=a['Data'][0]['LastRate']
+                if x<=SL_criteria_lower:
+                    brk=1
+                    #square off all the positions
+                    break
+        if brk==1:
+            break
 
         elif x<=lower_breakeven+5:
             #adjustment begins with a sell order at (on_strikeprice ce)
             test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
+            while True:
+                req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]
+                a=Client.fetch_market_feed(req_list_)
+                x=a['Data'][0]['LastRate']
+                if x>=SL_criteria_upper:
+                    brk=1
+                    #square off all the positions
+                    break
+        if brk==1:
+            break
         
 # need to write exit of the strategy
+
 
