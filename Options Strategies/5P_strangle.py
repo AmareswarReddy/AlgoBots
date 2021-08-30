@@ -183,18 +183,3 @@ while True:
             Client.place_order(test_order)
     if brk==1:
         break
-
-
-
-
-            
-
-
-        
-
-
-
-
-
-    
-# %%
