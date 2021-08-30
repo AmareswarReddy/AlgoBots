@@ -171,6 +171,7 @@ while True:
             Stop_loss=Total_value_new*1.15
             Total_value_old=Total_value_new
         if Total_value_new>Stop_loss or now.strftime('%H %M')=='15 15':
+            brk=1
             #square off all positions
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
@@ -180,7 +181,8 @@ while True:
             Client.place_order(test_order)
             test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
-            break
+    if brk==1:
+        break
 
 
 
