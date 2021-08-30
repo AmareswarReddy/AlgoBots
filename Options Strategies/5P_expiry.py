@@ -18,7 +18,7 @@ cred={
     "USER_KEY":,
     "ENCRYPTION_KEY":
     }
-Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwarvinay1@A',dob='19700701', cred=cred)
+Client = FivePaisaClient(email=, passwd=,dob=, cred=cred)
 Client.login()
 #%%
 req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]
