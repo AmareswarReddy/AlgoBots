@@ -180,6 +180,7 @@ while True:
             Client.place_order(test_order)
             test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
+            break
 
 
 
