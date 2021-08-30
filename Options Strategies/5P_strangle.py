@@ -22,14 +22,14 @@ if day!=0:
     Current_PE_strikeprice=input('enter the holding pe strike price (eg:34100) :')
 script=pd.read_csv('scripmaster-csv-format.csv')
 cred={
-    "APP_NAME":,
-    "APP_SOURCE":,
-    "USER_ID":,
-    "PASSWORD":,
-    "USER_KEY":,
-    "ENCRYPTION_KEY":
+    "APP_NAME":"5P56936208",
+    "APP_SOURCE":"2179",
+    "USER_ID":"w6MJ1dw5Yd0",
+    "PASSWORD":"V7JkGTUudjt",
+    "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
+    "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
     }
-Client = FivePaisaClient(email='@gmail.com', passwd='password',dob='yyyymmdd', cred=cred)
+Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwarvinay1@A',dob='19700701', cred=cred)
 Client.login()
 #%%
 #NOTE : Symbol has to be in the same format as specified in the example below.
@@ -172,14 +172,15 @@ while True:
             Total_value_old=Total_value_new
         if Total_value_new>Stop_loss or now.strftime('%H %M')=='15 15':
             #square off all positions
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00']['ScripCode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+CE_req['StrikePrice']+'.00']['ScripCode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(CE_hedge)+'.00']['ScripCode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(CE_hedge)+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['ScripCode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['Scripcode'])), quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
+
 
 
 
