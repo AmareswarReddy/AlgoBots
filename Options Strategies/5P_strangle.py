@@ -165,7 +165,7 @@ while True:
                 Client.place_order(test_order2)
                 CE_req = req_list_CE[CE_index_strikeprice]
                 break
-    if CE_req['StrikePrice']==PE_req['StrikePrice'] or (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] )<=100):
+    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] )<=100):
         Total_value_new=ce_lastrate+pe_lastrate
         if Total_value_new<Total_value_old:
             Stop_loss=Total_value_new*1.15
