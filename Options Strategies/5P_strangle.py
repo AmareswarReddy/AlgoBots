@@ -13,14 +13,11 @@ main_str_pe = main_str+"PE "
 main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
-money_in_account = input('enter the amount of money in the account in lakhs(Eg: 2)')
-lots = int(np.floor(money_in_account/1.5)*25)
+money_in_account = input('enter the amount of money in the account in lakhs(Eg: 2) :')
+lots = int(np.floor(money_in_account/1.65)*25)
 expiry = "20210902"
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
-if day!=0:
-    Current_CE_strikeprice=input('enter the holding ce strike price (eg:36100) :')
-    Current_PE_strikeprice=input('enter the holding pe strike price (eg:34100) :')
 script=pd.read_csv('scripmaster-csv-format.csv')
 cred={
     "APP_NAME":,
@@ -38,6 +35,14 @@ Client.login()
 #N	C	999920005	BANKNIFTY 	EQ	1980-01-01 00:00:00	EQ	0	Z  BANKNIFTY                                         
 req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
 a=Client.fetch_market_feed(req_list_)
+#%%
+if day!=0:
+    pos=Client.positions()
+    for i in range(0, len(pos)):
+        if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['BuyQty']==0 and pos[i]['SellQty']!= 0 :
+            Current_PE_strikeprice=pos[i]['ScripName'][25:30]
+        elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['BuyQty']==0 and pos[i]['SellQty']!= 0 :
+            Current_CE_strikeprice=pos[i]['ScripName'][25:30]
 
 '''
 # Fetches holdings
