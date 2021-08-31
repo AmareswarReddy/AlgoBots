@@ -86,7 +86,8 @@ strategy=strategies(user="@gmail.com", passw="PASSWORD", dob="YYYYMMDD",cred=cre
 #short_strangle(<symbol>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
 #strategy.short_strangle('banknifty',[str(PE_lower),str(CE_upper)],'25','20210902','D')
 #iron_condor(<symbol>,<List of buy strike prices>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
-strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
+if day==0:
+    strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
 positions= Client.positions()
 
 CE_req=req_list_CE[CE_index_strikeprice]
