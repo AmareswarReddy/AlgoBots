@@ -7,7 +7,6 @@ from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
-now=datetime.now()
 main_str="BANKNIFTY 02 SEP 2021 "
 main_str_format = "BANKNIFTY 02 Sep 2021 "
 main_str_pe = main_str+"PE "
@@ -168,7 +167,8 @@ while True:
                 Client.place_order(test_order2)
                 CE_req = req_list_CE[CE_index_strikeprice]
                 break
-    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] )<=100):
+    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] )<=100) and now.strftime("%H:%M")=='15:15':
+        now=datetime.now()
         Total_value_new=ce_lastrate+pe_lastrate
         if Total_value_new<Total_value_old:
             Stop_loss=Total_value_new*1.15
