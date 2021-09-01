@@ -109,6 +109,7 @@ if day!=0:
 
 Total_value_old=float('inf')
 # %%
+brk=0
 while True:
     req_list_=[CE_req,PE_req]
     b=Client.fetch_market_feed(req_list_)
