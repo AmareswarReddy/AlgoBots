@@ -115,7 +115,7 @@ while True:
     ce_lastrate=b['Data'][0]['LastRate']
     pe_lastrate=b['Data'][1]['LastRate']
     positions= Client.positions()
-    if ce_lastrate>=2*pe_lastrate and CE_req['StrikePrice']-PE_req['StrikePrice']>100:
+    if ce_lastrate>=2*pe_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>100:
         for i in range(0,len(positions)):
             if req_list_[1]['Symbol']==str.upper(positions[i]['ScripName']):
                 awesome_ammu=i
@@ -145,7 +145,7 @@ while True:
         
 
 
-    elif pe_lastrate>=2*ce_lastrate and CE_req['StrikePrice']-PE_req['StrikePrice']>100:
+    elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>100:
         for i in range(0,len(positions)):
             if req_list_[0]['Symbol']==str.upper(positions[i]['ScripName']):
                 awesome_ammu=i
@@ -191,3 +191,4 @@ while True:
             Client.place_order(test_order)
     if brk==1:
         break
+# %%
