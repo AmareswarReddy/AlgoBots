@@ -111,11 +111,42 @@ Total_value_old=float('inf')
 # %%
 brk=0
 while True:
+    req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
+    a=Client.fetch_market_feed(req_list_)
+    x=a['Data'][0]['LastRate']
+    req_list_PE=[{"Exch":"N","ExchType":"D","Symbol":main_str_pe+str(int(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(int(x/100)*100),"OptionType":"PE"}]
+    req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(int(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(int(x/100)*100),"OptionType":"CE"}]
+    req_list_PE_strikeprice=[int(x/100)*100]
+    req_list_CE_strikeprice=[int(x/100)*100]
+    for i in range(1,25):
+        req_list_PE=req_list_PE+[{"Exch":"N","ExchType":"D","Symbol": main_str_pe+str(int(x/100)*100-i*100)+".00","Expiry":expiry,"StrikePrice":str(int(x/100)*100-i*100),"OptionType":"PE"}] 
+        req_list_PE_strikeprice=req_list_PE_strikeprice+[int(x/100)*100-i*100]
+        req_list_CE=req_list_CE+[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(int(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(int(x/100)*100+i*100),"OptionType":"CE"}] 
+        req_list_CE_strikeprice=req_list_CE_strikeprice+[int(x/100)*100+i*100]
+        live_PE=Client.fetch_market_feed(req_list_PE)
+        live_PE_lastrate=[]
+        live_CE_lastrate=[]
+        live_CE = Client.fetch_market_feed(req_list_CE)
+    positions = Client.positions()
+    for i in range(0, len(positions)):
+        if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['NetQty']<0 :
+            Current_PE_strikeprice=positions[i]['ScripName'][25:30]
+        elif positions[i]['ScripName'][:25] == main_str_format_ce and  positions[i]['NetQty']<0 :
+            Current_CE_strikeprice = positions[i]['ScripName'][25:30]
+    
+    for i in range(0,len(req_list_CE)):
+        if req_list_CE[i]['StrikePrice']==str(Current_CE_strikeprice):
+            CE_req=req_list_CE[i]
+            break
+    for j in range(0,len(req_list_PE)):
+        if req_list_PE[j]['StrikePrice']==str(Current_PE_strikeprice):
+            PE_req=req_list_PE[j]
+            break
     req_list_=[CE_req,PE_req]
     b=Client.fetch_market_feed(req_list_)
     ce_lastrate=b['Data'][0]['LastRate']
     pe_lastrate=b['Data'][1]['LastRate']
-    positions= Client.positions()
+
     if ce_lastrate>=2*pe_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>100:
         for i in range(0,len(positions)):
             if req_list_[1]['Symbol']==str.upper(positions[i]['ScripName']):
