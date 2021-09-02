@@ -173,6 +173,7 @@ while True:
                 Client.place_order(test_order2)
                 CE_req = req_list_CE[CE_index_strikeprice]
                 break
+    now=datetime.now()
     if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] )<=100) and now.strftime("%H:%M")=='15:15':
         now=datetime.now()
         Total_value_new=ce_lastrate+pe_lastrate
