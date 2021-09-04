@@ -5,20 +5,20 @@ from time import sleep
 from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from cred import *
-main_str="BANKNIFTY 02 SEP 2021 "
-main_str_format = "BANKNIFTY 02 Sep 2021 "
-expiry = "20210902"
+main_str="BANKNIFTY 09 SEP 2021 "
+main_str_format = "BANKNIFTY 09 Sep 2021 "
+expiry = "20210909"
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 script=pd.read_csv('scripmaster-csv-format.csv')
 cred={
-    "APP_NAME":,
-    "APP_SOURCE":,
-    "USER_ID":,
-    "PASSWORD":,
-    "USER_KEY":,
-    "ENCRYPTION_KEY":
-    }
-Client = FivePaisaClient(email=, passwd=,dob=, cred=cred)
+    "APP_NAME":"5P56936208",
+    "APP_SOURCE":"2179",
+    "USER_ID":"w6MJ1dw5Yd0",
+    "PASSWORD":"V7JkGTUudjt",
+    "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
+    "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
+        }
+Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwarvinay1@A',dob='19700701', cred=cred)
 Client.login()
 #%%
 req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]
@@ -73,8 +73,8 @@ for i in range(0,len(awesome)):
     elif awesome[i]['ScripCode'] == int(on_scripcode):
         on_lastrate=awesome[i]['LTP']
 # if all orders are placed we should not get error in the next 2 lines
-lower_breakeven = strategy_lower_strikeprice+(lower_lastrate+upper_lastrate-2*on_lastrate)
-upper_breakeven = strategy_upper_strikeprice-(lower_lastrate+upper_lastrate-2*on_lastrate)
+lower_breakeven = int(strategy_lower_strikeprice)+(lower_lastrate+upper_lastrate-2*on_lastrate)
+upper_breakeven = int(strategy_upper_strikeprice)-(lower_lastrate+upper_lastrate-2*on_lastrate)
 SL_criteria_lower = (lower_breakeven+int(strategy_on_strikeprice))/2
 SL_criteria_upper = (upper_breakeven+int(strategy_on_strikeprice))/2
 #%%
