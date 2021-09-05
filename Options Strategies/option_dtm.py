@@ -3,4 +3,3 @@
 #manual check on banknifty greeks for different strikeprices mainly gamma
 # Black Scholes formula implimentation. ref:  youtube series: khan academy black scholes formula
 
- 
