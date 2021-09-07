@@ -55,9 +55,6 @@ Client.positions()
 Client.order_book()
 '''
 #%%
-"""
-let the nifty bank is trading at 36000
-"""
 #x = input('Bank Nifty Value on the day of taking the trades')
 x=a['Data'][0]['LastRate']
 req_list_PE=[{"Exch":"N","ExchType":"D","Symbol":main_str_pe+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"PE"}]
@@ -92,9 +89,10 @@ strategy=strategies(user="vinaykumar7295@gmail.com", passw="godofwarvinay1@A", d
 #iron_condor(<symbol>,<List of buy strike prices>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
 if day==0:
     strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
-positions= Client.positions()
-CE_req=req_list_CE[CE_index_strikeprice]
-PE_req=req_list_PE[PE_index_strikeprice]
+    sleep(5)
+    positions = Client.positions()
+    CE_req = req_list_CE[CE_index_strikeprice]
+    PE_req = req_list_PE[PE_index_strikeprice]
 #%%
 if day!=0:
     for i in range(0,len(req_list_CE)):
