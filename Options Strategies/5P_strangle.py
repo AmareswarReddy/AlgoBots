@@ -144,6 +144,7 @@ while True:
     pe_lastrate=b['Data'][1]['LastRate']
 
     if ce_lastrate>=2*pe_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>100:
+        #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in pe_lastrate will be far lower than the increase in ce_lastrate when stock price increases from the price it is now trading
         positions = Client.positions()
         for k in range(0,len(positions)):
             if req_list_[1]['Symbol']==str.upper(positions[k]['ScripName']):
@@ -174,6 +175,7 @@ while True:
 
 
     elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>100:
+        #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in ce_lastrate will be far lower than the increase in pe_lastrate when stock price decreases from the price it is now trading
         for k in range(0,len(positions)):
             if req_list_[0]['Symbol']==str.upper(positions[k]['ScripName']):
                 awesome_ammu=k
