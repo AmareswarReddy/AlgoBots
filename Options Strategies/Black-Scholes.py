@@ -26,7 +26,7 @@ from py_vollib.black_scholes import implied_volatility
 price = 115.6
 S = 36700
 K = 36900
-t = 0.5
+t = 0.1
 r = 0
 flag = 'c'
 
