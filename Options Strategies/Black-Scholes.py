@@ -26,6 +26,9 @@ from py_vollib.black_scholes import implied_volatility
 price = 115.6
 S = 36700
 K = 36900
+#considering a day has only 6 hours 15 min (total trading hours from 9:15am to 3:30pm)
+T = [12,30] #12 hours and 30 min
+t=(T[0]+T[1]/60)/(365*6.25)
 t = 0.1
 r = 0
 flag = 'c'
