@@ -1,6 +1,6 @@
 # Steps to install the library to implement Black-Scholes
 
-# Step 1 : Open Anaconda
+# Step 1 : Open Anaconda (Anaconda is not required. It is working fine with normal python interpretor. 'pip install py_vollib' is good to go  )
 # Step 2 : If multiple versions of Python or mutiple Virtual Python Environments are installed, activate the one you are using
 
 #Info : Suppose Python Virtual Env name is "py38", then run (conda activate py38); 
@@ -8,7 +8,7 @@
 # Step 3: Install the SWIG Dependency; Run (conda install swig)
 # Step 4: Install the Library; Run (pip install py_vollib)
 
-
+#%%
 from py_vollib import black_scholes
 from py_vollib.black_scholes import implied_volatility
 
