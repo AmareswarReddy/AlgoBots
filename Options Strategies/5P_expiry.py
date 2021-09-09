@@ -108,14 +108,15 @@ if hole==0:
         if profit>=potential_profit*0.75:
             #square off all the positions
             brk=1
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-            Client.place_order(test_order)
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-            Client.place_order(test_order)
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=50,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
             Client.place_order(test_order)
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+            Client.place_order(test_order)
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+            Client.place_order(test_order)
+            
             break
 
         if x >= upper_breakeven-5:
@@ -138,26 +139,28 @@ if hole==0:
                 if profit>=potential_profit*0.75:
                     #square off all the positions
                     brk=1
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=50,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    
                     break
                 elif x<=SL_criteria_lower:
                     brk=1
                     #square off all the positions
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=50,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    
                     break
         if brk==1:
             break
@@ -182,26 +185,28 @@ if hole==0:
                 if profit>=potential_profit*0.75:
                     #square off all the positions
                     brk=1
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=50,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
-                    break
-                elif x>=SL_criteria_upper:
-                    brk=1
-                    #square off all the positions
                     test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
+                    
+                    break
+                elif x>=SL_criteria_upper:
+                    brk=1
+                    #square off all the positions
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=50,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=scripcode_ce, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    
                     break
         if brk==1:
             break
@@ -231,26 +236,28 @@ elif hole==1:
                 if profit>=potential_profit*0.75:
                     #square off all the positions
                     brk=1
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=50,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
-                    break
-                elif x<=SL_criteria_lower:
-                    brk=1
-                    #square off all the positions
                     test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
+
+                    break
+                elif x<=SL_criteria_lower:
+                    brk=1
+                    #square off all the positions
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=50,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=scripcode_pe, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    
                     break
         if brk==1:
             break
@@ -275,26 +282,28 @@ elif hole==1:
                 if profit>=potential_profit*0.75:
                     #square off all the positions
                     brk=1
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=50,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    
                     break
                 elif x>=SL_criteria_upper:
                     brk=1
                     #square off all the positions
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
-                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
-                    Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=50,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
                     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=on_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
                     Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=lower_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=upper_scripcode, quantity=25,price=0,is_intraday=False,atmarket=True)
+                    Client.place_order(test_order)
+                    
                     break
         if brk==1:
             break
