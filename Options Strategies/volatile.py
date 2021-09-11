@@ -7,7 +7,7 @@ price = 115.6
 S = 36700
 K = 36900
 flag = 'c'
-holidays=int(input('enter number of holidays between expiry date and today date: '))
+holidays=   0  #int(input('enter number of holidays between expiry date and today date: '))
 def volatility(holidays,expiry,price,S,K,flag):
     r = 0
     today=str(datetime.today()).split()[0]
@@ -27,5 +27,3 @@ def volatility(holidays,expiry,price,S,K,flag):
     t=(T_one+T_zero)/(261*6.25)
     iv = implied_volatility.implied_volatility(price=price, S=S, K=K, t=t, r=r, flag=flag)
     return iv*100
-volatility(holidays=holidays,expiry=expiry,price=price,S=S,K=K,flag=flag)
-# %%
