@@ -6,6 +6,6 @@ import requests
 #Read Scrip Master
 url = "https://images.5paisa.com/website/scripmaster-csv-format.csv"
 r = requests.get(url)
-open('Scripmaster\scripmaster'+str(date.today())+'.csv', 'wb').write(r.content)
-filename = 'Scripmaster\scripmaster'+str(date.today())+'.csv'
+open('scripmaster-csv-format.csv', 'wb').write(r.content)
+filename = 'scripmaster-csv-format.csv'
 scrips = pd.read_csv(filename)
