@@ -181,7 +181,7 @@ while True:
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 PE_req = req_list_PE[PE_index_strikeprice]
-                loop_control==1
+                loop_control=1
                 break
         
 
@@ -211,7 +211,7 @@ while True:
                 #sell pe which is 80 to 95% of ce
                 atemp =  script[script['Expiry']==expiry_format+' 14:30:00']
                 atemp2=atemp[np.array(atemp['StrikeRate'])==req_list_CE_strikeprice[CE_index_strikeprice]]
-                scripcode_=str(int(atemp2[atemp2['CpType']=='PE']['Scripcode']))                
+                scripcode_=str(int(atemp2[atemp2['CpType']=='CE']['Scripcode']))                
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 CE_req = req_list_CE[CE_index_strikeprice]
