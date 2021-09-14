@@ -7,15 +7,15 @@ from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
-main_str="BANKNIFTY 09 SEP 2021 "
-main_str_format = "BANKNIFTY 09 Sep 2021 "
+main_str="BANKNIFTY 16 SEP 2021 "
+main_str_format = "BANKNIFTY 16 Sep 2021 "
 main_str_pe = main_str+"PE "
 main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
 lots = int(np.floor(money_in_account/1.65)*25)
-expiry = "20210909"
+expiry = "20210916"
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
 script=pd.read_csv('scripmaster-csv-format.csv')
@@ -104,7 +104,9 @@ if day!=0:
             PE_req=req_list_PE[j]
             break
 Total_value_old=float('inf')
-# %%
+PE_req_old = ' '
+CE_req_old = ' '
+
 brk=0
 while True:
     req=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
@@ -114,7 +116,6 @@ while True:
     req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"CE"}]
     req_list_PE_strikeprice=[round(x/100)*100]
     req_list_CE_strikeprice=[round(x/100)*100]
-    positions = Client.positions()
     for i in range(1,25):
         req_list_PE=req_list_PE+[{"Exch":"N","ExchType":"D","Symbol": main_str_pe+str(round(x/100)*100-i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100-i*100),"OptionType":"PE"}] 
         req_list_PE_strikeprice=req_list_PE_strikeprice+[round(x/100)*100-i*100]
@@ -124,6 +125,7 @@ while True:
     live_PE_lastrate=[]
     live_CE_lastrate=[]
     live_CE = Client.fetch_market_feed(req_list_CE)
+    positions = Client.positions()
     for i in range(0, len(positions)):
         if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['NetQty']<0 :
             Current_PE_strikeprice=positions[i]['ScripName'][25:30]
@@ -139,15 +141,22 @@ while True:
             PE_req=req_list_PE[j]
             break
     req_list_=[CE_req,PE_req]
+    if loop_control==1 and CE_req['StrikePrice']==CE_req_old and PE_req['StrikePrice']==PE_req_old:
+        print('Sorry for the inconvenience caused. Some of the orders were not executed. Please do the trades manually')
+        break
+    elif loop_control==1 and CE_req['StrikePrice']!=CE_req_old and PE_req['StrikePrice']==PE_req_old:
+        loop_control=0
+    elif loop_control==1 and CE_req['StrikePrice']==CE_req_old and PE_req['StrikePrice']!=PE_req_old:
+        loop_control=0
     b=Client.fetch_market_feed(req_list_)
     ce_lastrate=b['Data'][0]['LastRate']
     pe_lastrate=b['Data'][1]['LastRate']
 
     if ce_lastrate>=2*pe_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>100:
         #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in pe_lastrate will be far lower than the increase in ce_lastrate when stock price increases from the price it is now trading
-        positions = Client.positions()
+        PE_req_old = PE_req['StrikePrice']
         for k in range(0,len(positions)):
-            if req_list_[1]['Symbol']==str.upper(positions[k]['ScripName']):
+            if req_list_[1]['Symbol']==str.upper(positions[k]['ScripName']) and loop_control==0:
                 awesome_ammu=k   
                 a=Client.fetch_market_feed(req)
                 x=a['Data'][0]['LastRate']
@@ -172,20 +181,22 @@ while True:
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 PE_req = req_list_PE[PE_index_strikeprice]
+                loop_control==1
                 break
         
 
 
     elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>100:
         #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in ce_lastrate will be far lower than the increase in pe_lastrate when stock price decreases from the price it is now trading
+        CE_req_old = CE_req['StrikePrice']
         for k in range(0,len(positions)):
-            if req_list_[0]['Symbol']==str.upper(positions[k]['ScripName']):
+            if req_list_[0]['Symbol']==str.upper(positions[k]['ScripName']) and loop_control==0:
                 awesome_ammu=k
                 req=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
                 a=Client.fetch_market_feed(req)
                 x=a['Data'][0]['LastRate']
                 req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"CE"}]
-                req_list_PE_strikeprice=[round(x/100)*100]
+                req_list_CE_strikeprice=[round(x/100)*100]
                 for i in range(1,25):
                     req_list_CE=req_list_CE+[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100-i*100),"OptionType":"CE"}] 
                     req_list_CE_strikeprice=req_list_CE_strikeprice+[round(x/100)*100+i*100]
@@ -199,11 +210,12 @@ while True:
                 Client.place_order(test_order)
                 #sell pe which is 80 to 95% of ce
                 atemp =  script[script['Expiry']==expiry_format+' 14:30:00']
-                atemp2=atemp[np.array(atemp['StrikeRate'])==req_list_PE_strikeprice[PE_index_strikeprice]]
+                atemp2=atemp[np.array(atemp['StrikeRate'])==req_list_CE_strikeprice[CE_index_strikeprice]]
                 scripcode_=str(int(atemp2[atemp2['CpType']=='PE']['Scripcode']))                
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 CE_req = req_list_CE[CE_index_strikeprice]
+                loop_control=1
                 break
     now=datetime.now()
     if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))<=100 or now.strftime("%H:%M")=='15:15':
