@@ -7,15 +7,27 @@ from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
-main_str="BANKNIFTY 16 SEP 2021 "
-main_str_format = "BANKNIFTY 16 Sep 2021 "
+expiry = "20210916"
+temp={1:'JAN',
+            2:'FEB',
+            3:'MAR',
+            4:'APR',
+            5:'MAY',
+            6:'JUN',
+            7:'JUL',
+            8:'AUG',
+            9:'SEP',
+            10:'OCT',
+            11:'NOV',
+            12:'DEC'}
+main_str="BANKNIFTY "+expiry[-2:]+" "+temp[int(expiry[4:6])]+" "+expiry[:4]+" "
+main_str_format = main_str[:14]+main_str[14:16].lower()+main_str[16:] 
 main_str_pe = main_str+"PE "
 main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
 lots = int(np.floor(money_in_account/1.65)*25)
-expiry = "20210916"
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
 script=pd.read_csv('scripmaster-csv-format.csv')
