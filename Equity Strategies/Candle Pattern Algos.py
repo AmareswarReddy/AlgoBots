@@ -6,6 +6,7 @@ import talib
 from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from datetime import datetime 
+import numpy as np
 cred={
     "APP_NAME":"5P59470899",
     "APP_SOURCE":"6176",
