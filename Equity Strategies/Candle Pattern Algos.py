@@ -203,3 +203,87 @@ Dummy_variables = pd.get_dummies(df['candlestick_pattern'])
 concated_dummy_columns = pd.concat([df,Dummy_variables], axis=1)
 concated_dummy_columns.tail()
 
+#simple expected candle
+# function that helps to take trades for the next candle
+def f(df,candle_name):
+
+    profit=[]
+    loss=[]
+    try:
+        for i in range(0,len(df['candlestick_pattern'])):
+            temp=df['candlestick_pattern']
+            if temp[i] == candle_name and i!=len(temp):
+                if df['Close'][i+1]-df['Open'][i+1]>0:
+                    profit=profit+[df['Close'][i+1]-df['Open'][i+1]]
+                else :
+                    loss =loss+[df['Close'][i+1]-df['Open'][i+1]]
+        if len(loss)+len(profit)<=4:
+            raise Exception
+        bull_probability=len(profit)/(len(profit)+len(loss))
+        avg_profit=np.sum(np.array(profit))/len(profit)
+        avg_loss=-np.sum(np.array(loss))/len(loss)
+        if bull_probability*avg_profit>(1-bull_probability)*avg_loss:
+            a='going long is profitable'
+        elif bull_probability*avg_profit<(1-bull_probability)*avg_loss:
+            a='going short is profitable'
+        else :
+            a='no trade is profitable'
+    except Exception:
+        a='not enough data to conclude any decision'
+    return a
+f(df,candle_name='CDLBELTHOLD_Bull')
+
+def g(df,previous_candle_name,current_candle_name):
+    profit=[]
+    loss=[]
+    try:
+        for i in range(0,len(df['candlestick_pattern'])):
+            temp=df['candlestick_pattern']
+            if  temp[i]== previous_candle_name and temp[i+1] == current_candle_name and i<(len(temp)-1):
+                if df['Close'][i+2]-df['Open'][i+2]>0:
+                    profit=profit+[df['Close'][i+2]-df['Open'][i+2]]
+                else :
+                    loss =loss+[df['Close'][i+2]-df['Open'][i+2]]
+        if len(loss)+len(profit)<=4:
+            raise Exception
+        bull_probability=len(profit)/(len(profit)+len(loss))
+        avg_profit=np.sum(np.array(profit))/len(profit)
+        avg_loss=-np.sum(np.array(loss))/len(loss)
+        if bull_probability*avg_profit>(1-bull_probability)*avg_loss:
+            a='going long is profitable'
+        elif bull_probability*avg_profit<(1-bull_probability)*avg_loss:
+            a='going short is profitable'
+        else :
+            a='no trade is profitable'
+    except Exception:
+        a='not enough data to conclude'
+    return a
+g(df,previous_candle_name='NO_PATTERN',current_candle_name='CDLBELTHOLD_Bull')
+
+
+def h(df,primordial_candle_name,previous_candle_name,current_candle_name):
+    profit=[]
+    loss=[]
+    try:
+        for i in range(0,len(df['candlestick_pattern'])):
+            temp=df['candlestick_pattern']
+            if  temp[i]== primordial_candle_name and temp[i+1]==previous_candle_name and temp[i+2] == current_candle_name and i<(len(temp)-2):
+                if df['Close'][i+3]-df['Open'][i+3]>0:
+                    profit=profit+[df['Close'][i+3]-df['Open'][i+3]]
+            else :
+                    loss =loss+[df['Close'][i+3]-df['Open'][i+3]]
+            if len(loss)+len(profit)<=4:
+                raise Exception
+        bull_probability=len(profit)/(len(profit)+len(loss))
+        avg_profit=np.sum(np.array(profit))/len(profit)
+        avg_loss=-np.sum(np.array(loss))/len(loss)
+        if bull_probability*avg_profit>(1-bull_probability)*avg_loss:
+            a='going long is profitable'
+        elif bull_probability*avg_profit<(1-bull_probability)*avg_loss:
+            a='going short is profitable'
+        else :
+            a='no trade is profitable'
+    except Exception:
+        a='not enough data to conclude'
+    return a
+h(df,primordial_candle_name='NO_PATTERN',previous_candle_name='NO_PATTERN',current_candle_name='CDLBELTHOLD_Bull')
