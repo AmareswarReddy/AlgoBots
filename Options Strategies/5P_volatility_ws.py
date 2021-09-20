@@ -75,7 +75,8 @@ def volatility(holidays,expiry,price,S,K,flag):
 #%%
 def on_message(ws, message):
     print(message)
-    live_PE=Client.fetch_market_feed(req_list_PE)
+    
+'''    live_PE=Client.fetch_market_feed(req_list_PE)
     live_CE = Client.fetch_market_feed(req_list_CE)
     live_PE_lastrate=[]
     live_CE_lastrate=[]
@@ -99,13 +100,13 @@ def on_message(ws, message):
     summary_p=np.reshape(summary_p,(1,np.shape(summary_p)[0],np.shape(summary_p)[1]))
     call_data=np.concatenate((call_data,summary_c),axis=0)
     put_data=np.concatenate((put_data,summary_p),axis=0)
-    now=datetime.now()
-    print('hello')
+    now=datetime.now()'''
+    #print('hello')
 req_list=[]
 for i in range(0,len(PE_list)):
     req_list=req_list+[{ "Exch":"N","ExchType":"D","ScripCode":PE_scrips[i]}]
 for j in range(0,len(CE_list)):
-    req_list = req_list+[{"Exch":"N","ExchType":"D","ScripCode":CE_scrips[i]}]
+    req_list = req_list+[{"Exch":"N","ExchType":"D","ScripCode":CE_scrips[j]}]
 req_list=req_list+[{"Exch":"N","ExchType":"C","ScripCode":999920005}]
 # index of req_list greater than or equal to 49 is ce
 # index of req_list less than 49 is pe
