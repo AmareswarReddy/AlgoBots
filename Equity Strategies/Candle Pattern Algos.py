@@ -223,12 +223,12 @@ def f(df,candle_name):
         bull_probability=len(profit)/(len(profit)+len(loss))
         avg_profit=np.sum(np.array(profit))/len(profit)
         avg_loss=-np.sum(np.array(loss))/len(loss)
-        if bull_probability*avg_profit>(1-bull_probability)*avg_loss:
+        if bull_probability*avg_profit>2*(1-bull_probability)*avg_loss:
             #a='going long is profitable'
             a_rep=1
             if bull_probability>0.5:
               rating=rating+1
-        elif bull_probability*avg_profit<(1-bull_probability)*avg_loss:
+        elif bull_probability*avg_profit<2*(1-bull_probability)*avg_loss:
             #a='going short is profitable'
             a_rep=-1
             if (1-bull_probability)>0.5:
@@ -259,12 +259,12 @@ def g(df,previous_candle_name,current_candle_name):
         bull_probability=len(profit)/(len(profit)+len(loss))
         avg_profit=np.sum(np.array(profit))/len(profit)
         avg_loss=-np.sum(np.array(loss))/len(loss)
-        if bull_probability*avg_profit>(1-bull_probability)*avg_loss:
+        if bull_probability*avg_profit>2*(1-bull_probability)*avg_loss:
             #a='going long is profitable'
             a_rep=1
             if bull_probability>0.5:
               rating=rating+1
-        elif bull_probability*avg_profit<(1-bull_probability)*avg_loss:
+        elif bull_probability*avg_profit<2*(1-bull_probability)*avg_loss:
             #a='going short is profitable'
             a_rep=-1
             if (1-bull_probability)>0.5:
@@ -296,12 +296,12 @@ def h(df,primordial_candle_name,previous_candle_name,current_candle_name):
         bull_probability=len(profit)/(len(profit)+len(loss))
         avg_profit=np.sum(np.array(profit))/len(profit)
         avg_loss=-np.sum(np.array(loss))/len(loss)
-        if bull_probability*avg_profit>(1-bull_probability)*avg_loss:
+        if bull_probability*avg_profit>2*(1-bull_probability)*avg_loss:
             #a='going long is profitable'
             a_rep=1
             if bull_probability>0.5:
               rating=rating+1
-        elif bull_probability*avg_profit<(1-bull_probability)*avg_loss:
+        elif bull_probability*avg_profit<2*(1-bull_probability)*avg_loss:
             #a='going short is profitable'
             a_rep=-1
             if (1-bull_probability)>0.5:
