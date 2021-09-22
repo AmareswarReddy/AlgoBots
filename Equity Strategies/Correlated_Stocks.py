@@ -27,7 +27,7 @@ scripcode_to_Symbol = {}
 for index, row in scrip_codes.iterrows():
     scripcode_to_Symbol[row['Scripcode']] = row['Name']
     
- #Get only NSE listed stocks
+ #Get only NIFTY200  stocks
 nifty200 = pd.read_csv("ind_nifty200list (2).csv")
 nifty_with_200 = scrip_codes[scrip_codes['Name'].isin(nifty200['Symbol'])]
 
