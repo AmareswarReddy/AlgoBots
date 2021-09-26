@@ -36,7 +36,7 @@ Client.login()
 scripcode=999920005
 #Section 1
 # Identify the Candle type for each OHLC(Multiple candles are possible for a OHLC). A column os created for all the types of Candle Patterns found.
-data=Client.historical_data('N','C',scripcode,'15m','2021-04-17','2021-09-16')
+data=Client.historical_data('N','C',scripcode,'15m','2021-04-17','2021-09-15')
 candle_names = talib.get_function_groups()['Pattern Recognition']
 
 for candle in candle_names:
@@ -222,6 +222,7 @@ Dummy_variables = pd.get_dummies(df['candlestick_pattern'])
 concated_dummy_columns = pd.concat([df,Dummy_variables], axis=1)
 concated_dummy_columns.tail()
 temp=df
+
 #%%
 #simple expected candle
 # function that helps to take trades for the next candle
@@ -319,7 +320,7 @@ def h(df,primordial_candle_name,previous_candle_name,current_candle_name,intrade
 #running the program again to get recent data to test over
 #Section 1
 # Identify the Candle type for each OHLC(Multiple candles are possible for a OHLC). A column os created for all the types of Candle Patterns found.
-data=Client.historical_data('N','C',scripcode,'15m','2021-09-21','2021-09-24')
+data=Client.historical_data('N','C',scripcode,'15m','2021-09-21','2021-09-26')
 candle_names = talib.get_function_groups()['Pattern Recognition']
 
 for candle in candle_names:
@@ -372,7 +373,7 @@ for index, row in df.iterrows():
 # clean up candle columns
 df.drop(candle_names, axis = 1, inplace = True) 
 df1=df
-data=Client.historical_data('N','C',scripcode,'15m','2021-09-17','2021-09-21')
+data=Client.historical_data('N','C',scripcode,'15m','2021-09-16','2021-09-21')
 candle_names = talib.get_function_groups()['Pattern Recognition']
 
 for candle in candle_names:
@@ -456,67 +457,71 @@ def lead_trade(temp,intrade_period,risk_to_reward,current_candle_name,previous_c
 #plot1 is the test data progress
 #plot2 is the train data progress
 #intrade_period is int(x[0])
+#Eg: x=[1,3]
+#Eg: temp is 2020 jan to 2021 sep1,
+# df sep1 to sep5
+# df2 sep6 to sep10
 def find(x):
-  global plot1
-  global plot2
-  global item
-  global x_on_iter
-  global swarmsize
-  today_profit = 0
-  today_profit1=0
-  trades_taken = 0
-  intrade_period = int(x[0])
-  risk_to_reward = x[1]
-  for i in range(2,len(df['candlestick_pattern'])-intrade_period):
-      a=f(temp,df['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
-      a1=g(temp,df['candlestick_pattern'][i-1],df['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
-      a2=h(temp,df['candlestick_pattern'][i-2],df['candlestick_pattern'][i-1],df['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
-      #p_str = 'going long is profitable'
-      #l_str = 'going short is profitable'
-      if a>=0 and a1>=0 and a2>=0:
-          rating = a+a1+a2
-      elif a<=0 and a1<=0 and a2<=0:
-          rating = a+a1+a2
-      else:
-          rating=0
-      if df['candlestick_pattern'][i]!='NO_PATTERN':
-          if rating>0 :
-              trades_taken=trades_taken+1
-              today_profit=today_profit+df['Close'][i+intrade_period]-df['Open'][i+1]
-          elif rating<0 :
-              trades_taken=trades_taken+1
-              today_profit=today_profit+df['Open'][i+1]-df['Close'][i+intrade_period]
-  for i in range(2,len(df['candlestick_pattern'])-intrade_period):
-      b=f(temp,df1['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
-      b1=g(temp,df1['candlestick_pattern'][i-1],df1['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
-      b2=h(temp,df1['candlestick_pattern'][i-2],df1['candlestick_pattern'][i-1],df1['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
-      #p_str = 'going long is profitable'
-      #l_str = 'going short is profitable'
-      if b>=0 and b1>=0 and b2>=0:
-          rating1 = b+b1+b2
-      elif b<=0 and b1<=0 and b2<=0:
-          rating1 = b+b1+b2
-      else:
-          rating1=0
-      if df['candlestick_pattern'][i]!='NO_PATTERN':
-          if rating1>0 :
-              today_profit1=today_profit1+df['Close'][i+intrade_period]-df['Open'][i+1]
-          elif rating1<0 :
-              today_profit1=today_profit1+df['Open'][i+1]-df['Close'][i+intrade_period]
-  
-  index=int(item/swarmsize)
-  item=item+1
-  if len(plot1)>=index+1:
-    if plot1[-1]<today_profit:
-      plot1[-1]=today_profit
-      plot2[-1]=today_profit1
-      x_on_iter[-1] = x
-  elif len(plot1)<index+1:
-    plot1=plot1+[today_profit]
-    plot2=plot2+[today_profit1]
-    x_on_iter = [x_on_iter,x]
-  return -today_profit/intrade_period
-lb = [1,0.1]
+    global plot1
+    global plot2
+    global item
+    global x_on_iter
+    global swarmsize
+    global temp
+    today_profit = 0
+    today_profit1=0
+    trades_taken = 0
+    intrade_period = int(x[0])
+    risk_to_reward = x[1]
+    for i in range(2,len(df['candlestick_pattern'])-intrade_period):
+        a=f(temp,df['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
+        a1=g(temp,df['candlestick_pattern'][i-1],df['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
+        a2=h(temp,df['candlestick_pattern'][i-2],df['candlestick_pattern'][i-1],df['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
+        #p_str = 'going long is profitable'
+        #l_str = 'going short is profitable'
+        if a>=0 and a1>=0 and a2>=0:
+            rating = a+a1+a2
+        elif a<=0 and a1<=0 and a2<=0:
+            rating = a+a1+a2
+        else:
+            rating=0
+        if df['candlestick_pattern'][i]!='NO_PATTERN':
+            if rating>0 :
+                trades_taken=trades_taken+1
+                today_profit=today_profit+df['Close'][i+intrade_period]-df['Open'][i+1]
+            elif rating<0 :
+                trades_taken=trades_taken+1
+                today_profit=today_profit+df['Open'][i+1]-df['Close'][i+intrade_period]
+    for i in range(2,len(df1['candlestick_pattern'])-intrade_period):
+        b=f(temp,df1['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
+        b1=g(temp,df1['candlestick_pattern'][i-1],df1['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
+        b2=h(temp,df1['candlestick_pattern'][i-2],df1['candlestick_pattern'][i-1],df1['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
+        #p_str = 'going long is profitable'
+        #l_str = 'going short is profitable'
+        if b>=0 and b1>=0 and b2>=0:
+            rating1 = b+b1+b2
+        elif b<=0 and b1<=0 and b2<=0:
+            rating1 = b+b1+b2
+        else:
+            rating1=0
+        if df1['candlestick_pattern'][i]!='NO_PATTERN':
+            if rating1>0 :
+                today_profit1=today_profit1+df1['Close'][i+intrade_period]-df1['Open'][i+1]
+            elif rating1<0 :
+                today_profit1=today_profit1+df1['Open'][i+1]-df1['Close'][i+intrade_period]
+    index=int(item/swarmsize)
+    item=item+1
+    if len(plot1)>=index+1:
+        if plot1[-1]<today_profit:
+        plot1[-1]=today_profit
+        plot2[-1]=today_profit1
+        x_on_iter[-1] = x
+    elif len(plot1)<index+1:
+        plot1=plot1+[today_profit]
+        plot2=plot2+[today_profit1]
+        x_on_iter = [x_on_iter,x]
+    return -today_profit/intrade_period
+lb = [1,0.01]
 ub = [5,1]
 item=0
 x_on_iter=[]
