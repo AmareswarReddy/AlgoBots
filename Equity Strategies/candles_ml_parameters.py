@@ -525,3 +525,6 @@ plot2=[]
 swarmsize=5
 (xopt,fopt)=pso(find,lb=lb,ub=ub,swarmsize=swarmsize,maxiter=10)
 # please use the function lead_trade() to enter into the trade.
+#plot1 and plot2 gives a brief idea on how PSO is working with datasets
+#int(xopt[0]) is the last iteration's best possibility for intrade_period
+#xopt[1] is the last iteration's best possibility for risk_to_reward ratio
