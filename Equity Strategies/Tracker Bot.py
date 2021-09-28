@@ -4,6 +4,7 @@ from time import sleep, strftime
 from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from datetime import datetime 
+from py5paisa.order import Order, OrderType, Exchange
 import json
 now=datetime.now()
 
@@ -19,10 +20,18 @@ Client = FivePaisaClient(email="p.amareswar20@dmsiitd.org", passwd="Amarreddy@12
 Client.login()
 
 #Add all the instruments tokens and corresponding symbols to thi list
+#Add all the instruments tokens and corresponding symbols to thi list
 strategy2Tickers = {}
-ticker_symbol_token= {3045: "SBIN",2263:"BANDHANBNK"}
-
-correlated_pairs = [{"tickers":[3045 ,2263]}]
+ticker_symbol_token= {3045: "SBIN",2263:"BANDHANBNK", 3273:"SRF", 19943:"DEEPAKNTR", 275:"AUROPHARMA", 10440:"LUPIN", 11532:"ULTRACEMCO", 22:"ACC", 7406:"GLENMARK", 11373:"BIOCON", 11536:"TCS", 14356:"MINDTREE", 547:"BRITANNIA", 1394:"HINDUNILVR", 1901:"CUMMINSIND", 3150:"SIEMENS"}
+correlated_pairs = [{"tickers":[3045 ,2263]},
+                    {"tickers":[3273 ,19943]},
+                    {"tickers":[275 ,10440]},
+                    {"tickers":[11532 ,22]},
+                    {"tickers":[7406 ,11373]},
+                    {"tickers":[11536 ,14356]},
+                    {"tickers":[547 ,1394]},
+                    {"tickers":[1901 ,3150]}
+                   ]
 
 for element in correlated_pairs:
      #Place to store variables
@@ -35,9 +44,24 @@ for element in correlated_pairs:
     for tickerTemp in element["tickers"]:
         strategy2Tickers[tickerTemp] = {'tick_data':[], 'high':0, 'low':0, 'last_price':0}
         
+def getScripcode(tradingsymbol):
+    for key, value in ticker_symbol_token.items():
+        if value == tradingsymbol:
+            return key
+   
+
 def placeOrder(transact_type, price, tradingsymbol, order_type="MARKET"):
-    print("Transact Type is "+ transact_type+"@ "+ str(price)+ "for Stock "+ tradingsymbol)
+    quantity = int(40000/price)
+    scrip_code = getScripcode(tradingsymbol)
+    order_type= "B"
+    if (transact_type == "BUY") :
+       order_type= "B"
+    elif (transact_type == "SELL") :
+       order_type= "S"
+    test_order = Order(order_type='B',exchange='N',exchange_segment='C', scrip_code=scrip_code, quantity=quantity, price=price,is_intraday=True,atmarket=False)
+    Client.place_order(test_order)
     
+
 req_list=[
             { "Exch":"N","ExchType":"C","ScripCode":3045}, 
         { "Exch":"N","ExchType":"C","ScripCode":2263}     
