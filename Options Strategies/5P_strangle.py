@@ -41,12 +41,7 @@ cred={
     }
 Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwarvinay1@A',dob='19700701', cred=cred)
 Client.login()
-#%%
-#NOTE : Symbol has to be in the same format as specified in the example below.
-#banknifty scripcode=999920005
-#N	C	999920005	BANKNIFTY 	EQ	1980-01-01 00:00:00	EQ	0	Z  BANKNIFTY                                         
-req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-a=Client.fetch_market_feed(req_list_)
+
 #%%
 if day!=0:
     pos=Client.positions()
@@ -67,6 +62,11 @@ Client.positions()
 Client.order_book()
 '''
 #%%
+#NOTE : Symbol has to be in the same format as specified in the example below.
+#banknifty scripcode=999920005
+#N	C	999920005	BANKNIFTY 	EQ	1980-01-01 00:00:00	EQ	0	Z  BANKNIFTY                                         
+req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
+a=Client.fetch_market_feed(req_list_)
 #x = input('Bank Nifty Value on the day of taking the trades')
 x=a['Data'][0]['LastRate']
 req_list_PE=[{"Exch":"N","ExchType":"D","Symbol":main_str_pe+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"PE"}]

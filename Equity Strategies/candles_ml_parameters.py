@@ -12,6 +12,7 @@ url = 'https://anaconda.org/conda-forge/ta-lib/0.4.19/download/linux-64/ta-lib-0
 import talib
 """
 #%%
+from indicators import indicators as ind
 import pandas as pd
 from ta.utils import dropna
 from ta.volatility import BollingerBands
@@ -36,7 +37,7 @@ Client.login()
 scripcode=999920005
 #Section 1
 # Identify the Candle type for each OHLC(Multiple candles are possible for a OHLC). A column os created for all the types of Candle Patterns found.
-data=Client.historical_data('N','C',scripcode,'15m','2021-04-17','2021-09-15')
+data=Client.historical_data('N','C',scripcode,'15m','2021-04-17','2021-09-10')
 candle_names = talib.get_function_groups()['Pattern Recognition']
 
 for candle in candle_names:
@@ -320,7 +321,7 @@ def h(df,primordial_candle_name,previous_candle_name,current_candle_name,intrade
 #running the program again to get recent data to test over
 #Section 1
 # Identify the Candle type for each OHLC(Multiple candles are possible for a OHLC). A column os created for all the types of Candle Patterns found.
-data=Client.historical_data('N','C',scripcode,'15m','2021-09-21','2021-09-26')
+data=Client.historical_data('N','C',scripcode,'15m','2021-09-20','2021-09-28')
 candle_names = talib.get_function_groups()['Pattern Recognition']
 
 for candle in candle_names:
@@ -373,7 +374,7 @@ for index, row in df.iterrows():
 # clean up candle columns
 df.drop(candle_names, axis = 1, inplace = True) 
 df1=df
-data=Client.historical_data('N','C',scripcode,'15m','2021-09-16','2021-09-21')
+data=Client.historical_data('N','C',scripcode,'15m','2021-09-10','2021-09-20')
 candle_names = talib.get_function_groups()['Pattern Recognition']
 
 for candle in candle_names:
@@ -436,14 +437,14 @@ concated_dummy_columns.tail()
 #%%
 # simple program to decide whether to enter into the trade or avoid 
 # positive rating indicates long and negative rating indicates short 
-def lead_trade(temp,intrade_period,risk_to_reward,current_candle_name,previous_candle_name,primordial_candle_name):
+def lead_trade(temp,current_rsi,RSI1,RSI2,intrade_period,risk_to_reward,current_candle_name,previous_candle_name,primordial_candle_name):
 
     a=f(temp,current_candle_name,intrade_period=intrade_period,risk_to_reward=risk_to_reward)
     a1=g(temp,previous_candle_name,current_candle_name,intrade_period=intrade_period,risk_to_reward=risk_to_reward)
     a2=h(temp,primordial_candle_name,previous_candle_name,current_candle_name,intrade_period=intrade_period,risk_to_reward=risk_to_reward)
-    if a>=0 and a1>=0 and a2>=0:
+    if a>=0 and a1>=0 and a2>=0 and current_rsi<=RSI1:
         rating = a+a1+a2
-    elif a<=0 and a1<=0 and a2<=0:
+    elif a<=0 and a1<=0 and a2<=0 and current_rsi>=RSI2:
         rating = a+a1+a2
     else:
         rating=0
@@ -461,6 +462,19 @@ def lead_trade(temp,intrade_period,risk_to_reward,current_candle_name,previous_c
 #Eg: temp is 2020 jan to 2021 sep1,
 # df sep1 to sep5
 # df2 sep6 to sep10
+temp = ind(temp)
+temp['def']=temp['MFI']-temp['RSI']
+df=ind(df)
+df['def']=df['MFI']-df['RSI']
+df1=ind(df1)
+df1['def']=df1['MFI']-df1['RSI']
+item=0
+x_on_iter=[]
+plot1=[]
+plot2=[]
+lb = [2,0.01,temp['def'].min(),temp['def'].min()]
+ub = [2.1,1,temp['def'].max(),temp['def'].max()]
+swarmsize=20
 def find(x):
     global plot1
     global plot2
@@ -473,18 +487,21 @@ def find(x):
     trades_taken = 0
     intrade_period = int(x[0])
     risk_to_reward = x[1]
-    for i in range(2,len(df['candlestick_pattern'])-intrade_period):
+    def1=x[2]
+    def2=x[3]
+    for i in range(23,len(df['candlestick_pattern'])-intrade_period):
         a=f(temp,df['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
         a1=g(temp,df['candlestick_pattern'][i-1],df['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
         a2=h(temp,df['candlestick_pattern'][i-2],df['candlestick_pattern'][i-1],df['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
         #p_str = 'going long is profitable'
         #l_str = 'going short is profitable'
-        if a>=0 and a1>=0 and a2>=0:
+        if a>=0 and a1>=0 and a2>=0 and df['def'][i]<=def1:
             rating = a+a1+a2
-        elif a<=0 and a1<=0 and a2<=0:
+        elif a<=0 and a1<=0 and a2<=0 and df['def'][i]>=def2:
             rating = a+a1+a2
         else:
             rating=0
+        
         if df['candlestick_pattern'][i]!='NO_PATTERN':
             if rating>0 :
                 trades_taken=trades_taken+1
@@ -492,15 +509,16 @@ def find(x):
             elif rating<0 :
                 trades_taken=trades_taken+1
                 today_profit=today_profit+df['Open'][i+1]-df['Close'][i+intrade_period]
+        
     for i in range(2,len(df1['candlestick_pattern'])-intrade_period):
         b=f(temp,df1['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
         b1=g(temp,df1['candlestick_pattern'][i-1],df1['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
         b2=h(temp,df1['candlestick_pattern'][i-2],df1['candlestick_pattern'][i-1],df1['candlestick_pattern'][i],intrade_period=intrade_period,risk_to_reward=risk_to_reward)
         #p_str = 'going long is profitable'
         #l_str = 'going short is profitable'
-        if b>=0 and b1>=0 and b2>=0:
+        if b>=0 and b1>=0 and b2>=0 and df1['def'][i]<=def1:
             rating1 = b+b1+b2
-        elif b<=0 and b1<=0 and b2<=0:
+        elif b<=0 and b1<=0 and b2<=0 and df1['def'][i]>=def2:
             rating1 = b+b1+b2
         else:
             rating1=0
@@ -512,24 +530,22 @@ def find(x):
     index=int(item/swarmsize)
     item=item+1
     if len(plot1)>=index+1:
-        if plot1[-1]<today_profit:
-        plot1[-1]=today_profit
-        plot2[-1]=today_profit1
-        x_on_iter[-1] = x
+        if plot1[-1]<=today_profit:
+            plot1[-1]=today_profit
+            plot2[-1]=today_profit1
+            x_on_iter[-1] = x
     elif len(plot1)<index+1:
         plot1=plot1+[today_profit]
         plot2=plot2+[today_profit1]
-        x_on_iter = [x_on_iter,x]
+        x_on_iter = x_on_iter+[x]
     return -today_profit/intrade_period
-lb = [1,0.01]
-ub = [5,1]
-item=0
-x_on_iter=[]
-plot1=[]
-plot2=[]
-swarmsize=5
-(xopt,fopt)=pso(find,lb=lb,ub=ub,swarmsize=swarmsize,maxiter=10)
+(xopt,fopt)=pso(find,lb=lb,ub=ub,swarmsize=swarmsize,maxiter=15)
+plt.plot(-np.array(plot1))
+plt.plot(-np.array(plot2))
+plt.show()
 # please use the function lead_trade() to enter into the trade.
 #plot1 and plot2 gives a brief idea on how PSO is working with datasets
 #int(xopt[0]) is the last iteration's best possibility for intrade_period
 #xopt[1] is the last iteration's best possibility for risk_to_reward ratio
+
+# %%
