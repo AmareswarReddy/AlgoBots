@@ -7,6 +7,7 @@ from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
+from straddle import straddle
 expiry = "20210916"
 temp={1:'JAN',
             2:'FEB',
@@ -230,22 +231,25 @@ while True:
                 loop_control=1
                 break
     now=datetime.now()
-    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))<=100 or now.strftime("%H:%M")=='15:15':
-        Total_value_new=ce_lastrate+pe_lastrate
-        if Total_value_new<Total_value_old:
-            Stop_loss=Total_value_new*1.15
-            Total_value_old=Total_value_new
-        if Total_value_new>Stop_loss or now.strftime('%H %M')=='15 15':
-            brk=1
-            #square off all positions
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-            Client.place_order(test_order)
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-            Client.place_order(test_order)
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(CE_hedge)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-            Client.place_order(test_order)
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-            Client.place_order(test_order)
+    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))==0 or now.strftime("%H:%M")=='15:15':
+        try: 
+            straddle(expiry=expiry,strike=CE_req['StrikePrice'])
+        except Exception:
+            Total_value_new=ce_lastrate+pe_lastrate
+            if Total_value_new<Total_value_old:
+                Stop_loss=Total_value_new*1.15
+                Total_value_old=Total_value_new
+            if Total_value_new>Stop_loss or now.strftime('%H %M')=='15 15':
+                brk=1
+                #square off all positions
+                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+                Client.place_order(test_order)
+                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+                Client.place_order(test_order)
+                test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(CE_hedge)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+                Client.place_order(test_order)
+                test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+                Client.place_order(test_order)
     if brk==1:
         break
 # %%
