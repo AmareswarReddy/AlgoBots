@@ -6,7 +6,7 @@ from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
-expiry = "20210916"
+expiry = "20211007"
 temp={1:'JAN',
             2:'FEB',
             3:'MAR',
