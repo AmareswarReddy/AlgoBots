@@ -1,4 +1,5 @@
 #%%
+import pickle
 import numpy as np
 import pandas as pd
 from time import sleep, strftime
@@ -7,7 +8,7 @@ from py5paisa.strategy import *
 from cred import *
 from datetime import datetime,date
 from py_vollib.black_scholes import implied_volatility
-expiry = "20211007"
+expiry = input('enter the expiry date (Eg: 20211007) : ')
 temp={1:'JAN',
             2:'FEB',
             3:'MAR',
@@ -107,6 +108,7 @@ summary_p = np.concatenate((np.reshape(req_list_PE_strikeprice,(len(live_PE_last
 call_data = np.reshape(summary_c,(1,np.shape(summary_c)[0],np.shape(summary_c)[1]))
 put_data = np.reshape(summary_p,(1,np.shape(summary_p)[0],np.shape(summary_p)[1]))
 # %%
+times=0
 while True:
     sleep(5)
     live_PE=Client.fetch_market_feed(req_list_PE)
@@ -134,7 +136,12 @@ while True:
     call_data=np.concatenate((call_data,summary_c),axis=0)
     put_data=np.concatenate((put_data,summary_p),axis=0)
     now=datetime.now()
-    
-
+    times=times+1
+    min=int(now.strftime("%M"))
+    hour =int(now.strftime("%H"))
+    if hour == 15 and min>=30:
+        break
+with open('test.pkl','wb') as f:
+    pickle.dump(call_data, f)
 
 # %%

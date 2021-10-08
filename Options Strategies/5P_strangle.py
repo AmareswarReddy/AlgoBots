@@ -8,7 +8,7 @@ from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
 from straddle import straddle
-expiry = "20210916"
+expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
 temp={1:'JAN',
             2:'FEB',
             3:'MAR',
