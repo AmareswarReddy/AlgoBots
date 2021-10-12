@@ -47,9 +47,9 @@ Client.login()
 if day!=0:
     pos=Client.positions()
     for i in range(0, len(pos)):
-        if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['NetQty']<0 :
+        if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['SellQty']-pos[i]['BuyQty']>0 :
             Current_PE_strikeprice=pos[i]['ScripName'][25:30]
-        elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['NetQty']<0 :
+        elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['SellQty']-pos[i]['BuyQty']>0:
             Current_CE_strikeprice=pos[i]['ScripName'][25:30]
 
 '''
@@ -102,7 +102,7 @@ strategy=strategies(user="vinaykumar7295@gmail.com", passw="godofwarvinay1@A", d
 #iron_condor(<symbol>,<List of buy strike prices>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
 if day==0:
     strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
-    sleep(5)
+    sleep(2)
     positions = Client.positions()
     CE_req = req_list_CE[CE_index_strikeprice]
     PE_req = req_list_PE[PE_index_strikeprice]
@@ -119,8 +119,9 @@ if day!=0:
 Total_value_old=float('inf')
 PE_req_old = ' '
 CE_req_old = ' '
-
+loop_control=0
 brk=0
+#%%
 while True:
     req=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     a=Client.fetch_market_feed(req)
@@ -140,9 +141,9 @@ while True:
     live_CE = Client.fetch_market_feed(req_list_CE)
     positions = Client.positions()
     for i in range(0, len(positions)):
-        if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['NetQty']<0 :
+        if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['SellQty']-positions[i]['BuyQty']>0 :
             Current_PE_strikeprice=positions[i]['ScripName'][25:30]
-        elif positions[i]['ScripName'][:25] == main_str_format_ce and  positions[i]['NetQty']<0 :
+        elif positions[i]['ScripName'][:25] == main_str_format_ce and  positions[i]['SellQty']-positions[i]['BuyQty']>0 :
             Current_CE_strikeprice = positions[i]['ScripName'][25:30]
     
     for i in range(0,len(req_list_CE)):
