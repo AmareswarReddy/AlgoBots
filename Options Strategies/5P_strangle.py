@@ -47,9 +47,9 @@ Client.login()
 if day!=0:
     pos=Client.positions()
     for i in range(0, len(pos)):
-        if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['SellQty']-pos[i]['BuyQty']>0 :
+        if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['NetQty']<0 :
             Current_PE_strikeprice=pos[i]['ScripName'][25:30]
-        elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['SellQty']-pos[i]['BuyQty']>0:
+        elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['NetQty']<0:
             Current_CE_strikeprice=pos[i]['ScripName'][25:30]
 
 '''
