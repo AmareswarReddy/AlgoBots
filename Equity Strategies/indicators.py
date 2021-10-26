@@ -250,7 +250,7 @@ def indicators(data):
         return rsi_div
     data['MFI'] = MFI(data)
     data['RSI']=RSI(data)
-    data['EMA22'] = EMA(data,22)
+    data['EMA200'] = EMA(data,200)
     data['OBV'] = OBV(data)
     data['ATR'] = ATR(data,14)
     data = VORTEX(data)
