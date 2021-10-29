@@ -1,3 +1,4 @@
+#%%
 import numpy as np
 import pandas as pd
 from time import sleep, strftime
@@ -68,3 +69,5 @@ for pair in correlated_pairs:
 print(correlated_pairs_by_symbol)
 
 
+
+# %%

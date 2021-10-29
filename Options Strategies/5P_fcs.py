@@ -51,8 +51,24 @@ def start_fc(data):
     else :
         a=False
     return a
+if day==0 and start_fc(data)==True:
+    #buy fut and sell call  
 while True:
-    if day==0 and start_fc(data)==True:
-        #buy fut and sell call      
+    if live_price<breakeven and days_left_in_the_month>10:
+        # change call option
+        #update call strikeprice
+    if live_price<breakeven and days_left_in_the_month<10:
+        # squareoff current positions and take next month fut and call with call being at the same strike price
+    if live_price>max_profit_price:
+        #staircase adjustment
+        #define min_profit_price and max_profit_price
+        a=1
+    if live_price<min_profit_price and a==1:
+        #change the call towards live_price
+    if can_exit(data)=='yes':
+        #square off positions
+
+
+        
 
 
