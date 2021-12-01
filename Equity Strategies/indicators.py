@@ -18,7 +18,7 @@ def indicators(data):
         for i in range(50,macd_signal.size):
             macd_signal.iloc[i]=(close.iloc[i]-macd_signal.iloc[i-1])*(2/(9+1))+macd_signal.iloc[i-1]
         return macd_signal
-    def RSI(data):
+    def RSI(data,period):
         data['RSI'] = 0
         data['aa']=0
         close = data['Close'].copy()
@@ -27,8 +27,8 @@ def indicators(data):
         aa.iloc[1:]=close.iloc[:-1]
         bb=close-aa
         bb.iloc[0]=0
-        i=15
-        first_14= bb.iloc[i-14:i]
+        i=period+1
+        first_14= bb.iloc[i-period:i]
         U = first_14.loc[first_14>0].sum()
         U_count = len(first_14.loc[first_14>0])
         L = first_14.loc[first_14<0].sum()
@@ -41,8 +41,8 @@ def indicators(data):
             last= bb.iloc[i]
             U_new = last*(last>0)
             L_new = last*(last<0)
-            U_average = (U_average*13+U_new)/14
-            L_average = (L_average*13-L_new)/14
+            U_average = (U_average*(period-1)+U_new)/period
+            L_average = (L_average*(period-1)-L_new)/period
             k = (U_average)/(L_average)
             rsi.iloc[i] = 100-(100/(1+k))
         del data['aa']
@@ -50,13 +50,13 @@ def indicators(data):
     def MFI(data):
         data['MFI'] = 0
         data['aa']=0
-        close = data['Close'].copy()
+        close = data['Close'].copy()  # only volume now
         mfi = data['MFI'].copy()
         aa = data['aa'].copy()
         aa.iloc[1:]=close.iloc[:-1]
         bb=(close-aa)
-        bb.iloc[0]=0
-        bb=bb*data['Volume']
+        bb.iloc[0]=0 
+        bb=bb*data['Volume'] #bb in the place of 1 for volume*close
         i=15
         first_14= bb.iloc[i-14:i]
         U = first_14.loc[first_14>0].sum()
@@ -249,7 +249,7 @@ def indicators(data):
                     rsi_div.iloc[i-1]=-1
         return rsi_div
     data['MFI'] = MFI(data)
-    data['RSI']=RSI(data)
+    data['RSI']=RSI(data,9)
     data['EMA200'] = EMA(data,200)
     data['OBV'] = OBV(data)
     data['ATR'] = ATR(data,14)

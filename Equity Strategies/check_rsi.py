@@ -31,7 +31,7 @@ cred={
 Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwarvinay1@A',dob='19700701', cred=cred)
 Client.login()
 #%%
-scripcode=220
+scripcode=1333
 #Section 1
 # Identify the Candle type for each OHLC(Multiple candles are possible for a OHLC). A column os created for all the types of Candle Patterns found.
 data=Client.historical_data('N','C',scripcode,'1d','2018-06-01','2021-09-10')

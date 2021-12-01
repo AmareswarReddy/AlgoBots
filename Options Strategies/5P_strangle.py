@@ -7,7 +7,7 @@ from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
-from straddle import straddle
+#from straddle import straddle
 expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
 temp={1:'JAN',
             2:'FEB',
@@ -28,19 +28,19 @@ main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
-lots = int(np.floor(money_in_account/1.65)*25)
+lots = int(np.floor(money_in_account/1.5)*25)
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
 script=pd.read_csv('scripmaster-csv-format.csv')
 cred={
-    "APP_NAME":"5P56936208",
-    "APP_SOURCE":"2179",
-    "USER_ID":"w6MJ1dw5Yd0",
-    "PASSWORD":"V7JkGTUudjt",
-    "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
-    "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
+    "APP_NAME":"5P53784053",
+    "APP_SOURCE":"8023",
+    "USER_ID":"y4JUrjToSOR",
+    "PASSWORD":"y0tc7unqQAV",
+    "USER_KEY":"DrmeltLdZo82SKaxWJoeMALor1Xaiqk5",
+    "ENCRYPTION_KEY":"ANb7Y0ouVD5iX0jcPGwPMIEyQnwPjxuI"
     }
-Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwarvinay1@A',dob='19700701', cred=cred)
+Client = FivePaisaClient(email='chandinimadduru123@gmail.com', passwd='amar@0987',dob='19950820', cred=cred)
 Client.login()
 
 #%%
@@ -51,7 +51,6 @@ if day!=0:
             Current_PE_strikeprice=pos[i]['ScripName'][25:30]
         elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['NetQty']<0:
             Current_CE_strikeprice=pos[i]['ScripName'][25:30]
-
 '''
 # Fetches holdings
 Client.holdings()
@@ -96,13 +95,13 @@ PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
 PE_hedge=req_list_PE_strikeprice[PE_hedge_index_strikeprice]
 
 #%%
-strategy=strategies(user="vinaykumar7295@gmail.com", passw="godofwarvinay1@A", dob="19700701",cred=cred)
+strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob="19950820",cred=cred)
 #short_strangle(<symbol>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
 #strategy.short_strangle('banknifty',[str(PE_lower),str(CE_upper)],'25','20210902','D')
 #iron_condor(<symbol>,<List of buy strike prices>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
 if day==0:
     strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
-    sleep(2)
+    sleep(3)
     positions = Client.positions()
     CE_req = req_list_CE[CE_index_strikeprice]
     PE_req = req_list_PE[PE_index_strikeprice]
@@ -232,7 +231,7 @@ while True:
                 loop_control=1
                 break
     now=datetime.now()
-    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))<=300 or now.strftime("%H:%M")=='15:15':
+    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))<=300 :   #or now.strftime('%H %M')=='15 15'
         try: 
             straddle(expiry=expiry,strike=CE_req['StrikePrice'])
         except Exception:
@@ -240,9 +239,20 @@ while True:
             if Total_value_new<Total_value_old:
                 Stop_loss=Total_value_new*1.15
                 Total_value_old=Total_value_new
-            if Total_value_new>Stop_loss or now.strftime('%H %M')=='15 15':
+            if Total_value_new>Stop_loss :
                 brk=1
                 #square off all positions
+                pos=Client.positions()
+                for i in range(0, len(pos)):
+                    if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['NetQty']<0 :
+                        Current_PE_strikeprice=pos[i]['ScripName'][25:30]
+                    elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['NetQty']<0:
+                        Current_CE_strikeprice=pos[i]['ScripName'][25:30]
+                for i in range(0, len(pos)):
+                    if pos[i]['ScripName'][:25] == main_str_format_pe and  int(pos[i]['ScripName'][25:30])<int(Current_PE_strikeprice) and pos[i]['NetQty']>0 :
+                        PE_Hedge = pos[i]['ScripName'][25:30]
+                    elif pos[i]['ScripName'][:25] == main_str_format_ce and  int(pos[i]['ScripName'][25:30])>int(Current_CE_strikeprice) and pos[i]['NetQty']>0 :
+                        CE_Hedge=pos[i]['ScripName'][25:30]
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
