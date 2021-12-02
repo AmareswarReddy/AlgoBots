@@ -7,8 +7,23 @@ from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
-#from straddle import straddle
+import requests
 expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
+money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
+lots = int(np.floor(money_in_account/1.5)*25)
+day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
+url = "https://images.5paisa.com/website/scripmaster-csv-format.csv"
+r = requests.get(url)
+open('scripmaster-csv-format.csv', 'wb').write(r.content)
+filename = 'scripmaster-csv-format.csv'
+script = pd.read_csv(filename)
+def fix(script):
+    for i in range(0,len(script)):
+        script['Name'].at[i]=script['Name'][i][:25]
+        script['Expiry'].at[i]=script['Expiry'][i][:10]
+    return script
+
+script=fix(script)
 temp={1:'JAN',
             2:'FEB',
             3:'MAR',
@@ -27,11 +42,7 @@ main_str_pe = main_str+"PE "
 main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
-money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
-lots = int(np.floor(money_in_account/1.5)*25)
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
-day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
-script=pd.read_csv('scripmaster-csv-format.csv')
 cred={
     "APP_NAME":"5P53784053",
     "APP_SOURCE":"8023",
@@ -61,6 +72,7 @@ Client.positions()
 # Fetches the order book of the client
 Client.order_book()
 '''
+
 #%%
 #NOTE : Symbol has to be in the same format as specified in the example below.
 #banknifty scripcode=999920005
@@ -188,9 +200,9 @@ while True:
                 Client.place_order(test_order)
                 
                 #sell pe which is 80 to 95% of ce
-                atemp =  script[script['Expiry']==expiry_format+' 14:30:00']
+                atemp =  script[script['Expiry']==expiry_format]
                 atemp2=atemp[np.array(atemp['StrikeRate'])==req_list_PE_strikeprice[PE_index_strikeprice]]
-                scripcode_=str(int(atemp2[atemp2['CpType']=='PE']['Scripcode']))
+                scripcode_=str(int(atemp2[atemp2['Name']==main_str_format_pe]['Scripcode']))
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 PE_req = req_list_PE[PE_index_strikeprice]
@@ -222,9 +234,9 @@ while True:
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
                 #sell pe which is 80 to 95% of ce
-                atemp =  script[script['Expiry']==expiry_format+' 14:30:00']
+                atemp =  script[script['Expiry']==expiry_format]
                 atemp2=atemp[np.array(atemp['StrikeRate'])==req_list_CE_strikeprice[CE_index_strikeprice]]
-                scripcode_=str(int(atemp2[atemp2['CpType']=='CE']['Scripcode']))                
+                scripcode_=str(int(atemp2[atemp2['Name']==main_str_format_ce]['Scripcode']))                
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
                 CE_req = req_list_CE[CE_index_strikeprice]
@@ -263,4 +275,11 @@ while True:
                 Client.place_order(test_order)
     if brk==1:
         break
+# %%
+
+def expiryfix(script):
+    for i in range(0,len(script)):
+        script['Expiry'][i]=script['Expiry'][i][:10]
+    return script
+
 # %%
