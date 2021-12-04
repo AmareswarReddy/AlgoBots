@@ -2,7 +2,7 @@ import requests
 import json
 from datetime import datetime
 
-def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:00', toDate = '2018-12-25', toTime='03:30:00'):
+def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:00', toDate = '2018-12-25', toTime='09:30:00'):
     baseURL = 'https://opstra.definedge.com/api/optionsimulator/optionchain/'
     currentDate = fromDate + " "+ fromTime
     datetime_object_current = datetime.strptime(currentDate, '%Y-%m-%d %X')
@@ -28,6 +28,8 @@ def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:0
 
   
 
+import requests
+import json
 def downloaddata(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; Rigor/1.0.0; http://rigor.com)",
@@ -41,3 +43,4 @@ def downloaddata(url):
         return json_data;
       
 data = getOptionData(symbol = 'BANKNIFTY', fromDate = '2021-11-25', toDate = '2021-11-25')
+print(data)
