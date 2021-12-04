@@ -41,6 +41,31 @@ def downloaddata(url):
     if(r.status_code == 200):
         json_data = json.loads(r.content)
         return json_data;
-      
-data = getOptionData(symbol = 'BANKNIFTY', fromDate = '2021-11-25', toDate = '2021-11-25')
-print(data)
+    
+def jsonDump(symbol, fromDate, toDate, data):
+    # the json file where the output must be stored
+    fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+'.json'
+    out_file = open(fileName, "w")
+
+    json.dump(data, out_file, indent = 6)
+
+    out_file.close()
+
+
+def readJson(symbol, fromDate, toDate):
+    fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+'.json'
+    f = open(fileName)
+    # returns JSON object as
+    # a dictionary
+    data = json.load(f)
+    f.close()
+    return data
+
+symbol = 'BANKNIFTY'
+fromDate = '2021-11-25'
+toDate = '2021-11-25'
+data = getOptionData(symbol=symbol,fromDate=fromDate , toDate=toDate)
+jsonDump(symbol,  fromDate,toDate, data)
+
+#Use this function first to check if data exists already else use getOption data
+dataJson = readJson(symbol,  fromDate,toDate)
