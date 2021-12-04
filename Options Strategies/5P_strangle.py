@@ -53,7 +53,6 @@ cred={
     }
 Client = FivePaisaClient(email='chandinimadduru123@gmail.com', passwd='amar@0987',dob='19950820', cred=cred)
 Client.login()
-
 #%%
 if day!=0:
     pos=Client.positions()
@@ -152,9 +151,9 @@ while True:
     live_CE = Client.fetch_market_feed(req_list_CE)
     positions = Client.positions()
     for i in range(0, len(positions)):
-        if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['SellQty']-positions[i]['BuyQty']>0 :
+        if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['SellQty']-positions[i]['NetQty']>0 :
             Current_PE_strikeprice=positions[i]['ScripName'][25:30]
-        elif positions[i]['ScripName'][:25] == main_str_format_ce and  positions[i]['SellQty']-positions[i]['BuyQty']>0 :
+        elif positions[i]['ScripName'][:25] == main_str_format_ce and  positions[i]['SellQty']-positions[i]['NetQty']>0 :
             Current_CE_strikeprice = positions[i]['ScripName'][25:30]
     
     for i in range(0,len(req_list_CE)):
@@ -194,7 +193,7 @@ while True:
                 live_PE_lastrate=[]
                 for j in range(0,25):
                     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
-                PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-0.89*ce_lastrate))
+                PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-0.85*ce_lastrate))
                 #exit pe
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
@@ -229,7 +228,7 @@ while True:
                 live_CE_lastrate=[]
                 for j in range(0,25):
                     live_CE_lastrate=live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
-                CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-0.89*pe_lastrate))
+                CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-0.85*pe_lastrate))
                 #exit pe
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
@@ -275,11 +274,5 @@ while True:
                 Client.place_order(test_order)
     if brk==1:
         break
-# %%
-
-def expiryfix(script):
-    for i in range(0,len(script)):
-        script['Expiry'][i]=script['Expiry'][i][:10]
-    return script
 
 # %%
