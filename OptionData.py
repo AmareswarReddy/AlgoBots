@@ -2,7 +2,7 @@ import requests
 import json
 from datetime import datetime
 
-def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:00', toDate = '2018-12-25', toTime='09:30:00'):
+def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:00', toDate = '2018-12-25', toTime='10:30:00', expiry='02DEC2021' ):
     baseURL = 'https://opstra.definedge.com/api/optionsimulator/optionchain/'
     currentDate = fromDate + " "+ fromTime
     datetime_object_current = datetime.strptime(currentDate, '%Y-%m-%d %X')
@@ -20,7 +20,9 @@ def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:0
         timeparts = str(only_time).split(":")
         if (9 <= int(timeparts[0]) <= 15):
             #print(only_time)
-            url = baseURL + str(timestamp_current)+"&"+symbol+"&"+(datetime.fromtimestamp(timestamp_current).strftime('%d%b%Y')).upper()
+            #url = baseURL + str(timestamp_current)+"&"+symbol+"&"+(datetime.fromtimestamp(timestamp_current).strftime('%d%b%Y')).upper()
+            url = baseURL + str(timestamp_current)+"&"+symbol+"&"+ expiry
+            print(url)
             #print(url)
             final_data[str(dt_object)] = downloaddata(url)
         timestamp_current = timestamp_current + fivemin_timestamp    
@@ -64,8 +66,9 @@ def readJson(symbol, fromDate, toDate):
 symbol = 'BANKNIFTY'
 fromDate = '2021-11-25'
 toDate = '2021-11-25'
-data = getOptionData(symbol=symbol,fromDate=fromDate , toDate=toDate)
-jsonDump(symbol,  fromDate,toDate, data)
+expiry = '02DEC2021'
+data = getOptionData(symbol, fromDate, toDate , expiry)
+jsonDump(symbol,  fromDate,expiry, data)
 
 #Use this function first to check if data exists already else use getOption data
-dataJson = readJson(symbol,  fromDate,toDate)
+dataJson = readJson(symbol,  fromDate,expiry)
