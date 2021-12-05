@@ -51,9 +51,9 @@ def downloaddata(url):
     else:
         return None;
     
-def jsonDump(symbol, fromDate, toDate, data):
+def jsonDump(symbol, fromDate, toDate, expiry,data):
     # the json file where the output must be stored
-    fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+'.json'
+    fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+"_"+str(expiry)+'.json'
     out_file = open(fileName, "w")
 
     json.dump(data, out_file, indent = 6)
@@ -61,8 +61,8 @@ def jsonDump(symbol, fromDate, toDate, data):
     out_file.close()
 
 
-def readJson(symbol, fromDate, toDate):
-    fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+'.json'
+def readJson(symbol, fromDate, toDate,expiry):
+    fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+"_"+str(expiry)+'.json'
     f = open(fileName)
     # returns JSON object as
     # a dictionary
@@ -77,7 +77,7 @@ toDate = '2021-11-25'
 toTime='15:35:00'
 expiry = '25NOV2021'
 data = getOptionData(symbol, fromDate,fromTime, toDate,toTime, expiry)
-jsonDump(symbol,  fromDate,expiry, data)
+jsonDump(symbol,  fromDate,toDate,expiry, data)
 
 #Use this function first to check if data exists already else use getOption data
-dataJson = readJson(symbol,  fromDate,expiry)
+dataJson = readJson(symbol,  fromDate,toDate,expiry)
