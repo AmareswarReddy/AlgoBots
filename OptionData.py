@@ -16,15 +16,20 @@ def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:0
     final_data = {}
     while (timestamp_current < timestamp_end):
         dt_object = datetime.fromtimestamp(timestamp_current)
+        
         only_time = dt_object.time()
         timeparts = str(only_time).split(":")
         if (9 <= int(timeparts[0]) <= 15):
             #print(only_time)
             #url = baseURL + str(timestamp_current)+"&"+symbol+"&"+(datetime.fromtimestamp(timestamp_current).strftime('%d%b%Y')).upper()
             url = baseURL + str(timestamp_current)+"&"+symbol+"&"+ expiry
-            print(url)
+            
             #print(url)
-            final_data[str(dt_object)] = downloaddata(url)
+            tempData = downloaddata(url)
+            if tempData is not None:
+                final_data[str(dt_object)] = tempData
+                print(dt_object)
+                print(url)
         timestamp_current = timestamp_current + fivemin_timestamp    
     return final_data
 
@@ -43,6 +48,8 @@ def downloaddata(url):
     if(r.status_code == 200):
         json_data = json.loads(r.content)
         return json_data;
+    else:
+        return None;
     
 def jsonDump(symbol, fromDate, toDate, data):
     # the json file where the output must be stored
@@ -64,11 +71,11 @@ def readJson(symbol, fromDate, toDate):
     return data
 
 symbol = 'BANKNIFTY'
-fromDate = '2021-11-25'
+fromDate = '2021-11-23'
 fromTime = '09:20:00'
 toDate = '2021-11-25'
-toTime='15:30:00'
-expiry = '02DEC2021'
+toTime='15:35:00'
+expiry = '25NOV2021'
 data = getOptionData(symbol, fromDate,fromTime, toDate,toTime, expiry)
 jsonDump(symbol,  fromDate,expiry, data)
 
