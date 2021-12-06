@@ -1,3 +1,4 @@
+#%%
 import requests
 import json
 from datetime import datetime
@@ -81,3 +82,5 @@ jsonDump(symbol,  fromDate,toDate,expiry, data)
 
 #Use this function first to check if data exists already else use getOption data
 dataJson = readJson(symbol,  fromDate,toDate,expiry)
+
+# %%

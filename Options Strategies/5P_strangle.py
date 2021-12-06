@@ -8,11 +8,15 @@ from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
 import requests
+#inputs to the code
 expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
 lots = int(np.floor(money_in_account/1.5)*25)
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
 url = "https://images.5paisa.com/website/scripmaster-csv-format.csv"
+
+
+#download and reading scriptmaster
 r = requests.get(url)
 open('scripmaster-csv-format.csv', 'wb').write(r.content)
 filename = 'scripmaster-csv-format.csv'
@@ -24,6 +28,9 @@ def fix(script):
     return script
 
 script=fix(script)
+
+
+# formatting the input data 
 temp={1:'JAN',
             2:'FEB',
             3:'MAR',
@@ -43,6 +50,8 @@ main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
+
+# Client login credentials
 cred={
     "APP_NAME":"5P53784053",
     "APP_SOURCE":"8023",
@@ -54,6 +63,8 @@ cred={
 Client = FivePaisaClient(email='chandinimadduru123@gmail.com', passwd='amar@0987',dob='19950820', cred=cred)
 Client.login()
 #%%
+
+# if the 
 if day!=0:
     pos=Client.positions()
     for i in range(0, len(pos)):
@@ -97,9 +108,9 @@ for j in range(0,25):
     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
     live_CE_lastrate = live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
 CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-115))
-CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-15))
+CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-10))
 PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-115))
-PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-15))
+PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-10))
 CE_upper=req_list_CE_strikeprice[CE_index_strikeprice]
 CE_hedge=req_list_CE_strikeprice[CE_hedge_index_strikeprice]
 PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
@@ -111,6 +122,9 @@ strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob=
 #strategy.short_strangle('banknifty',[str(PE_lower),str(CE_upper)],'25','20210902','D')
 #iron_condor(<symbol>,<List of buy strike prices>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
 if day==0:
+    #short_strangle(<symbol>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
+    #strategy.short_strangle("banknifty",[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
+
     strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
     sleep(3)
     positions = Client.positions()
