@@ -48,12 +48,12 @@ req_list_CE_strikeprice=[round(x/100)*100]
 #ce_positions{p_keys[i]:}
 
 for i in range(1,25):
-    req_list_PE_strikeprice=req_list_PE_strikeprice+[round(x/100)*100-i*100]
-    req_list_CE_strikeprice=req_list_CE_strikeprice+[round(x/100)*100+i*100]
+    req_list_PE_strikeprice=[round(x/100)*100+i*100]+req_list_PE_strikeprice+[round(x/100)*100-i*100]
+    req_list_CE_strikeprice=[round(x/100)*100-i*100]+req_list_CE_strikeprice+[round(x/100)*100+i*100]
 live_PE_lastrate=[]
 live_CE_lastrate=[]
-
-for j in range(0,25):
+#%%
+for j in range(0,49):
     try:
         live_PE_lastrate=live_PE_lastrate+[putprice(optionchain=present_expiry[p_keys[start]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[j])]
     except Exception:
@@ -94,16 +94,16 @@ for i in range(len(p_keys)):
     except Exception:
         True
     profit=profit+[ce_positions[list(ce_positions.keys())[-1]][1]-call_ltp+pe_positions[list(pe_positions.keys())[-1]][1]-put_ltp+booked_profit]
-    if call_ltp>=2.5*put_ltp and Current_CE_strikeprice-Current_PE_strikeprice>300:   #changing put position
+    if call_ltp>=2.5*put_ltp and Current_CE_strikeprice-Current_PE_strikeprice>-2000:   #changing put position
         x=present_expiry[p_keys[i]]['spotPrice']
         req_list_PE_strikeprice=[round(x/100)*100]
         req_list_CE_strikeprice=[round(x/100)*100]
         for k in range(1,25):
-            req_list_PE_strikeprice=req_list_PE_strikeprice+[round(x/100)*100-k*100]
-            req_list_CE_strikeprice=req_list_CE_strikeprice+[round(x/100)*100+k*100]
+            req_list_PE_strikeprice=[round(x/100)*100+k*100]+req_list_PE_strikeprice+[round(x/100)*100-k*100]
+            req_list_CE_strikeprice=[round(x/100)*100-k*100]+req_list_CE_strikeprice+[round(x/100)*100+k*100]
         live_PE_lastrate=[]
         live_CE_lastrate=[]
-        for j in range(0,25):
+        for j in range(0,49):
             try:
                 live_PE_lastrate = live_PE_lastrate+[putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[j])]
             except Exception:
@@ -116,16 +116,16 @@ for i in range(len(p_keys)):
         put_price = putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[PE_index_strikeprice])
         pe_positions[p_keys[i]] = [req_list_PE_strikeprice[PE_index_strikeprice],put_price]
         booked_profit = booked_profit+pe_positions[list(pe_positions.keys())[-2]][1]-put_ltp
-    if put_ltp>=2.5*call_ltp and Current_CE_strikeprice-Current_PE_strikeprice>300:   #changing call position
+    if put_ltp>=2.5*call_ltp and Current_CE_strikeprice-Current_PE_strikeprice>-2000:   #changing call position
         x=present_expiry[p_keys[i]]['spotPrice']
         req_list_PE_strikeprice=[round(x/100)*100]
         req_list_CE_strikeprice=[round(x/100)*100]
         for k in range(1,25):
-            req_list_PE_strikeprice=req_list_PE_strikeprice+[round(x/100)*100-k*100]
-            req_list_CE_strikeprice=req_list_CE_strikeprice+[round(x/100)*100+k*100]
+            req_list_PE_strikeprice=[round(x/100)*100+k*100]+req_list_PE_strikeprice+[round(x/100)*100-k*100]
+            req_list_CE_strikeprice=[round(x/100)*100-k*100]+req_list_CE_strikeprice+[round(x/100)*100+k*100]
         live_PE_lastrate=[]
         live_CE_lastrate=[]
-        for j in range(0,25):
+        for j in range(0,49):
             try:
                 live_PE_lastrate = live_PE_lastrate+[putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[j])]
             except Exception:
@@ -139,7 +139,7 @@ for i in range(len(p_keys)):
         ce_positions[p_keys[i]] = [req_list_CE_strikeprice[CE_index_strikeprice],call_price]
         booked_profit = booked_profit+ce_positions[list(ce_positions.keys())[-2]][1]-call_ltp
 
-    if Current_CE_strikeprice-Current_PE_strikeprice<=300:
+    if Current_CE_strikeprice-Current_PE_strikeprice<=-2000:
         Total_value_new=call_ltp+put_ltp
         if Total_value_new<Total_value_old:
             Stop_loss=Total_value_new*1.15
