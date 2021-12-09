@@ -230,13 +230,13 @@ while True:
         for k in range(0,len(positions)):
             if req_list_[0]['Symbol']==str.upper(positions[k]['ScripName']) and loop_control==0:
                 awesome_ammu=k
-                req=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
+                #req=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
                 a=Client.fetch_market_feed(req)
                 x=a['Data'][0]['LastRate']
                 req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"CE"}]
                 req_list_CE_strikeprice=[round(x/100)*100]
                 for i in range(1,25):
-                    req_list_CE=req_list_CE+[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100-i*100),"OptionType":"CE"}] 
+                    req_list_CE=req_list_CE+[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"CE"}] 
                     req_list_CE_strikeprice=req_list_CE_strikeprice+[round(x/100)*100+i*100]
                 live_CE=Client.fetch_market_feed(req_list_CE)
                 live_CE_lastrate=[]
