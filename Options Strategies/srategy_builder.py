@@ -25,19 +25,19 @@ def readJson(symbol, fromDate, toDate,expiry):
     f.close()
     return data
 symbol = 'BANKNIFTY'
-fromDate = '2021-11-03'
+fromDate = '2021-03-18'
 fromTime = '09:20:00'
-toDate = '2021-11-25'
+toDate = '2021-03-25'
 toTime='15:35:00'
-expiry = '25NOV2021'
+expiry = '25MAR2021'
 
 #dataJson = readJson(symbol, fromDate, toDate, expiry)
-present_expiry = readJson(symbol, fromDate, toDate, expiry='11NOV2021')
+present_expiry = readJson(symbol, fromDate, toDate, expiry='25MAR2021')
 p_keys=list(present_expiry.keys())
-near_expiry = readJson(symbol, fromDate, toDate, expiry='18NOV2021')
-n_keys=list(near_expiry.keys())
-far_expiry = readJson(symbol, fromDate, toDate, expiry='25NOV2021')
-f_keys=list(far_expiry.keys())
+'''near_expiry = readJson(symbol, fromDate, toDate, expiry='18NOV2021')'''
+'''n_keys=list(near_expiry.keys())'''
+'''far_expiry = readJson(symbol, fromDate, toDate, expiry='25NOV2021')'''
+'''f_keys=list(far_expiry.keys())'''
 
 import matplotlib.pyplot as plt
 start=0
@@ -94,7 +94,7 @@ for i in range(len(p_keys)):
     except Exception:
         True
     profit=profit+[ce_positions[list(ce_positions.keys())[-1]][1]-call_ltp+pe_positions[list(pe_positions.keys())[-1]][1]-put_ltp+booked_profit]
-    if call_ltp>=2.5*put_ltp and Current_CE_strikeprice-Current_PE_strikeprice>-2000:   #changing put position
+    if call_ltp>=2*put_ltp and Current_CE_strikeprice-Current_PE_strikeprice>-1000:   #changing put position
         x=present_expiry[p_keys[i]]['spotPrice']
         req_list_PE_strikeprice=[round(x/100)*100]
         req_list_CE_strikeprice=[round(x/100)*100]
@@ -116,7 +116,7 @@ for i in range(len(p_keys)):
         put_price = putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[PE_index_strikeprice])
         pe_positions[p_keys[i]] = [req_list_PE_strikeprice[PE_index_strikeprice],put_price]
         booked_profit = booked_profit+pe_positions[list(pe_positions.keys())[-2]][1]-put_ltp
-    if put_ltp>=2.5*call_ltp and Current_CE_strikeprice-Current_PE_strikeprice>-2000:   #changing call position
+    if put_ltp>=2*call_ltp and Current_CE_strikeprice-Current_PE_strikeprice>-1000:   #changing call position
         x=present_expiry[p_keys[i]]['spotPrice']
         req_list_PE_strikeprice=[round(x/100)*100]
         req_list_CE_strikeprice=[round(x/100)*100]
@@ -139,7 +139,7 @@ for i in range(len(p_keys)):
         ce_positions[p_keys[i]] = [req_list_CE_strikeprice[CE_index_strikeprice],call_price]
         booked_profit = booked_profit+ce_positions[list(ce_positions.keys())[-2]][1]-call_ltp
 
-    if Current_CE_strikeprice-Current_PE_strikeprice<=-2000:
+    if Current_CE_strikeprice-Current_PE_strikeprice<=-1000:
         Total_value_new=call_ltp+put_ltp
         if Total_value_new<Total_value_old:
             Stop_loss=Total_value_new*1.15

@@ -68,9 +68,9 @@ Client.login()
 if day!=0:
     pos=Client.positions()
     for i in range(0, len(pos)):
-        if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['NetQty']<0 :
+        if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0 :
             Current_PE_strikeprice=pos[i]['ScripName'][25:30]
-        elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['NetQty']<0:
+        elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0:
             Current_CE_strikeprice=pos[i]['ScripName'][25:30]
 '''
 # Fetches holdings
@@ -165,9 +165,9 @@ while True:
     live_CE = Client.fetch_market_feed(req_list_CE)
     positions = Client.positions()
     for i in range(0, len(positions)):
-        if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['SellQty']-positions[i]['NetQty']>0 :
+        if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['SellQty']-positions[i]['BuyQty']-positions[i]['NetQty']>0 :
             Current_PE_strikeprice=positions[i]['ScripName'][25:30]
-        elif positions[i]['ScripName'][:25] == main_str_format_ce and  positions[i]['SellQty']-positions[i]['NetQty']>0 :
+        elif positions[i]['ScripName'][:25] == main_str_format_ce and  positions[i]['SellQty']-positions[i]['BuyQty']-positions[i]['NetQty']>0 :
             Current_CE_strikeprice = positions[i]['ScripName'][25:30]
     
     for i in range(0,len(req_list_CE)):

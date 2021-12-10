@@ -72,11 +72,11 @@ def readJson(symbol, fromDate, toDate,expiry):
     return data
 
 symbol = 'BANKNIFTY'
-fromDate = '2021-11-23'
+fromDate = '2021-03-18'
 fromTime = '09:20:00'
-toDate = '2021-11-25'
+toDate = '2021-03-25'
 toTime='15:35:00'
-expiry = '25NOV2021'
+expiry = '25MAR2021'
 data = getOptionData(symbol, fromDate,fromTime, toDate,toTime, expiry)
 jsonDump(symbol,  fromDate,toDate,expiry, data)
 
