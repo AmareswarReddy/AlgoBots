@@ -3,7 +3,7 @@ import requests
 import json
 from datetime import datetime
 
-def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:00', toDate = '2018-12-25', toTime='15:30:00', expiry='02DEC2021' ):
+def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:00', toDate = '2018-12-25', toTime='15:35:00', expiry='02DEC2021' ):
     baseURL = 'https://opstra.definedge.com/api/optionsimulator/optionchain/'
     currentDate = fromDate + " "+ fromTime
     datetime_object_current = datetime.strptime(currentDate, '%Y-%m-%d %X')
@@ -72,11 +72,11 @@ def readJson(symbol, fromDate, toDate,expiry):
     return data
 
 symbol = 'BANKNIFTY'
-fromDate = '2021-03-18'
+fromDate = '2021-11-03'
 fromTime = '09:20:00'
-toDate = '2021-03-25'
+toDate = '2021-11-03'
 toTime='15:35:00'
-expiry = '25MAR2021'
+expiry = '11NOV2021'
 data = getOptionData(symbol, fromDate,fromTime, toDate,toTime, expiry)
 jsonDump(symbol,  fromDate,toDate,expiry, data)
 

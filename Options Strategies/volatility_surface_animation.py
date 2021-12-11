@@ -24,9 +24,9 @@ def readJson(symbol, fromDate, toDate,expiry):
 symbol = 'BANKNIFTY'
 fromDate = '2021-11-03'
 fromTime = '09:20:00'
-toDate = '2021-11-25'
+toDate = '2021-11-03'
 toTime='15:35:00'
-expiry = '25NOV2021'
+expiry = '11NOV2021'
 present_expiry = readJson(symbol, fromDate, toDate, expiry='11NOV2021')
 p_keys=list(present_expiry.keys())
 
