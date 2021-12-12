@@ -41,6 +41,7 @@ f_keys=list(far_expiry.keys())
 
 import matplotlib.pyplot as plt
 start=0
+time_to_break=0
 start_cpLTP=115
 x=present_expiry[p_keys[start]]['spotPrice']
 req_list_PE_strikeprice=[round(x/100)*100]
@@ -138,7 +139,12 @@ for i in range(len(p_keys)):
         call_price = callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[CE_index_strikeprice])
         ce_positions[p_keys[i]] = [req_list_CE_strikeprice[CE_index_strikeprice],call_price]
         booked_profit = booked_profit+ce_positions[list(ce_positions.keys())[-2]][1]-call_ltp
+#
+    if Current_CE_strikeprice-Current_PE_strikeprice<=500 and abs(call_ltp-put_ltp)<call_ltp/20:
+        #square of all positions
+        break
 
+#
     if Current_CE_strikeprice-Current_PE_strikeprice<=-2000:
         Total_value_new=call_ltp+put_ltp
         if Total_value_new<Total_value_old:
@@ -146,6 +152,10 @@ for i in range(len(p_keys)):
             Total_value_old=Total_value_new
         if Total_value_new>Stop_loss :
             #square off all positions
-            break
+            time_to_break=1
+    if time_to_break==1:
+        break
 plt.plot(profit)
+# %%
+
 # %%
