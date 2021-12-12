@@ -116,7 +116,7 @@ for i in range(len(p_keys)):
                 live_CE_lastrate = live_CE_lastrate+[callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[j])]
             except Exception:
                 live_CE_lastrate = live_CE_lastrate+[-1]
-        PE_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-0.9*call_ltp))
+        PE_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-0.85*call_ltp))
         put_price = putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[PE_index_strikeprice])
         pe_positions[p_keys[i]] = [req_list_PE_strikeprice[PE_index_strikeprice],put_price]
         booked_profit = booked_profit+pe_positions[list(pe_positions.keys())[-2]][1]-put_ltp
@@ -138,7 +138,7 @@ for i in range(len(p_keys)):
                 live_CE_lastrate = live_CE_lastrate+[callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[j])]
             except Exception:
                 live_CE_lastrate = live_CE_lastrate+[-1]
-        CE_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-0.9*put_ltp))
+        CE_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-0.85*put_ltp))
         call_price = callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[CE_index_strikeprice])
         ce_positions[p_keys[i]] = [req_list_CE_strikeprice[CE_index_strikeprice],call_price]
         booked_profit = booked_profit+ce_positions[list(ce_positions.keys())[-2]][1]-call_ltp
