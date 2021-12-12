@@ -220,7 +220,7 @@ while True:
         
 
 
-    elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>300:
+    elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>-1000:
         #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in ce_lastrate will be far lower than the increase in pe_lastrate when stock price decreases from the price it is now trading
         CE_req_old = CE_req['StrikePrice']
         for k in range(0,len(positions)):
@@ -253,7 +253,7 @@ while True:
                 loop_control=1
                 break
     now=datetime.now()
-    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))<=300 :   #or now.strftime('%H %M')=='15 15'
+    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))<=-1000 :   #or now.strftime('%H %M')=='15 15'
         try: 
             straddle(expiry=expiry,strike=CE_req['StrikePrice'])
         except Exception:

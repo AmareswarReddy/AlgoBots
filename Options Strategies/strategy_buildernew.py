@@ -34,14 +34,16 @@ expiry = '25NOV2021'
 #dataJson = readJson(symbol, fromDate, toDate, expiry)
 present_expiry = readJson(symbol, fromDate, toDate, expiry='11NOV2021')
 p_keys=list(present_expiry.keys())
+'''
 near_expiry = readJson(symbol, fromDate, toDate, expiry='18NOV2021')
 n_keys=list(near_expiry.keys())
 far_expiry = readJson(symbol, fromDate, toDate, expiry='25NOV2021')
 f_keys=list(far_expiry.keys())
-
+'''
 import matplotlib.pyplot as plt
 start=0
 time_to_break=0
+ceequalspe=0
 start_cpLTP=115
 x=present_expiry[p_keys[start]]['spotPrice']
 req_list_PE_strikeprice=[round(x/100)*100]
@@ -53,7 +55,6 @@ for i in range(1,25):
     req_list_CE_strikeprice=[round(x/100)*100-i*100]+req_list_CE_strikeprice+[round(x/100)*100+i*100]
 live_PE_lastrate=[]
 live_CE_lastrate=[]
-#%%
 for j in range(0,49):
     try:
         live_PE_lastrate=live_PE_lastrate+[putprice(optionchain=present_expiry[p_keys[start]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[j])]
@@ -73,6 +74,7 @@ PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
 
 
 profit=[0]
+spot=[]
 booked_profit=0
 Total_value_old=float('inf')
 call_price=callprice(optionchain=present_expiry[p_keys[start]]['optionchaindata'],strikeprice=CE_upper)
@@ -80,6 +82,7 @@ put_price=putprice(optionchain=present_expiry[p_keys[start]]['optionchaindata'],
 ce_positions={p_keys[start]:[CE_upper,call_price]}
 pe_positions={p_keys[start]:[PE_lower,put_price]}
 for i in range(len(p_keys)):
+    spot=spot+[present_expiry[p_keys[i]]['spotPrice']]
     print(booked_profit)
     Current_CE_strikeprice=ce_positions[list(ce_positions.keys())[-1]][0]
     Current_PE_strikeprice=pe_positions[list(pe_positions.keys())[-1]][0]
@@ -142,20 +145,30 @@ for i in range(len(p_keys)):
 #
     if Current_CE_strikeprice-Current_PE_strikeprice<=500 and abs(call_ltp-put_ltp)<call_ltp/20:
         #square of all positions
-        break
+        ceequalspe=ceequalspe+1
+        print('ce=pe')
+        #break
 
 #
-    if Current_CE_strikeprice-Current_PE_strikeprice<=-2000:
+    if Current_CE_strikeprice-Current_PE_strikeprice<=-1000:
         Total_value_new=call_ltp+put_ltp
         if Total_value_new<Total_value_old:
-            Stop_loss=Total_value_new*1.15
+            Stop_loss=Total_value_new*1.2
             Total_value_old=Total_value_new
         if Total_value_new>Stop_loss :
             #square off all positions
             time_to_break=1
     if time_to_break==1:
+        print('stoplosshit')
         break
+        
 plt.plot(profit)
-# %%
+plt.xlabel('time(scale=5min)')
+plt.ylabel("profit(scale=25rs.)")
+plt.show()
+plt.plot(spot)
+plt.xlabel('time(scale=5min)')
+plt.ylabel('spotprice')
+
 
 # %%
