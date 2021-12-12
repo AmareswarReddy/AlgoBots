@@ -169,6 +169,7 @@ plt.show()
 plt.plot(spot)
 plt.xlabel('time(scale=5min)')
 plt.ylabel('spotprice')
-
+plt.show()
+print('Total profit booked:',profit[-1])
 
 # %%
