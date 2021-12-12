@@ -5,7 +5,7 @@ import numpy as np
 #eg: optionchain=present_expiry[p_keys[0]]['optionchaindata']
 #eg: strikeprice= 35500
 alpha1=2 #call_ltp>=alpha1*put_ltp
-alpha2=3  #put_ltp>=alpha2*call_ltp
+alpha2=2  #put_ltp>=alpha2*call_ltp
 beta=0.85
 gamma=-1000
 import pandas as pd
@@ -150,6 +150,7 @@ for i in range(len(p_keys)):
     if Current_CE_strikeprice-Current_PE_strikeprice<=0 and abs(call_ltp-put_ltp)<call_ltp/20:
         #square of all positions
         ceequalspe=ceequalspe+1
+        print(p_keys[i])
         print('ce=pe')
         #break
 
