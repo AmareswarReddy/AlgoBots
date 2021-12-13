@@ -10,7 +10,7 @@ from py5paisa.strategy import *
 from cred import *
 main_str="BANKNIFTY 09 SEP 2021 "
 main_str_format = "BANKNIFTY 09 Sep 2021 "
-expiry = "20210909"
+expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 script=pd.read_csv('scripmaster-csv-format.csv')
 cred={
