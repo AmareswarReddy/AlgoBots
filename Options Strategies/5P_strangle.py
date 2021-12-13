@@ -269,16 +269,16 @@ while True:
                 #square off all positions
                 pos=Client.positions()
                 for i in range(0, len(pos)):
-                    if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['NetQty']<0 :
+                    if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0  :
                         Current_PE_strikeprice=pos[i]['ScripName'][25:30]
-                    elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['NetQty']<0:
+                    elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0  :
                         Current_CE_strikeprice=pos[i]['ScripName'][25:30]
                 for i in range(0, len(pos)):
-                    if pos[i]['ScripName'][:25] == main_str_format_pe and  int(pos[i]['ScripName'][25:30])<int(Current_PE_strikeprice) and pos[i]['NetQty']>0 :
+                    if pos[i]['ScripName'][:25] == main_str_format_pe and  int(pos[i]['ScripName'][25:30])<int(Current_PE_strikeprice) and pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']<0   :
                         PE_Hedge = pos[i]['ScripName'][25:30]
-                    elif pos[i]['ScripName'][:25] == main_str_format_ce and  int(pos[i]['ScripName'][25:30])>int(Current_CE_strikeprice) and pos[i]['NetQty']>0 :
+                    elif pos[i]['ScripName'][:25] == main_str_format_ce and  int(pos[i]['ScripName'][25:30])>int(Current_CE_strikeprice) and pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']<0   :
                         CE_Hedge=pos[i]['ScripName'][25:30]
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+PE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
@@ -286,6 +286,7 @@ while True:
                 Client.place_order(test_order)
                 test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
+                print('stoplosshit')
     if brk==1:
         break
 
