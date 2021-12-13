@@ -8,6 +8,7 @@ alpha1=2 #call_ltp>=alpha1*put_ltp
 alpha2=2  #put_ltp>=alpha2*call_ltp
 beta=0.85
 gamma=-1000
+start_cpLTP=115
 import pandas as pd
 import requests
 import json
@@ -75,7 +76,6 @@ for i in range(0, len(expires_list)):
         start=0
         time_to_break=0
         ceequalspe=0
-        start_cpLTP=115
         x=present_expiry[p_keys[start]]['spotPrice']
         req_list_PE_strikeprice=[round(x/100)*100]
         req_list_CE_strikeprice=[round(x/100)*100]
