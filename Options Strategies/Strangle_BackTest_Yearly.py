@@ -1,3 +1,4 @@
+#%%
 import json
 from os import error
 import numpy as np
@@ -7,8 +8,9 @@ from datetime import datetime, timedelta
 alpha1=2 #call_ltp>=alpha1*put_ltp
 alpha2=2  #put_ltp>=alpha2*call_ltp
 beta=0.85
-gamma=-1000
-start_cpLTP=115
+gamma=-1200
+start_cpLTP=60
+days_in_strategy=4
 import pandas as pd
 import requests
 import json
@@ -52,7 +54,7 @@ for i in range(0, len(expires_list)):
         print(expires_list[i])
         enddate = datetime.strptime(expires_list[i], '%d%b%Y')
         print(enddate.date())
-        startdate = enddate - timedelta(days=7)
+        startdate = enddate - timedelta(days=days_in_strategy)
         print(startdate.date())
         symbol = 'BANKNIFTY'
         fromDate = startdate.strftime('%Y-%m-%d')
@@ -282,3 +284,5 @@ def readJson(symbol, fromDate, toDate,expiry):
     data = json.load(f)
     f.close()
     return data
+
+# %%
