@@ -8,6 +8,9 @@ from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
 import requests
+from pytz import timezone 
+from datetime import datetime
+
 #inputs to the code
 expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
@@ -191,6 +194,8 @@ while True:
     pe_lastrate=b['Data'][1]['LastRate']
 
     if ce_lastrate>=2*pe_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>300:
+        ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+        print(ind_time)
         print('Current CE Strikeprice: ',Current_CE_strikeprice)
         print('ce_lastrate: ', ce_lastrate)
         print('Current PE Strikeprice: ',Current_PE_strikeprice)
@@ -217,6 +222,8 @@ while True:
                 #exit pe
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
+                ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+                print(ind_time)
                 print('exit(bought) pe at srikeprice:  ', PE_req_old)
 
                 #sell pe which is 80 to 95% of ce
@@ -225,6 +232,8 @@ while True:
                 scripcode_=str(int(atemp2[atemp2['Name']==main_str_format_pe]['Scripcode']))
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
+                ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+                print(ind_time)
                 print('re entry(Sold) pe at strikeprice: ',req_list_PE_strikeprice[PE_index_strikeprice])
                 PE_req = req_list_PE[PE_index_strikeprice]
                 print('New PE_req is : ',PE_req)
@@ -234,6 +243,8 @@ while True:
 
 
     elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>300:
+        ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+        print(ind_time)
         print('Current CE Strikeprice: ',Current_CE_strikeprice)
         print('ce_lastrate: ', ce_lastrate)
         print('Current PE Strikeprice: ',Current_PE_strikeprice)
@@ -259,6 +270,8 @@ while True:
                 #exit pe
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
+                ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+                print(ind_time)
                 print('exit(bought) ce at srikeprice:  ', CE_req_old)
                 #sell pe which is 80 to 95% of ce
                 atemp =  script[script['Expiry']==expiry_format]
@@ -266,6 +279,8 @@ while True:
                 scripcode_=str(int(atemp2[atemp2['Name']==main_str_format_ce]['Scripcode']))                
                 test_order2=Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=scripcode_, quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order2)
+                ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+                print(ind_time)
                 print('re entry(Sold) ce at strikeprice: ',req_list_CE_strikeprice[CE_index_strikeprice])
                 CE_req = req_list_CE[CE_index_strikeprice]
                 print('New CE_req is : ',CE_req)
