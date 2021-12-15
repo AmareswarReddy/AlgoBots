@@ -88,7 +88,7 @@ for sample in range(0, len(expires_list)):
                 start=0
                 time_to_break=0
                 ceequalspe=0
-                start_cpLTP=50+j*15
+                start_cpLTP=50+max(j,5)*15
                 x=present_expiry[p_keys[start]]['spotPrice']
                 print(x)
                 
