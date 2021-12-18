@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 #eg: optionchain=present_expiry[p_keys[0]]['optionchaindata']
 #eg: strikeprice= 35500
 alpha1=2 #call_ltp>=alpha1*put_ltp
-alpha2=2  #put_ltp>=alpha2*call_ltp
-beta=0.85
+#alpha2=2  #put_ltp>=alpha2*call_ltp
+beta=1-((alpha1-1)/(3*alpha1))
 gamma=-1000
 import pandas as pd
 import requests
@@ -65,7 +65,7 @@ for sample in range(0, len(expires_list)):
 
             symbol = 'BANKNIFTY'
             fromDate = startdate.strftime('%Y-%m-%d')
-            fromTime = '09:20:00'
+            fromTime = '09:30:00'
             toDate = enddate.strftime('%Y-%m-%d')
             toTime='15:35:00'
             print(expiry)
@@ -88,7 +88,7 @@ for sample in range(0, len(expires_list)):
                 start=0
                 time_to_break=0
                 ceequalspe=0
-                start_cpLTP=50+max(j,5)*15
+                start_cpLTP=40+min(j,5)*15
                 x=present_expiry[p_keys[start]]['spotPrice']
                 print(x)
                 
@@ -127,11 +127,13 @@ for sample in range(0, len(expires_list)):
                 put_price=putprice(optionchain=present_expiry[p_keys[start]]['optionchaindata'],strikeprice=PE_lower)
                 ce_positions={p_keys[start]:[CE_upper,call_price]}
                 pe_positions={p_keys[start]:[PE_lower,put_price]}
+                initial_value=(int(CE_upper)-int(PE_lower)-2*gamma)/100
                 for i in range(len(p_keys)):
                     spot=spot+[present_expiry[p_keys[i]]['spotPrice']]
                     #print(booked_profit)
                     Current_CE_strikeprice=ce_positions[list(ce_positions.keys())[-1]][0]
                     Current_PE_strikeprice=pe_positions[list(pe_positions.keys())[-1]][0]
+                    current_value=(int(Current_CE_strikeprice)-int(Current_PE_strikeprice)-2*gamma)/100
                     try:
                         temp= callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_CE_strikeprice)
                         call_ltp=temp
@@ -144,6 +146,9 @@ for sample in range(0, len(expires_list)):
                     except Exception:
                         True
                     profit=profit+[ce_positions[list(ce_positions.keys())[-1]][1]-call_ltp+pe_positions[list(pe_positions.keys())[-1]][1]-put_ltp+booked_profit]
+                    alpha1= 2*(initial_value/current_value)
+                    print(alpha1)
+                    beta=1-((alpha1-1)/(3*alpha1))
                     if call_ltp>=alpha1*put_ltp and Current_CE_strikeprice-Current_PE_strikeprice>gamma:   #changing put position
                         x=present_expiry[p_keys[i]]['spotPrice']
                         req_list_PE_strikeprice=[round(x/100)*100]
@@ -166,7 +171,7 @@ for sample in range(0, len(expires_list)):
                         put_price = putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[PE_index_strikeprice])
                         pe_positions[p_keys[i]] = [req_list_PE_strikeprice[PE_index_strikeprice],put_price]
                         booked_profit = booked_profit+pe_positions[list(pe_positions.keys())[-2]][1]-put_ltp
-                    if put_ltp>=alpha2*call_ltp and Current_CE_strikeprice-Current_PE_strikeprice>gamma:   #changing call position
+                    if put_ltp>=alpha1*call_ltp and Current_CE_strikeprice-Current_PE_strikeprice>gamma:   #changing call position
                         x=present_expiry[p_keys[i]]['spotPrice']
                         req_list_PE_strikeprice=[round(x/100)*100]
                         req_list_CE_strikeprice=[round(x/100)*100]
