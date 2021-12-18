@@ -124,8 +124,30 @@ for i in range(0, len(expires_list)):
                 if stoplosshit>0:
                     Current_CE_strikeprice=after_gamma_adjustments[list(after_gamma_adjustments.keys())[-1]][0]
                     Current_PE_strikeprice=after_gamma_adjustments[list(after_gamma_adjustments.keys())[-1]][0]
-                    call_ltp=callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_CE_strikeprice)
-                    put_ltp=putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_PE_strikeprice)
+                    try :
+                        call_ltp=callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_CE_strikeprice)
+                    except Exception:
+                        try:
+                            t1=callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_CE_strikeprice+100)
+                            t2=callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_CE_strikeprice-100)
+                            call_ltp=-(2.6*(t1+t2))/100+(t1+t2)/2
+                        except Exception:
+                            try:
+                                call_ltp=callprice(optionchain=present_expiry[p_keys[i-2]]['optionchaindata'],strikeprice=Current_CE_strikeprice)
+                            except Exception:
+                                call_ltp=callprice(optionchain=present_expiry[p_keys[i-3]]['optionchaindata'],strikeprice=Current_CE_strikeprice)
+                    try:
+                        put_ltp=putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_PE_strikeprice)
+                    except Exception:
+                        try:
+                            t1==putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_PE_strikeprice+100)
+                            t2==putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_PE_strikeprice-100) 
+                            put_ltp=-(2.6*(t1+t2))/100+(t1+t2)/2
+                        except Exception:
+                            try:
+                                put_ltp=putprice(optionchain=present_expiry[p_keys[i-2]]['optionchaindata'],strikeprice=Current_PE_strikeprice)
+                            except Exception:
+                                put_ltp=putprice(optionchain=present_expiry[p_keys[i-3]]['optionchaindata'],strikeprice=Current_PE_strikeprice)
                     #print('booked', booked_profit)
                     profit=profit+[booked_profit+after_gamma_adjustments[list(after_gamma_adjustments.keys())[-1]][1]-call_ltp+after_gamma_adjustments[list(after_gamma_adjustments.keys())[-1]][2]-put_ltp]
                 elif stoplosshit==0:
@@ -223,11 +245,38 @@ for i in range(0, len(expires_list)):
                     time_to_break=0
             
             fig, ax = plt.subplots(2, 1)
-            ax[0].plot(profit)
+            ax[0].plot(profit,'k')
             ax[0].set_xlabel('time(scale=5min)')
             ax[0].set_ylabel("profit(scale=25rs.)")
             
-            ax[1].plot(spot)
+            ax[1].plot(spot,'k')
+            for hun in range(0,len(ce_positions)):
+                try:
+                    ax[1].plot([ce_positions[list(ce_positions.keys())[hun]][-1],ce_positions[list(ce_positions.keys())[hun+1]][-1]],[ce_positions[list(ce_positions.keys())[hun]][0],ce_positions[list(ce_positions.keys())[hun]][0]],'b')
+                except Exception:
+                    try:
+                        ax[1].plot([ce_positions[list(ce_positions.keys())[hun]][-1],after_gamma_adjustments[list(after_gamma_adjustments.keys())[0]][-1]],[ce_positions[list(ce_positions.keys())[hun]][0],ce_positions[list(ce_positions.keys())[hun]][0]],'b')
+                    except Exception:
+                        ax[1].plot([ce_positions[list(ce_positions.keys())[hun]][-1],len(profit)],[ce_positions[list(ce_positions.keys())[hun]][0],ce_positions[list(ce_positions.keys())[hun]][0]],'b')
+
+            for hun in range(0,len(pe_positions)):
+                try:
+                    ax[1].plot([pe_positions[list(pe_positions.keys())[hun]][-1],pe_positions[list(pe_positions.keys())[hun+1]][-1]],[pe_positions[list(pe_positions.keys())[hun]][0],pe_positions[list(pe_positions.keys())[hun]][0]],'r')
+                except Exception:
+                    try:
+                        ax[1].plot([pe_positions[list(pe_positions.keys())[hun]][-1],after_gamma_adjustments[list(after_gamma_adjustments.keys())[0]][-1]],[pe_positions[list(pe_positions.keys())[hun]][0],pe_positions[list(pe_positions.keys())[hun]][0]],'r')
+                    except Exception:
+                        ax[1].plot([pe_positions[list(pe_positions.keys())[hun]][-1],len(profit)],[pe_positions[list(pe_positions.keys())[hun]][0],pe_positions[list(pe_positions.keys())[hun]][0]],'r')
+
+
+
+
+            for hun in range(0,len(after_gamma_adjustments)):
+                try:
+                    ax[1].plot([after_gamma_adjustments[list(after_gamma_adjustments.keys())[hun]][-1],after_gamma_adjustments[list(after_gamma_adjustments.keys())[hun+1]][-1]],[after_gamma_adjustments[list(after_gamma_adjustments.keys())[hun]][0],after_gamma_adjustments[list(after_gamma_adjustments.keys())[hun]][0]],'y')
+                except Exception:
+                    ax[1].plot([after_gamma_adjustments[list(after_gamma_adjustments.keys())[hun]][-1],len(profit)],[after_gamma_adjustments[list(after_gamma_adjustments.keys())[hun]][0],after_gamma_adjustments[list(after_gamma_adjustments.keys())[hun]][0]],'y')                        
+            
             ax[1].set_xlabel('time(scale=5min)')
             ax[1].set_ylabel('spotprice')
             filename = 'images/'+expiry+"_"+str(start_cpLTP)+".png"
@@ -240,6 +289,11 @@ for i in range(0, len(expires_list)):
                 profit_115 = profit[-1]
         df_writeData.loc[0 if pd.isnull(df_writeData.index.max()) else df_writeData.index.max() + 1] = [expiry,profit_75, profit_115 ]
         df_writeData.to_excel('report.xlsx')
+
+
+
+
+
 # %%
 
 
