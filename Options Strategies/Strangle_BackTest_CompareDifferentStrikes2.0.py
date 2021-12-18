@@ -1,15 +1,18 @@
+#%%
 import json
+import os
 from os import error
 import numpy as np
 from datetime import datetime, timedelta
+os.chdir('/Users/vinayreddy/Desktop/strangle better comparision')
 #eg: optionchain=present_expiry[p_keys[0]]['optionchaindata']
 #eg: strikeprice= 35500
 alpha1=2 #call_ltp>=alpha1*put_ltp
 alpha2=2  #put_ltp>=alpha2*call_ltp
 beta=0.85
-gamma=-1200
+gamma=50
 start_cpLTP=75
-days_in_strategy=4
+days_in_strategy=6
 import pandas as pd
 import requests
 import json
@@ -37,15 +40,6 @@ def putprice(optionchain,strikeprice):
     return price
 
 
-def readJson(symbol, fromDate, toDate,expiry):
-    fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+"_"+str(expiry)+'.json'
-    f = open(fileName)
-    # returns JSON object as
-    # a dictionary
-    data = json.load(f)
-    f.close()
-    return data
-
 df_writeData = pd.DataFrame(columns=['Expiry', 'Total Profit Booked 75', 'Total Profit Booked 115'])
 start_cpLTP_list= [75, 115]
 for i in range(0, len(expires_list)):
@@ -57,9 +51,9 @@ for i in range(0, len(expires_list)):
             start_cpLTP = price
             print("Start Price:"+str(start_cpLTP))
             if start_cpLTP == 75:
-                gamma = -1200
+                gamma = 0
             elif start_cpLTP == 115:
-                gamma = -1000
+                gamma = 0
             #print(expires_list[i])
             enddate = datetime.strptime(expiry, '%d%b%Y')
             print(enddate.date())
@@ -74,7 +68,7 @@ for i in range(0, len(expires_list)):
             #dataJson = readJson(symbol, fromDate, toDate, expiry)
             #data = getOptionData(symbol, fromDate,fromTime, toDate,toTime, expiry)
             #jsonDump(symbol,  fromDate,toDate,expiry, data)
-            present_expiry = readJson(symbol, fromDate, toDate, expiry)
+            present_expiry = readJson(symbol, fromDate, toDate,expiry, fromTime, toTime)
             p_keys=list(present_expiry.keys())
             '''
             near_expiry = readJson(symbol, fromDate, toDate, expiry='18NOV2021')
@@ -120,25 +114,35 @@ for i in range(0, len(expires_list)):
             Total_value_old=float('inf')
             call_price=callprice(optionchain=present_expiry[p_keys[start]]['optionchaindata'],strikeprice=CE_upper)
             put_price=putprice(optionchain=present_expiry[p_keys[start]]['optionchaindata'],strikeprice=PE_lower)
-            ce_positions={p_keys[start]:[CE_upper,call_price]}
-            pe_positions={p_keys[start]:[PE_lower,put_price]}
+            ce_positions={p_keys[start]:[CE_upper,call_price,start]}
+            pe_positions={p_keys[start]:[PE_lower,put_price,start]}
+            after_gamma_adjustments={}
+            stoplosshit=0
             for i in range(len(p_keys)):
                 spot=spot+[present_expiry[p_keys[i]]['spotPrice']]
                 #print(booked_profit)
-                Current_CE_strikeprice=ce_positions[list(ce_positions.keys())[-1]][0]
-                Current_PE_strikeprice=pe_positions[list(pe_positions.keys())[-1]][0]
-                try:
-                    temp= callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_CE_strikeprice)
-                    call_ltp=temp
-                except Exception:
-                    True
+                if stoplosshit>0:
+                    Current_CE_strikeprice=after_gamma_adjustments[list(after_gamma_adjustments.keys())[-1]][0]
+                    Current_PE_strikeprice=after_gamma_adjustments[list(after_gamma_adjustments.keys())[-1]][0]
+                    call_ltp=callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_CE_strikeprice)
+                    put_ltp=putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_PE_strikeprice)
+                    #print('booked', booked_profit)
+                    profit=profit+[booked_profit+after_gamma_adjustments[list(after_gamma_adjustments.keys())[-1]][1]-call_ltp+after_gamma_adjustments[list(after_gamma_adjustments.keys())[-1]][2]-put_ltp]
+                elif stoplosshit==0:
+                    Current_CE_strikeprice=ce_positions[list(ce_positions.keys())[-1]][0]
+                    Current_PE_strikeprice=pe_positions[list(pe_positions.keys())[-1]][0]
+                    try:
+                        temp= callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_CE_strikeprice)
+                        call_ltp=temp
+                    except Exception:
+                        True
 
-                try:
-                    temp= putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_PE_strikeprice)
-                    put_ltp=temp
-                except Exception:
-                    True
-                profit=profit+[ce_positions[list(ce_positions.keys())[-1]][1]-call_ltp+pe_positions[list(pe_positions.keys())[-1]][1]-put_ltp+booked_profit]
+                    try:
+                        temp= putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=Current_PE_strikeprice)
+                        put_ltp=temp
+                    except Exception:
+                        True
+                    profit=profit+[ce_positions[list(ce_positions.keys())[-1]][1]-call_ltp+pe_positions[list(pe_positions.keys())[-1]][1]-put_ltp+booked_profit]
                 if call_ltp>=alpha1*put_ltp and Current_CE_strikeprice-Current_PE_strikeprice>gamma:   #changing put position
                     x=present_expiry[p_keys[i]]['spotPrice']
                     req_list_PE_strikeprice=[round(x/100)*100]
@@ -159,7 +163,7 @@ for i in range(0, len(expires_list)):
                             live_CE_lastrate = live_CE_lastrate+[-1]
                     PE_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-beta*call_ltp))
                     put_price = putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[PE_index_strikeprice])
-                    pe_positions[p_keys[i]] = [req_list_PE_strikeprice[PE_index_strikeprice],put_price]
+                    pe_positions[p_keys[i]] = [req_list_PE_strikeprice[PE_index_strikeprice],put_price,i]
                     booked_profit = booked_profit+pe_positions[list(pe_positions.keys())[-2]][1]-put_ltp
                 if put_ltp>=alpha2*call_ltp and Current_CE_strikeprice-Current_PE_strikeprice>gamma:   #changing call position
                     x=present_expiry[p_keys[i]]['spotPrice']
@@ -181,7 +185,7 @@ for i in range(0, len(expires_list)):
                             live_CE_lastrate = live_CE_lastrate+[-1]
                     CE_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-beta*put_ltp))
                     call_price = callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[CE_index_strikeprice])
-                    ce_positions[p_keys[i]] = [req_list_CE_strikeprice[CE_index_strikeprice],call_price]
+                    ce_positions[p_keys[i]] = [req_list_CE_strikeprice[CE_index_strikeprice],call_price,i]
                     booked_profit = booked_profit+ce_positions[list(ce_positions.keys())[-2]][1]-call_ltp
             #
                 if Current_CE_strikeprice-Current_PE_strikeprice<=0 and abs(call_ltp-put_ltp)<call_ltp/20:
@@ -200,8 +204,23 @@ for i in range(0, len(expires_list)):
                         #square off all positions
                         time_to_break=1
                 if time_to_break==1:
-                    print('stoplosshit')
-                    break
+
+                    stoplosshit=stoplosshit+1
+                    Total_value_old=float('inf')
+                    x=present_expiry[p_keys[i]]['spotPrice']
+                    req_list_PE_strikeprice=[round(x/100)*100]
+                    req_list_CE_strikeprice=[round(x/100)*100]
+                    live_PE_lastrate = [putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[0])]
+                    live_CE_lastrate = [callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[0])]
+                    call_price = live_CE_lastrate[0]
+                    put_price = live_PE_lastrate[0]
+
+                    after_gamma_adjustments[p_keys[i]]=[req_list_CE_strikeprice[0],call_price,put_price,i]
+                    booked_profit = profit[-1]
+                    #print('stoplosshits = ', stoplosshit)
+                    #print(after_gamma_adjustments)
+                    #print(profit[-1])
+                    time_to_break=0
             
             fig, ax = plt.subplots(2, 1)
             ax[0].plot(profit)
@@ -214,7 +233,7 @@ for i in range(0, len(expires_list)):
             filename = 'images/'+expiry+"_"+str(start_cpLTP)+".png"
             plt.savefig(filename, transparent=True)
             
-            print('Total profit booked:',profit[-1])
+            #print('Total profit booked:',profit[-1])
             if start_cpLTP == 75:
                 profit_75 = profit[-1]
             elif start_cpLTP == 115:
@@ -257,8 +276,6 @@ def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:0
         timestamp_current = timestamp_current + fivemin_timestamp    
     return final_data
 
-  
-
 import requests
 import json
 def downloaddata(url):
@@ -284,12 +301,17 @@ def jsonDump(symbol, fromDate, toDate, expiry,data):
 
     out_file.close()
 
-
-def readJson(symbol, fromDate, toDate,expiry):
+def readJson(symbol, fromDate, toDate,expiry, fromTime, toTime):
     fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+"_"+str(expiry)+'.json'
+    if  not os.path.isfile(fileName):
+        print("Downloading Data")
+        data = getOptionData(symbol, fromDate,fromTime, toDate,toTime, expiry)
+        jsonDump(symbol,  fromDate,toDate,expiry, data)
     f = open(fileName)
     # returns JSON object as
     # a dictionary
     data = json.load(f)
     f.close()
     return data
+
+# %%
