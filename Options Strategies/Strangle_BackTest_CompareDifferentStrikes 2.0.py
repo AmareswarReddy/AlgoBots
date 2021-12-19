@@ -80,7 +80,12 @@ for i in range(0, len(expires_list)):
             start=0
             time_to_break=0
             ceequalspe=0
-            x=present_expiry[p_keys[start]]['spotPrice']
+            try:
+                x=present_expiry[p_keys[start]]['spotPrice']
+                if x==0:
+                    raise Exception("")
+            except Exception:
+                x=present_expiry[p_keys[start]]['futuresPrice']
             req_list_PE_strikeprice=[round(x/100)*100]
             req_list_CE_strikeprice=[round(x/100)*100]
             #ce_positions{p_keys[i]:}
@@ -166,7 +171,12 @@ for i in range(0, len(expires_list)):
                         True
                     profit=profit+[ce_positions[list(ce_positions.keys())[-1]][1]-call_ltp+pe_positions[list(pe_positions.keys())[-1]][1]-put_ltp+booked_profit]
                 if call_ltp>=alpha1*put_ltp and Current_CE_strikeprice-Current_PE_strikeprice>gamma:   #changing put position
-                    x=present_expiry[p_keys[i]]['spotPrice']
+                    try:
+                        x=present_expiry[p_keys[i]]['spotPrice']
+                        if x==0:
+                            raise Exception("")
+                    except Exception:
+                        x=present_expiry[p_keys[i]]['futuresPrice']
                     req_list_PE_strikeprice=[round(x/100)*100]
                     req_list_CE_strikeprice=[round(x/100)*100]
                     for k in range(1,25):
@@ -188,7 +198,12 @@ for i in range(0, len(expires_list)):
                     pe_positions[p_keys[i]] = [req_list_PE_strikeprice[PE_index_strikeprice],put_price,i]
                     booked_profit = booked_profit+pe_positions[list(pe_positions.keys())[-2]][1]-put_ltp
                 if put_ltp>=alpha2*call_ltp and Current_CE_strikeprice-Current_PE_strikeprice>gamma:   #changing call position
-                    x=present_expiry[p_keys[i]]['spotPrice']
+                    try:
+                        x=present_expiry[p_keys[i]]['spotPrice']
+                        if x==0:
+                            raise Exception("")
+                    except Exception:
+                        x=present_expiry[p_keys[i]]['futuresPrice']
                     req_list_PE_strikeprice=[round(x/100)*100]
                     req_list_CE_strikeprice=[round(x/100)*100]
                     for k in range(1,25):
@@ -229,11 +244,40 @@ for i in range(0, len(expires_list)):
 
                     stoplosshit=stoplosshit+1
                     Total_value_old=float('inf')
-                    x=present_expiry[p_keys[i]]['spotPrice']
+                    try:
+                        x=present_expiry[p_keys[i]]['spotPrice']
+                        if x==0:
+                            raise Exception("")
+                    except Exception:
+                        x=present_expiry[p_keys[i]]['futuresPrice']
                     req_list_PE_strikeprice=[round(x/100)*100]
                     req_list_CE_strikeprice=[round(x/100)*100]
-                    live_PE_lastrate = [putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[0])]
-                    live_CE_lastrate = [callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[0])]
+                    try :
+                        call_ltp=callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[0])
+                    except Exception:
+                        try:
+                            t1=callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[0]+100)
+                            t2=callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[0]-100)
+                            call_ltp=-(2.6*(t1+t2))/100+(t1+t2)/2
+                        except Exception:
+                            try:
+                                call_ltp=callprice(optionchain=present_expiry[p_keys[i-1]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[0])
+                            except Exception:
+                                call_ltp=callprice(optionchain=present_expiry[p_keys[i-2]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[0])
+                    try:
+                        put_ltp=putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[0])
+                    except Exception:
+                        try:
+                            t1==putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[0]+100)
+                            t2==putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[0]-100) 
+                            put_ltp=-(2.6*(t1+t2))/100+(t1+t2)/2
+                        except Exception:
+                            try:
+                                put_ltp=putprice(optionchain=present_expiry[p_keys[i-1]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[0])
+                            except Exception:
+                                put_ltp=putprice(optionchain=present_expiry[p_keys[i-2]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[0])                    
+                    live_PE_lastrate = [put_ltp]
+                    live_CE_lastrate = [call_ltp]
                     call_price = live_CE_lastrate[0]
                     put_price = live_PE_lastrate[0]
 
