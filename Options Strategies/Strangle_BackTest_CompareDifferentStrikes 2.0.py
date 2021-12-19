@@ -124,7 +124,10 @@ for i in range(0, len(expires_list)):
             after_gamma_adjustments={}
             stoplosshit=0
             for i in range(len(p_keys)):
-                spot=spot+[present_expiry[p_keys[i]]['spotPrice']]
+                if present_expiry[p_keys[i]]['spotPrice']==0:
+                    spot=spot+[present_expiry[p_keys[i]]['futuresPrice']]
+                else:
+                    spot=spot+[present_expiry[p_keys[i]]['spotPrice']]
                 #print(booked_profit)
                 if stoplosshit>0:
                     Current_CE_strikeprice=after_gamma_adjustments[list(after_gamma_adjustments.keys())[-1]][0]
