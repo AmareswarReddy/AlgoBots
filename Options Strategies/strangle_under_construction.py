@@ -8,6 +8,47 @@ from py5paisa.strategy import *
 from cred import *
 from datetime import datetime 
 import requests
+
+def new_short_straddle():  #do not try running this function seperately. this is just an add on to strangle. 
+    while True:                
+        #square off all positions
+        pos=Client.positions()
+        for i in range(0, len(pos)):
+            if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0  :
+                Current_PE_strikeprice=pos[i]['ScripName'][25:30]
+            elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0  :
+                Current_CE_strikeprice=pos[i]['ScripName'][25:30]
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(Current_PE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+        Client.place_order(test_order)
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(Current_CE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+        Client.place_order(test_order)
+        req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
+        a=Client.fetch_market_feed(req_list_)
+        x=a['Data'][0]['LastRate']
+        req_list_PE={"Exch":"N","ExchType":"D","Symbol":main_str_pe+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"PE"}
+        req_list_CE={"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"CE"}
+        req_list2=[req_list_CE,req_list_PE]
+        req_list_PE_strikeprice=round(x/100)*100
+        req_list_CE_strikeprice=round(x/100)*100
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(req_list_CE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+        Client.place_order(test_order)
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(req_list_PE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+        Client.place_order(test_order)
+        Total_value_old=float('inf')
+        while True :
+            b=Client.fetch_market_feed(req_list2)
+            ce_lastrate=b['Data'][0]['LastRate']
+            pe_lastrate=b['Data'][1]['LastRate']
+            Total_value_new=ce_lastrate+pe_lastrate
+            if Total_value_new<Total_value_old:
+                Stop_loss=Total_value_new*1.2
+                Total_value_old=Total_value_new
+            if Total_value_new>Stop_loss :
+                brk=1
+            if brk==1:
+                print('#########                                         stoplosshit                                         #########')
+                break
+            
 #inputs to the code
 expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
@@ -17,8 +58,9 @@ url = "https://images.5paisa.com/website/scripmaster-csv-format.csv"
 
 
 #download and reading scriptmaster
-r = requests.get(url)
-open('scripmaster-csv-format.csv', 'wb').write(r.content)
+if day==0:
+    r = requests.get(url)
+    open('scripmaster-csv-format.csv', 'wb').write(r.content)
 filename = 'scripmaster-csv-format.csv'
 script = pd.read_csv(filename)
 def fix(script):
@@ -185,7 +227,7 @@ while True:
     ce_lastrate=b['Data'][0]['LastRate']
     pe_lastrate=b['Data'][1]['LastRate']
 
-    if ce_lastrate>2*pe_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>-1000:
+    if ce_lastrate>2*pe_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>0:
         #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in pe_lastrate will be far lower than the increase in ce_lastrate when stock price increases from the price it is now trading
         PE_req_old = PE_req['StrikePrice']
         for k in range(0,len(positions)):
@@ -220,7 +262,7 @@ while True:
         
 
 
-    elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>-1000:
+    elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>0:
         #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in ce_lastrate will be far lower than the increase in pe_lastrate when stock price decreases from the price it is now trading
         CE_req_old = CE_req['StrikePrice']
         for k in range(0,len(positions)):
@@ -253,37 +295,14 @@ while True:
                 loop_control=1
                 break
     now=datetime.now()
-    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))<=-1000 :   #or now.strftime('%H %M')=='15 15'
-        try: 
-            straddle(expiry=expiry,strike=CE_req['StrikePrice'])
-        except Exception:
-            Total_value_new=ce_lastrate+pe_lastrate
-            if Total_value_new<Total_value_old:
-                Stop_loss=Total_value_new*1.15
-                Total_value_old=Total_value_new
-            if Total_value_new>Stop_loss :
-                brk=1
-                #square off all positions
-                pos=Client.positions()
-                for i in range(0, len(pos)):
-                    if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0  :
-                        Current_PE_strikeprice=pos[i]['ScripName'][25:30]
-                    elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0  :
-                        Current_CE_strikeprice=pos[i]['ScripName'][25:30]
-                for i in range(0, len(pos)):
-                    if pos[i]['ScripName'][:25] == main_str_format_pe and  int(pos[i]['ScripName'][25:30])<int(Current_PE_strikeprice) and pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']<0   :
-                        PE_Hedge = pos[i]['ScripName'][25:30]
-                    elif pos[i]['ScripName'][:25] == main_str_format_ce and  int(pos[i]['ScripName'][25:30])>int(Current_CE_strikeprice) and pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']<0   :
-                        CE_Hedge=pos[i]['ScripName'][25:30]
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+PE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-                Client.place_order(test_order)
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+CE_req['StrikePrice']+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-                Client.place_order(test_order)
-                test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(CE_hedge)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-                Client.place_order(test_order)
-                test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(PE_hedge)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-                Client.place_order(test_order)
-                print('stoplosshit')
+    if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))<=0 :   #or now.strftime('%H %M')=='15 15'
+        Total_value_new=ce_lastrate+pe_lastrate
+        if Total_value_new<Total_value_old:
+            Stop_loss=Total_value_new*1.15
+            Total_value_old=Total_value_new
+        if Total_value_new>Stop_loss :
+            brk=1
+            new_short_straddle()           
     if brk==1:
         break
 
