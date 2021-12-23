@@ -50,7 +50,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
                 break
             
 #inputs to the code
-expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
+expiry = str(input('enter the expiry(Eg: 20210916 ) : '))
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
 lots = int(np.floor(money_in_account/1.5)*25)
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
