@@ -117,6 +117,7 @@ for j in range(0,49):
     except Exception:
         req_list_CE_strikeprice[j]=0
 req_list_CE_strikeprice.remove(0)
+req_list_PE_strikeprice.remove(0)
 v1=np.array(req_list_CE_strikeprice)
 v1=v1[v1!=0]
 v2=np.array(req_list_PE_strikeprice)
@@ -133,6 +134,6 @@ def change_in_call(strikeprice=41000,f1spot=f1spot,delta=200):
 def change_in_put(strikeprice=41000,f2spot=f2spot,delta=200):
     a=f2spot(strikeprice-delta)-f2spot(strikeprice)
     return a
-change_in_call(40000,f1spot,1)
+change_in_call(40100,f1spot,1)
 
 # %%
