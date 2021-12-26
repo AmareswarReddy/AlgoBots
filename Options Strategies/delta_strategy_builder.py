@@ -118,8 +118,10 @@ def functions(start='2021-11-03 09:25:00',present_expiry=present_expiry):
             live_CE_lastrate = live_CE_lastrate+[callprice(optionchain=present_expiry[p_keys[start]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[j])]
         except Exception:
             req_list_CE_strikeprice[j]=0
-    req_list_CE_strikeprice.remove(0)
-    req_list_PE_strikeprice.remove(0)
+    if 0 in req_list_CE_strikeprice :
+        req_list_CE_strikeprice.remove(0)
+    if 0 in req_list_PE_strikeprice :
+        req_list_PE_strikeprice.remove(0)
     v1=np.array(req_list_CE_strikeprice)
     v1=v1[v1!=0]
     v2=np.array(req_list_PE_strikeprice)
