@@ -96,7 +96,7 @@ expiry = '11NOV2021'
 
 present_expiry = readJson(symbol, fromDate, toDate,expiry, fromTime, toTime)
 
-def functions(start='2021-11-03 09:25:00',present_expiry=present_expiry,):
+def functions(start='2021-11-03 09:25:00',present_expiry=present_expiry):
 
     p_keys=list(present_expiry.keys())
     if type(start)==str:
@@ -130,13 +130,20 @@ def functions(start='2021-11-03 09:25:00',present_expiry=present_expiry,):
     f1spot = interpolate.interp1d(v1, n1,kind = 'cubic')
     f2spot = interpolate.interp1d(v2, n2, kind = 'cubic')
     return f1spot,f2spot
-f1spot,f2spot=functions()
-def change_in_call(strikeprice=41000,f1spot=f1spot,delta=200):
+callspot,putspot=functions(start='2021-11-03 09:25:00',present_expiry=present_expiry)     # use this line of code for callspot and putspot price
+def change_in_call(strikeprice=41000,f1spot=callspot,delta=200):
     a=f1spot(strikeprice-delta)-f1spot(strikeprice)
     return a
-def change_in_put(strikeprice=41000,f2spot=f2spot,delta=200):
+def change_in_put(strikeprice=41000,f2spot=putspot,delta=200):
     a=f2spot(strikeprice-delta)-f2spot(strikeprice)
     return a
-change_in_call(40200,f1spot,1)
+change_in_call(40200,callspot,1)
 
 # %%
+p_keys=list(present_expiry.keys())
+call_lastrate_spot=[]
+for i in range(0,len(p_keys)):
+    callspot,putspot=functions(start=i,present_expiry=present_expiry)
+    call_lastrate_spot=call_lastrate_spot+[callspot(present_expiry[p_keys[i]]['spotPrice'])]
+plt.plot(call_lastrate_spot)
+    
