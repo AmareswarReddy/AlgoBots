@@ -119,14 +119,13 @@ def functions(start='2021-11-03 09:25:00',present_expiry=present_expiry):
         except Exception:
             req_list_CE_strikeprice[j]=0
     req_list_CE_strikeprice.remove(0)
+    req_list_PE_strikeprice.remove(0)
     v1=np.array(req_list_CE_strikeprice)
     v1=v1[v1!=0]
     v2=np.array(req_list_PE_strikeprice)
     v2=v2[v2!=0]
-
     n1=np.array(live_CE_lastrate)
     n2=np.array(live_PE_lastrate)
-
     f1spot = interpolate.interp1d(v1, n1,kind = 'cubic')
     f2spot = interpolate.interp1d(v2, n2, kind = 'cubic')
     return f1spot,f2spot
@@ -142,8 +141,18 @@ change_in_call(40200,callspot,1)
 # %%
 p_keys=list(present_expiry.keys())
 call_lastrate_spot=[]
+put_lastrate_spot=[]
+spot=[]
 for i in range(0,len(p_keys)):
     callspot,putspot=functions(start=i,present_expiry=present_expiry)
-    call_lastrate_spot=call_lastrate_spot+[callspot(present_expiry[p_keys[i]]['spotPrice'])]
-plt.plot(call_lastrate_spot)
-    
+    call_lastrate_spot=call_lastrate_spot+[callspot(present_expiry[p_keys[i]]['spotPrice']+500)]
+    put_lastrate_spot=put_lastrate_spot+[putspot(present_expiry[p_keys[i]]['spotPrice']-500)]
+    spot=spot+[present_expiry[p_keys[i]]['spotPrice']]
+plt.plot(call_lastrate_spot,'b')
+plt.plot(put_lastrate_spot,'r')
+plt.legend(['call','put'])
+plt.show()
+plt.plot(spot)
+plt.show()
+
+# %%
