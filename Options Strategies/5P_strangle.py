@@ -9,7 +9,6 @@ from cred import *
 from datetime import datetime 
 import requests
 from pytz import timezone 
-from datetime import datetime
 
 #inputs to the code
 expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
