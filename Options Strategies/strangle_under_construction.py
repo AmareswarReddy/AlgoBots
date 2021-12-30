@@ -9,9 +9,11 @@ from cred import *
 from datetime import datetime 
 import requests
 from pytz import timezone 
- 
+ #%%
 def new_short_straddle():  #do not try running this function seperately. this is just an add on to strangle. 
-    while True:                
+    
+    while True:
+        brk=0                
         #square off all positions
         pos=Client.positions()
         for i in range(0, len(pos)):
@@ -52,7 +54,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
                 print(ind_time)
                 print('#########                                         stoplosshit                                         #########')
                 break
-            
+#%%          
 #inputs to the code
 expiry = str(input('enter the expiry(Eg: 20210916 ) : '))
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
@@ -165,14 +167,14 @@ PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
 PE_hedge=req_list_PE_strikeprice[PE_hedge_index_strikeprice]
 
 #%%
-strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob="19950820",cred=cred)
+
 #short_strangle(<symbol>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
 #strategy.short_strangle('banknifty',[str(PE_lower),str(CE_upper)],'25','20210902','D')
 #iron_condor(<symbol>,<List of buy strike prices>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
 if day==0:
     #short_strangle(<symbol>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
     #strategy.short_strangle("banknifty",[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
-
+    strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob="19950820",cred=cred)
     strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
     sleep(3)
     positions = Client.positions()
@@ -194,6 +196,7 @@ CE_req_old = ' '
 loop_control=0
 brk=0
 #%%
+turn=0
 while True:
     req=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     a=Client.fetch_market_feed(req)
@@ -326,14 +329,17 @@ while True:
                 break
     now=datetime.now()
     if (int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'] ))<=0 :   #or now.strftime('%H %M')=='15 15'
-        Total_value_new=ce_lastrate+pe_lastrate
-        if Total_value_new<Total_value_old:
-            Stop_loss=Total_value_new*1.15
-            Total_value_old=Total_value_new
-        if Total_value_new>Stop_loss :
-            brk=1
-            print('stoplosshit')
-            new_short_straddle()           
+        if turn==0:
+            turn=1
+        elif turn==1:
+            Total_value_new=ce_lastrate+pe_lastrate
+            if Total_value_new<Total_value_old:
+                Stop_loss=Total_value_new*1.15
+                Total_value_old=Total_value_new
+            if Total_value_new>Stop_loss :
+                brk=1
+                print('stoplosshit')
+                new_short_straddle()           
     if brk==1:
         break
 
