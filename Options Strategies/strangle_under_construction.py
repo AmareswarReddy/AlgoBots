@@ -9,6 +9,7 @@ from cred import *
 from datetime import datetime 
 import requests
 from pytz import timezone 
+import os
  #%%
 def new_short_straddle():  #do not try running this function seperately. this is just an add on to strangle. 
     
@@ -67,15 +68,16 @@ url = "https://images.5paisa.com/website/scripmaster-csv-format.csv"
 if day==0:
     r = requests.get(url)
     open('scripmaster-csv-format.csv', 'wb').write(r.content)
-filename = 'scripmaster-csv-format.csv'
-script = pd.read_csv(filename)
-def fix(script):
-    for i in range(0,len(script)):
-        script['Name'].at[i]=script['Name'][i][:25]
-        script['Expiry'].at[i]=script['Expiry'][i][:10]
-    return script
-
-script=fix(script)
+    filename = 'scripmaster-csv-format.csv'
+    script = pd.read_csv(filename)
+    def fix(script):
+        for i in range(0,len(script)):
+            script['Name'].at[i]=script['Name'][i][:25]
+            script['Expiry'].at[i]=script['Expiry'][i][:10]
+        return script
+    script=fix(script)
+    script.to_pickle(os.path.abspath(os.getcwd())+'/script.pickle')
+script=pd.read_pickle('script.pickle')
 
 
 # formatting the input data 
