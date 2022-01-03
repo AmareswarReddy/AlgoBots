@@ -113,7 +113,11 @@ cred={
 Client = FivePaisaClient(email='chandinimadduru123@gmail.com', passwd='amar@0987',dob='19950820', cred=cred)
 Client.login()
 #%%
-
+while True:
+    now=datetime.now()
+    if now.strftime('%H %M')=='09 15':
+        break
+#%%
 # if the 
 if day!=0:
     pos=Client.positions()
