@@ -115,7 +115,9 @@ Client.login()
 #%%
 while True:
     now=datetime.now()
-    if now.strftime('%H %M')=='09 15':
+    if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=15:
+        break
+    elif int(now.strftime('%H'))>9:
         break
 #%%
 # if the 
