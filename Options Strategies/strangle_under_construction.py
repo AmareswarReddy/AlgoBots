@@ -114,7 +114,7 @@ Client = FivePaisaClient(email='chandinimadduru123@gmail.com', passwd='amar@0987
 Client.login()
 #%%
 while True:
-    now=datetime.now()
+    now=datetime.now(timezone("Asia/Kolkata"))
     if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=15:
         break
     elif int(now.strftime('%H'))>9:
