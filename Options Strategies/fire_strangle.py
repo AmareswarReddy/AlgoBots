@@ -1,4 +1,9 @@
 #%%
+
+# Navigate to Below Link and obtain auth_code
+#https://api.fyers.in/api/v2/generate-authcode?client_id=3XWQKG835V-100&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F&response_type=code&state=None&scope=&nonce=private
+auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE2NDEzMTE3MTcsImV4cCI6MTY0MTM0MTcxNywibmJmIjoxNjQxMzExMTE3LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJYQzA0MTY1Iiwibm9uY2UiOiJwcml2YXRlIiwiYXBwX2lkIjoiM1hXUUtHODM1ViIsInV1aWQiOiIxMTk5MTViMTRlMzY0YmRlODFlMDY5ODAzYzZlNmQ2ZiIsImlwQWRkciI6IjAuMC4wLjAiLCJzY29wZSI6IiJ9.wYg9KmfTyc-PV2vhNqu-6WVvf12pb61asGE7zRPYjYI"
+
 # Update scripmaster file every week
 import numpy as np
 import pandas as pd
@@ -11,60 +16,33 @@ import requests
 from pytz import timezone 
 from fyers_api import fyersModel
 from fyers_api import accessToken
-#%%
-client_id=
-secret_key=
-redirect_uri=
-response_type=
-grant_type=
-state=
-scope=
-nonce=
+
+
+
+
+client_id = "3XWQKG835V-100"
+secret_key = "B3NTA5RP9Q"
+redirect_uri = "http://localhost:8000/"
+response_type = "code"
+grant_type = "authorization_code"
+state = "None"
+nonce = "private"
+
 session=accessToken.SessionModel(client_id=client_id,
 secret_key=secret_key,redirect_uri=redirect_uri, 
 response_type=response_type, grant_type=grant_type,
-state=state,scope=scope,nonce=nonce)
+state=state,scope="",nonce=nonce)
 
-response = session.generate_authcode()  
-'''
-scope=”The value in scope must be openid if being passed.
-Though this is an optional field”
-
-Nonce = “The value in nonce can be any random string value.
-This is also an optional field”
-
-SAMPLE SUCCESS RESPONSE : 
-You will be redirected to this url on which by clicking you will
-get the authorization code.
-'''
-#############################                                               https://api.fyers.in/api/v2/generate-authcode?
-#############################                                               client_id=SPXXXXE7-100&
-'''redirect_uri=https%3A%2F%2Fdev.fyers.in%2Fredirection%2Findex.html'''
-'''&response_type=code&state=sample_state&nonce=sample_nonce'''
-auth_code = "This will be the response of the session.generate_authcode() method once you click on the redirect_url you will be provided with the auth_code"
 
 session.set_token(auth_code)
-response = session.generate_token()
+response_token = session.generate_token()
+print(response_token)
 
-access_token = response["access_token"]
-"You will be provided with the access_token which will have the below shown response" 
+access_token = response_token['access_token']
 
 fyers = fyersModel.FyersModel(client_id=client_id, token=access_token,log_path="/home/Desktop/apiV2")
 
-is_async = True  #(By default the async will be False, Change to True for async API calls.)
 
-log_path = "This will create logs in the local system and that will be stored in the particular local address you have defined"
-'''
-----------------------------------------------------------------------------------------------------------------------------------------
- Sample Success Response 
----------------------------------------------------------------------------------------------------------------------------------------
-{
-    "s": "ok",
-    "code": 200,
-    "message": "",
-    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkuZnllcnMuaW4iLCJpYXQiOjE2MDM4ODA4NTIsImV4cCI6MTYwMzkzMTQzMiwibmJmIjoxNjAzODgwODUyLCJhdWQiOlsieDoyIiwieDoxIiwieDowIl0sInN1YiI6ImFjY2Vzc190b2tlbiIsImF0X2hhc2giOiJnQUFBQUFCZm1VZVVlSTJnYTVQR2pnNktPSXRoU1JxUklDOVlxeTdxYm1SLVEyR1NLY29OSjgxWEdXLVl1U1BjbzY1T2hESVprT1U1X2RRRUJwUE15M24zS1dQYjUyVkFnUW1BQ2JUZGNZRVRfbjJudEQ2QmYxND0iLCJkaXNwbGF5X25hbWUiOiJQSVlVU0ggUkFKRU5EUkEgS0FQU0UiLCJmeV9pZCI6IkRQMDA0MDQiLCJhcHBUeXBlIjoxMDB9.EquxH8D98KSoRzMcicIkGLszGubh_cCwwQXALP-OLOk"
-}
-'''
 
 #%%
 expiry = str(input('enter the expiry(Eg: 20210916 ) : '))
