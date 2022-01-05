@@ -80,6 +80,15 @@ if day==0:
 script=pd.read_pickle('script.pickle')
 
 
+#%%
+while True:
+    now=datetime.now(timezone("Asia/Kolkata"))
+    if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=16:
+        break
+    elif int(now.strftime('%H'))>9:
+        break
+#%%
+
 # formatting the input data 
 temp={1:'JAN',
             2:'FEB',
@@ -112,14 +121,7 @@ cred={
     }
 Client = FivePaisaClient(email='chandinimadduru123@gmail.com', passwd='amar@0987',dob='19950820', cred=cred)
 Client.login()
-#%%
-while True:
-    now=datetime.now(timezone("Asia/Kolkata"))
-    if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=15:
-        break
-    elif int(now.strftime('%H'))>9:
-        break
-#%%
+
 # if the 
 if day!=0:
     pos=Client.positions()
