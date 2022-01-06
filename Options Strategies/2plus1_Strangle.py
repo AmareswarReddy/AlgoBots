@@ -48,6 +48,7 @@ n_keys=list(near_expiry.keys())
 far_expiry = readJson(symbol, fromDate, toDate, expiry='25NOV2021')
 f_keys=list(far_expiry.keys())
 '''
+#%%
 import matplotlib.pyplot as plt
 start=0
 time_to_break=0
@@ -118,19 +119,19 @@ for i in range(len(p_keys)):
             try:
                 live_PE_lastrate = live_PE_lastrate+[putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[j])]
             except Exception:
-                live_PE_lastrate = live_PE_lastrate+[-1]
+                live_PE_lastrate = live_PE_lastrate+[-1000]
             try:
                 live_CE_lastrate = live_CE_lastrate+[callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[j])]
             except Exception:
-                live_CE_lastrate = live_CE_lastrate+[-1]
+                live_CE_lastrate = live_CE_lastrate+[-1000]
         if modified_strangle_tracker%2 == 0:
                     PE_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-beta*call_ltp))
                     put_price = putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[PE_index_strikeprice])
                     pe_positions[p_keys[i]] = [req_list_PE_strikeprice[PE_index_strikeprice],put_price]
                     booked_profit = booked_profit+pe_positions[list(pe_positions.keys())[-2]][1]-put_ltp
                     modified_strangle_tracker = modified_strangle_tracker + 1
-        if modified_strangle_tracker%2 == 1:
-                    CE_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)- call_ltp))
+        elif modified_strangle_tracker%2 == 1:
+                    CE_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)- put_ltp))
                     print(CE_index_strikeprice)
                     call_price = callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[CE_index_strikeprice])
                     ce_positions[p_keys[i]] = [req_list_CE_strikeprice[CE_index_strikeprice],call_price]
@@ -149,11 +150,11 @@ for i in range(len(p_keys)):
             try:
                 live_PE_lastrate = live_PE_lastrate+[putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[j])]
             except Exception:
-                live_PE_lastrate = live_PE_lastrate+[-1]
+                live_PE_lastrate = live_PE_lastrate+[-1000]
             try:
                 live_CE_lastrate = live_CE_lastrate+[callprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_CE_strikeprice[j])]
             except Exception:
-                live_CE_lastrate = live_CE_lastrate+[-1]
+                live_CE_lastrate = live_CE_lastrate+[-1000]
                 
         if modified_strangle_tracker%2 == 0:
                     CE_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-beta*put_ltp))
@@ -162,8 +163,8 @@ for i in range(len(p_keys)):
                     booked_profit = booked_profit+ce_positions[list(ce_positions.keys())[-2]][1]-call_ltp
                     modified_strangle_tracker = modified_strangle_tracker + 1
             
-        if modified_strangle_tracker%2 == 1:
-                    PE_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-put_ltp))
+        elif modified_strangle_tracker%2 == 1:
+                    PE_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-call_ltp))
                     print(PE_index_strikeprice)
                     put_price = putprice(optionchain=present_expiry[p_keys[i]]['optionchaindata'],strikeprice=req_list_PE_strikeprice[PE_index_strikeprice])
                     pe_positions[p_keys[i]] = [req_list_PE_strikeprice[PE_index_strikeprice],put_price]
