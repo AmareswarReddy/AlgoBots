@@ -46,7 +46,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
             pe_lastrate=b['Data'][1]['LastRate']
             Total_value_new=ce_lastrate+pe_lastrate
             if Total_value_new<Total_value_old:
-                Stop_loss=Total_value_new*1.2
+                Stop_loss=Total_value_new*1.15
                 Total_value_old=Total_value_new
             if Total_value_new>Stop_loss :
                 brk=1
@@ -168,9 +168,9 @@ for j in range(0,49):
     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
     live_CE_lastrate = live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
 CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-115))
-CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-10))
+CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-20))
 PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-115))
-PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-10))
+PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-20))
 CE_upper=req_list_CE_strikeprice[CE_index_strikeprice]
 CE_hedge=req_list_CE_strikeprice[CE_hedge_index_strikeprice]
 PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
@@ -273,6 +273,7 @@ while True:
                 margin=Client.margin()
                 if margin[0]['AvailableMargin']<lots*20000:
                     #close all positions
+                    print('no margin for any more adjustments')
                     quit()
 
                 #exit pe
@@ -326,6 +327,7 @@ while True:
                 margin=Client.margin()
                 if margin[0]['AvailableMargin']<lots*20000:
                     #close all positions
+                    print('no margin for any more adjustments')
                     quit()
                 #exit pe
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
