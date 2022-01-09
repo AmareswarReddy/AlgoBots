@@ -270,6 +270,11 @@ while True:
                 for j in range(0,49):
                     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
                 PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-0.85*ce_lastrate))
+                margin=Client.margin()
+                if margin[0]['AvailableMargin']<lots*20000:
+                    #close all positions
+                    quit()
+
                 #exit pe
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
@@ -290,7 +295,7 @@ while True:
                 loop_control=1
                 break
         
-
+    
 
     elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>0:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -318,6 +323,10 @@ while True:
                 for j in range(0,49):
                     live_CE_lastrate=live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
                 CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-0.85*pe_lastrate))
+                margin=Client.margin()
+                if margin[0]['AvailableMargin']<lots*20000:
+                    #close all positions
+                    quit()
                 #exit pe
                 test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 Client.place_order(test_order)
