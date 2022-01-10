@@ -95,7 +95,6 @@ expiry = '02DEC2021'
 
 
 present_expiry = readJson(symbol, fromDate, toDate,expiry, fromTime, toTime)
-
 def functions(start=0,present_expiry=present_expiry):
 
     p_keys=list(present_expiry.keys())
@@ -128,11 +127,10 @@ def functions(start=0,present_expiry=present_expiry):
     v2=v2[v2!=0]
     n1=np.array(live_CE_lastrate)
     n2=np.array(live_PE_lastrate)
-    f1spot = interpolate.interp1d(v1, n1,kind = 'cubic')
-    f2spot = interpolate.interp1d(v2, n2, kind = 'cubic')
+    f1spot = interpolate.interp1d(v1, n1,kind = 'cubic',fill_value='extrapolate')
+    f2spot = interpolate.interp1d(v2, n2, kind = 'cubic',fill_value='extrapolate')
     return f1spot,f2spot
-
-# %%
+#%%
 # theta visualisation by taking virtual positions at the spot price.
 p_keys=list(present_expiry.keys())
 call_lastrate_spot=[]
@@ -187,25 +185,25 @@ def long_positions(present_expiry,start):
     x=present_expiry[p_keys[start]]['spotPrice']
     out=[]
     for i in range(1,15):
-        positions_taken=[{'strike':round(x/100)*100,
+        positions_taken=[{'strike':round(x/100)*100+i*100,
                                     'type':'CE',
                                     'side':1},
-                                    {'strike':round(x/100)*100,
+                                    {'strike':round(x/100)*100+i*100,
                                       'type':'PE',
                                       'side':1},
-                                    {'strike':round(x/100)*100-i*100,
+                                    {'strike':round(x/100)*100,
                                      'type':'PE',
                                      'side':-1}]
-        a=instant_cost(positions_taken=positions_taken,delta=-100,start=start)
-        b=instant_cost(positions_taken=positions_taken,delta=100,start=start)
+        a=instant_cost(positions_taken=positions_taken,delta=-200,start=start)
+        b=instant_cost(positions_taken=positions_taken,delta=200,start=start)
         out=out+[abs(b/a)]
-    return  [{'strike':round(x/100)*100,
+    return  [{'strike':round(x/100)*100+(np.argmax(out)+1)*100,
                 'type':'CE',
                 'side':1},
-                {'strike':round(x/100)*100,
+                {'strike':round(x/100)*100+(np.argmax(out)+1)*100,
                   'type':'PE',
                   'side':1},
-                {'strike':round(x/100)*100-(np.argmax(out)+1)*100,
+                {'strike':round(x/100)*100,
                  'type':'PE',
                  'side':-1}]
 
@@ -214,25 +212,25 @@ def short_positions(present_expiry,start):
     x=present_expiry[p_keys[start]]['spotPrice']
     out=[]
     for i in range(1,15):
-        positions_taken=[{'strike':round(x/100)*100,
+        positions_taken=[{'strike':round(x/100)*100-i*100,
                                     'type':'CE',
                                     'side':1},
-                                    {'strike':round(x/100)*100,
+                                    {'strike':round(x/100)*100-i*100,
                                       'type':'PE',
                                       'side':1},
-                                    {'strike':round(x/100)*100+i*100,
+                                    {'strike':round(x/100)*100,
                                      'type':'CE',
                                      'side':-1}]
-        a=instant_cost(positions_taken=positions_taken,delta=-100,start=start)
-        b=instant_cost(positions_taken=positions_taken,delta=100,start=start)
+        a=instant_cost(positions_taken=positions_taken,delta=-200,start=start)
+        b=instant_cost(positions_taken=positions_taken,delta=200,start=start)
         out=out+[abs(a/b)]
-    return  [{'strike':round(x/100)*100,
+    return  [{'strike':round(x/100)*100-(np.argmax(out)+1)*100,
                 'type':'CE',
                 'side':1},
-                {'strike':round(x/100)*100,
+                {'strike':round(x/100)*100-(np.argmax(out)+1)*100,
                   'type':'PE',
                   'side':1},
-                {'strike':round(x/100)*100+(np.argmax(out)+1)*100,
+                {'strike':round(x/100)*100,
                  'type':'CE',
                  'side':-1}]
 #%%
@@ -240,4 +238,10 @@ best_long_positions=long_positions(present_expiry=present_expiry,start=25)
 best_short_positions=short_positions(present_expiry=present_expiry,start=25)
 print(best_long_positions)
 print(best_short_positions)
-# %%
+
+
+
+
+
+
+#%%
