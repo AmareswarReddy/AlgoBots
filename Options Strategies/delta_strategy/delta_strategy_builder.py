@@ -157,7 +157,7 @@ def change_in_call(strikeprice=41000,f1spot=callspot,delta=200):
 def change_in_put(strikeprice=41000,f2spot=putspot,delta=200):
     a=f2spot(strikeprice-delta)-f2spot(strikeprice)
     return a
-# real time delta stratey
+# real time delta strategy
 positions_taken=[{'strike':38200,
                                 'type':'CE',
                                 'side':1},
@@ -167,18 +167,30 @@ positions_taken=[{'strike':38200,
                               {'strike':37500,
                                  'type':'PE',
                                  'side':-1}]
-                            
-                            
-                            
-def instant_cost(positions_taken=positions_taken,delta=100,start=5):
-    callspot,putspot=functions(start=start,present_expiry=present_expiry) 
+                                                  
+def instant_cost(positions_taken=positions_taken,delta=100,start=5,time_lapsed=10):
+    callspot,putspot=functions(start=start+time_lapsed,present_expiry=present_expiry) 
+    callspot_prime,putspot_prime=functions(start=start,present_expiry=present_expiry) 
+    temp=[]
+    temp2=[]
+    for i in range(len(positions_taken)): 
+        if positions_taken[i]['type']=='CE':
+            temp=temp+[positions_taken[i]['side']*callspot(positions_taken[i]['strike'])]
+        elif positions_taken[i]['type']=='PE':
+            temp=temp+[positions_taken[i]['side']*putspot(positions_taken[i]['strike'])]
+        if positions_taken[i]['type']=='CE':
+            temp2=temp2+[positions_taken[i]['side']*callspot_prime(positions_taken[i]['strike'])]
+        elif positions_taken[i]['type']=='PE':
+            temp2=temp2+[positions_taken[i]['side']*putspot_prime(positions_taken[i]['strike'])]
+
+    profit=np.sum(np.array(temp)-np.array(temp2))
     a=0
     for i in range(len(positions_taken)):
         if positions_taken[i]['type']=='CE':
             a=a+positions_taken[i]['side']*change_in_call(positions_taken[i]['strike'],f1spot=callspot,delta=delta)
         elif positions_taken[i]['type']=='PE':
             a=a+positions_taken[i]['side']*change_in_put(positions_taken[i]['strike'],f2spot=putspot,delta=delta)
-    return a
+    return profit+a
 # %%
 def long_positions(present_expiry,start):
     p_keys=list(present_expiry.keys())
@@ -194,8 +206,8 @@ def long_positions(present_expiry,start):
                                     {'strike':round(x/100)*100,
                                      'type':'PE',
                                      'side':-1}]
-        a=instant_cost(positions_taken=positions_taken,delta=-200,start=start)
-        b=instant_cost(positions_taken=positions_taken,delta=200,start=start)
+        a=instant_cost(positions_taken=positions_taken,delta=-200,start=start,time_lapsed=0)
+        b=instant_cost(positions_taken=positions_taken,delta=200,start=start,time_lapsed=0)
         out=out+[abs(b/a)]
     return  [{'strike':round(x/100)*100+(np.argmax(out)+1)*100,
                 'type':'CE',
@@ -221,8 +233,8 @@ def short_positions(present_expiry,start):
                                     {'strike':round(x/100)*100,
                                      'type':'CE',
                                      'side':-1}]
-        a=instant_cost(positions_taken=positions_taken,delta=-200,start=start)
-        b=instant_cost(positions_taken=positions_taken,delta=200,start=start)
+        a=instant_cost(positions_taken=positions_taken,delta=-200,start=start,time_lapsed=0)
+        b=instant_cost(positions_taken=positions_taken,delta=200,start=start,time_lapsed=0)
         out=out+[abs(a/b)]
     return  [{'strike':round(x/100)*100-(np.argmax(out)+1)*100,
                 'type':'CE',
@@ -234,14 +246,22 @@ def short_positions(present_expiry,start):
                  'type':'CE',
                  'side':-1}]
 #%%
-best_long_positions=long_positions(present_expiry=present_expiry,start=25)
-best_short_positions=short_positions(present_expiry=present_expiry,start=25)
+best_long_positions=long_positions(present_expiry=present_expiry,start=15)
+best_short_positions=short_positions(present_expiry=present_expiry,start=15)
 print(best_long_positions)
 print(best_short_positions)
 
-
-
-
-
-
+# %%
+def max_loss(present_expiry=present_expiry,positions_taken=best_long_positions,start=15,time_lapsed=10):
+    ammu=[]
+    for i in np.linspace(500,-500,101):
+        ammu=ammu+[instant_cost(positions_taken=positions_taken,delta=i,start=start,time_lapsed=time_lapsed)]
+    ammu=np.array(ammu)
+    plt.plot(ammu)
+    return {'maxloss':min(ammu),
+                'maxloss_at':round(present_expiry[p_keys[0]]['spotPrice'])+np.argmin(ammu)-round(len(ammu)/2),
+                'breakeven':round(present_expiry[p_keys[0]]['spotPrice'])+np.argmin(np.abs(ammu[round(len(ammu)/2):]))
+                }
+max_loss(present_expiry=present_expiry,positions_taken=best_long_positions,start=100,time_lapsed=0)
 #%%
+for i in range(0,len(p_keys)):
