@@ -15,7 +15,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
     while True:
         brk=0                
         #square off all positions
-        pos=Client.positions()
+        pos=strategy.positions()
         for i in range(0, len(pos)):
             if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0  :
                 Current_PE_strikeprice=pos[i]['ScripName'][25:30]
@@ -28,7 +28,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
         pe_memory=Current_PE_strikeprice
         ce_memory=Current_CE_strikeprice
         req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-        a=Client.fetch_market_feed(req_list_)
+        a=strategy.fetch_market_feed(req_list_)
         x=a['Data'][0]['LastRate']
         req_list_PE={"Exch":"N","ExchType":"D","Symbol":main_str_pe+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"PE"}
         req_list_CE={"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"CE"}
@@ -44,7 +44,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
         Total_value_old=float('inf')
 
         while True :
-            b=Client.fetch_market_feed(req_list2)
+            b=strategy.fetch_market_feed(req_list2)
             ce_lastrate=b['Data'][0]['LastRate']
             pe_lastrate=b['Data'][1]['LastRate']
             Total_value_new=ce_lastrate+pe_lastrate
@@ -119,13 +119,12 @@ cred={
     }
 
 #%%
-Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='vinay1@A',dob='19700701', cred=cred)
-Client.login()
+strategy=strategies(user="vinaykumar7295@gmail.com", passw="vinay1@A", dob="19700701",cred=cred)
 #%%
 
 # if the 
 if day!=0:
-    pos=Client.positions()
+    pos=strategy.positions()
     for i in range(0, len(pos)):
         if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0 :
             Current_PE_strikeprice=pos[i]['ScripName'][25:30]
@@ -147,7 +146,7 @@ Client.order_book()
 #banknifty scripcode=999920005
 #N	C	999920005	BANKNIFTY 	EQ	1980-01-01 00:00:00	EQ	0	Z  BANKNIFTY                                         
 req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-a=Client.fetch_market_feed(req_list_)
+a=strategy.fetch_market_feed(req_list_)
 #x = input('Bank Nifty Value on the day of taking the trades')
 x=a['Data'][0]['LastRate']
 req_list_PE=[{"Exch":"N","ExchType":"D","Symbol":main_str_pe+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"PE"}]
@@ -159,10 +158,10 @@ for i in range(1,25):
     req_list_PE_strikeprice=req_list_PE_strikeprice+[round(x/100)*100-i*100]
     req_list_CE=req_list_CE+[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"CE"}] 
     req_list_CE_strikeprice=req_list_CE_strikeprice+[round(x/100)*100+i*100]
-live_PE=Client.fetch_market_feed(req_list_PE)
+live_PE=strategy.fetch_market_feed(req_list_PE)
 live_PE_lastrate=[]
 live_CE_lastrate=[]
-live_CE = Client.fetch_market_feed(req_list_CE)
+live_CE = strategy.fetch_market_feed(req_list_CE)
 for j in range(0,25):
     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
     live_CE_lastrate = live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
@@ -183,10 +182,10 @@ PE_hedge=req_list_PE_strikeprice[PE_hedge_index_strikeprice]
 if day==0:
     #short_strangle(<symbol>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
     #strategy.short_strangle("banknifty",[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
-    strategy=strategies(user="vinaykumar7295@gmail.com", passw="vinay1@A", dob="19700701",cred=cred)
+    
     strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
     sleep(3)
-    positions = Client.positions()
+    positions = strategy.positions()
     CE_req = req_list_CE[CE_index_strikeprice]
     PE_req = req_list_PE[PE_index_strikeprice]
 #%%
@@ -208,7 +207,7 @@ brk=0
 turn=0
 while True:
     req=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-    a=Client.fetch_market_feed(req)
+    a=strategy.fetch_market_feed(req)
     x=a['Data'][0]['LastRate']     #int
     req_list_PE=[{"Exch":"N","ExchType":"D","Symbol":main_str_pe+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"PE"}]
     req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"CE"}]
@@ -217,7 +216,7 @@ while True:
         req_list_PE=[{"Exch":"N","ExchType":"D","Symbol": main_str_pe+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"PE"}]+req_list_PE
         req_list_CE=req_list_CE+[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"CE"}] 
         req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100-i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100-i*100),"OptionType":"CE"}]+req_list_CE
-    positions = Client.positions()
+    positions = strategy.positions()
     for i in range(0, len(positions)):
         if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['SellQty']-positions[i]['BuyQty']-positions[i]['NetQty']>0 :
             Current_PE_strikeprice=positions[i]['ScripName'][25:30]
@@ -239,7 +238,7 @@ while True:
         loop_control=0
     elif loop_control==1 and CE_req['StrikePrice']==CE_req_old and PE_req['StrikePrice']!=PE_req_old:
         loop_control=0
-    b=Client.fetch_market_feed(req_list_)
+    b=strategy.fetch_market_feed(req_list_)
     ce_lastrate=b['Data'][0]['LastRate']
     pe_lastrate=b['Data'][1]['LastRate']
 
@@ -256,7 +255,7 @@ while True:
         for k in range(0,len(positions)):
             if req_list_[1]['Symbol']==str.upper(positions[k]['ScripName']) and loop_control==0:
                 awesome_ammu=k   
-                a=Client.fetch_market_feed(req)
+                a=strategy.fetch_market_feed(req)
                 x=a['Data'][0]['LastRate']
                 req_list_PE=[{"Exch":"N","ExchType":"D","Symbol":main_str_pe+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"PE"}]
                 req_list_PE_strikeprice=[round(x/100)*100]
@@ -264,7 +263,7 @@ while True:
                     req_list_PE=req_list_PE+[{"Exch":"N","ExchType":"D","Symbol":main_str_pe+str(round(x/100)*100-i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100-i*100),"OptionType":"PE"}] 
                     req_list_PE=[{"Exch":"N","ExchType":"D","Symbol": main_str_pe+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"PE"}]+req_list_PE
                     req_list_PE_strikeprice=[round(x/100)*100+i*100]+req_list_PE_strikeprice+[round(x/100)*100-i*100]
-                live_PE=Client.fetch_market_feed(req_list_PE)
+                live_PE=strategy.fetch_market_feed(req_list_PE)
                 live_PE_lastrate=[]
                 for j in range(0,49):
                     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
@@ -305,7 +304,7 @@ while True:
             if req_list_[0]['Symbol']==str.upper(positions[k]['ScripName']) and loop_control==0:
                 awesome_ammu=k
                 #req=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-                a=Client.fetch_market_feed(req)
+                a=strategy.fetch_market_feed(req)
                 x=a['Data'][0]['LastRate']
                 req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100),"OptionType":"CE"}]
                 req_list_CE_strikeprice=[round(x/100)*100]
@@ -313,7 +312,7 @@ while True:
                     req_list_CE=req_list_CE+[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"CE"}] 
                     req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100-i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100-i*100),"OptionType":"CE"}]+req_list_CE
                     req_list_CE_strikeprice=[round(x/100)*100-i*100]+req_list_CE_strikeprice+[round(x/100)*100+i*100]
-                live_CE=Client.fetch_market_feed(req_list_CE)
+                live_CE=strategy.fetch_market_feed(req_list_CE)
                 live_CE_lastrate=[]
                 for j in range(0,49):
                     live_CE_lastrate=live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
