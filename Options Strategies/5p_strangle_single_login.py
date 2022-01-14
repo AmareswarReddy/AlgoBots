@@ -63,24 +63,6 @@ expiry = str(input('enter the expiry(Eg: "20210916" ) : '))
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
 lots = int(np.floor(money_in_account/1.5)*25)
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
-url = "https://images.5paisa.com/website/scripmaster-csv-format.csv"
-
-
-#download and reading scriptmaster
-if day==0:
-    r = requests.get(url)
-    open('scripmaster-csv-format.csv', 'wb').write(r.content)
-    filename = 'scripmaster-csv-format.csv'
-    script = pd.read_csv(filename)
-    def fix(script):
-        for i in range(0,len(script)):
-            script['Name'].at[i]=script['Name'][i][:25]
-            script['Expiry'].at[i]=script['Expiry'][i][:10]
-        return script
-
-    script=fix(script)
-    script.to_pickle(os.path.abspath(os.getcwd())+'/script.pickle')
-script=pd.read_pickle('script.pickle')
 while True:
     now=datetime.now(timezone("Asia/Kolkata"))
     if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=16:
