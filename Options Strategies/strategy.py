@@ -8,8 +8,12 @@ class strategies:
 
     def __init__(self,user=None,passw=None,dob=None,cred=None):
         self.Client=FivePaisaClient(email=user, passwd=passw, dob=dob,cred=cred)
-        self.Client.login()
-        
+        self.Client.login()  
+    def positions(self):
+        return self.Client.positions()
+    def fetch_market_feed(self,list):
+        return self.Client.fetch_market_feed(list)
+    # symbol='banknifty',strike=
     def get_scripcode(self,symbol,strike,expiry,opt):
         month={
             "01":'JAN',
