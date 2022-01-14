@@ -21,10 +21,12 @@ def new_short_straddle():  #do not try running this function seperately. this is
                 Current_PE_strikeprice=pos[i]['ScripName'][25:30]
             elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0  :
                 Current_CE_strikeprice=pos[i]['ScripName'][25:30]
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(Current_PE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-        Client.place_order(test_order)
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(Current_CE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-        Client.place_order(test_order)
+        #test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(Current_PE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+        #Client.place_order(test_order)
+        #test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(Current_CE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+        #Client.place_order(test_order)
+        pe_memory=Current_PE_strikeprice
+        ce_memory=Current_CE_strikeprice
         req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
         a=Client.fetch_market_feed(req_list_)
         x=a['Data'][0]['LastRate']
@@ -33,10 +35,12 @@ def new_short_straddle():  #do not try running this function seperately. this is
         req_list2=[req_list_CE,req_list_PE]
         req_list_PE_strikeprice=round(x/100)*100
         req_list_CE_strikeprice=round(x/100)*100
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(req_list_CE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-        Client.place_order(test_order)
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(req_list_PE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
-        Client.place_order(test_order)
+        #test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_ce+str(req_list_CE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+        #Client.place_order(test_order)
+        #test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=str(int(script[script['FullName']==main_str_format_pe+str(req_list_PE_strikeprice)+'.00']['Scripcode'])), quantity=lots,price=0,is_intraday=False,atmarket=True)
+        #Client.place_order(test_order)
+        strategy.adjustment_ce('banknifty',[str(ce_memory)],[str(req_list_CE_strikeprice)],str(lots),expiry,'D')
+        strategy.adjustment_pe('banknifty',[str(pe_memory)],[str(req_list_PE_strikeprice)],str(lots),expiry,'D')
         Total_value_old=float('inf')
 
         while True :
