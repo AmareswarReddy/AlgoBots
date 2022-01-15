@@ -1,12 +1,13 @@
 #%%
 import numpy as np
+import os
 from scipy import interpolate
 import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
 import requests
 import json
-
+from scipy import optimize
 def callprice(optionchain,strikeprice):
     a=pd.DataFrame(optionchain)
     price=float(a[a['Strikes']==strikeprice]['CallLTP'])
@@ -127,8 +128,21 @@ def functions(start=0,present_expiry=present_expiry):
     v2=v2[v2!=0]
     n1=np.array(live_CE_lastrate)
     n2=np.array(live_PE_lastrate)
-    f1spot = interpolate.interp1d(v1, n1,kind = 'cubic',fill_value='extrapolate')
-    f2spot = interpolate.interp1d(v2, n2, kind = 'cubic',fill_value='extrapolate')
+    ce_cubic = interpolate.interp1d(v1, n1,kind = 'cubic',fill_value='extrapolate')
+    pe_cubic = interpolate.interp1d(v2, n2, kind = 'cubic',fill_value='extrapolate')
+
+    def hyperbola_ce(spotprice,ltp):
+        def f(a):
+            y=np.sqrt(np.square(ltp)+(np.square((a-spotprice)/2)))-(a-spotprice)/2
+            return y
+        return f
+    def hyperbola_pe(spotprice,ltp):
+        def f(a):
+            y=np.sqrt(np.square(ltp)+(np.square((a-spotprice)/2)))+(a-spotprice)/2
+            return y
+        return f
+    f2spot= hyperbola_pe(spotprice=x,ltp=pe_cubic(x))
+    f1spot =hyperbola_ce(spotprice=x,ltp=ce_cubic(x))
     return f1spot,f2spot
 #%%
 # theta visualisation by taking virtual positions at the spot price.
@@ -246,15 +260,16 @@ def short_positions(present_expiry,start):
                  'type':'CE',
                  'side':-1}]
 #%%
-best_long_positions=long_positions(present_expiry=present_expiry,start=15)
-best_short_positions=short_positions(present_expiry=present_expiry,start=15)
+best_long_positions=long_positions(present_expiry=present_expiry,start=10)
+best_short_positions=short_positions(present_expiry=present_expiry,start=10)
 print(best_long_positions)
 print(best_short_positions)
 
 # %%
 def max_loss(present_expiry=present_expiry,positions_taken=best_long_positions,start=15,time_lapsed=10):
     ammu=[]
-    for i in np.linspace(500,-500,101):
+    a=5000
+    for i in np.linspace(-a,a,2*(int(a/100))+1):
         ammu=ammu+[instant_cost(positions_taken=positions_taken,delta=i,start=start,time_lapsed=time_lapsed)]
     ammu=np.array(ammu)
     plt.plot(ammu)
@@ -262,6 +277,6 @@ def max_loss(present_expiry=present_expiry,positions_taken=best_long_positions,s
                 'maxloss_at':round(present_expiry[p_keys[0]]['spotPrice'])+np.argmin(ammu)-round(len(ammu)/2),
                 'breakeven':round(present_expiry[p_keys[0]]['spotPrice'])+np.argmin(np.abs(ammu[round(len(ammu)/2):]))
                 }
-max_loss(present_expiry=present_expiry,positions_taken=best_long_positions,start=100,time_lapsed=0)
-#%%
-for i in range(0,len(p_keys)):
+max_loss(present_expiry=present_expiry,positions_taken=best_long_positions,start=10,time_lapsed=0)
+
+# %%
