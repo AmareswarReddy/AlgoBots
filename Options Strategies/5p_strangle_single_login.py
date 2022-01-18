@@ -49,7 +49,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
             pe_lastrate=b['Data'][1]['LastRate']
             Total_value_new=ce_lastrate+pe_lastrate
             if Total_value_new<Total_value_old:
-                Stop_loss=Total_value_new*1.2
+                Stop_loss=Total_value_new*1.15
                 Total_value_old=Total_value_new
             if Total_value_new>Stop_loss :
                 brk=1
@@ -89,7 +89,6 @@ main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
-#%%
 # Client login credentials
 cred={
     "APP_NAME":"5P56936208",
@@ -137,20 +136,22 @@ req_list_PE_strikeprice=[round(x/100)*100]
 req_list_CE_strikeprice=[round(x/100)*100]
 for i in range(1,25):
     req_list_PE=req_list_PE+[{"Exch":"N","ExchType":"D","Symbol": main_str_pe+str(round(x/100)*100-i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100-i*100),"OptionType":"PE"}] 
-    req_list_PE_strikeprice=req_list_PE_strikeprice+[round(x/100)*100-i*100]
+    req_list_PE=[{"Exch":"N","ExchType":"D","Symbol": main_str_pe+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"PE"}]+req_list_PE
+    req_list_PE_strikeprice=[round(x/100)*100+i*100]+req_list_PE_strikeprice+[round(x/100)*100-i*100]
     req_list_CE=req_list_CE+[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"CE"}] 
-    req_list_CE_strikeprice=req_list_CE_strikeprice+[round(x/100)*100+i*100]
+    req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100-i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100-i*100),"OptionType":"CE"}]+req_list_CE
+    req_list_CE_strikeprice=[round(x/100)*100-i*100]+req_list_CE_strikeprice+[round(x/100)*100+i*100]
 live_PE=strategy.fetch_market_feed(req_list_PE)
 live_PE_lastrate=[]
 live_CE_lastrate=[]
 live_CE = strategy.fetch_market_feed(req_list_CE)
-for j in range(0,25):
+for j in range(0,49):
     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
     live_CE_lastrate = live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
-CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-400))
-CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-50))
-PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-400))
-PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-50))
+CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-115))
+CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-20))
+PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-115))
+PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-20))
 CE_upper=req_list_CE_strikeprice[CE_index_strikeprice]
 CE_hedge=req_list_CE_strikeprice[CE_hedge_index_strikeprice]
 PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
@@ -250,6 +251,11 @@ while True:
                 for j in range(0,49):
                     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
                 PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-0.85*ce_lastrate))
+                margin=strategy.margin()
+                if margin[0]['AvailableMargin']<lots*20000:
+                    #close all positions
+                    print('no margin fund for any more adjustments')
+                    quit()
                 #exit pe
                 #test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 #Client.place_order(test_order)
@@ -299,6 +305,11 @@ while True:
                 for j in range(0,49):
                     live_CE_lastrate=live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
                 CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-0.85*pe_lastrate))
+                margin=strategy.margin()
+                if margin[0]['AvailableMargin']<lots*20000:
+                    #close all positions
+                    print('no margin for any more adjustments')
+                    quit()
                 #exit pe
                 #test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 #Client.place_order(test_order)
