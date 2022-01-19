@@ -230,10 +230,10 @@ while True:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response(ind_time)
         log_response(positions)
-        log_response('Current CE Strikeprice: ',Current_CE_strikeprice)
-        log_response('ce_lastrate: ', ce_lastrate)
-        log_response('Current PE Strikeprice: ',Current_PE_strikeprice)
-        log_response('pe_lastrate: ',pe_lastrate)
+        log_response('Current CE Strikeprice: '+ str(Current_CE_strikeprice))
+        log_response('ce_lastrate: '+ str(ce_lastrate))
+        log_response('Current PE Strikeprice: '+str(Current_PE_strikeprice))
+        log_response('pe_lastrate: '+str(pe_lastrate))
 
         #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in pe_lastrate will be far lower than the increase in ce_lastrate when stock price increases from the price it is now trading
         PE_req_old = PE_req['StrikePrice']
@@ -263,7 +263,7 @@ while True:
                 #Client.place_order(test_order)
                 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
                 log_response(ind_time)
-                log_response('exit(bought) pe at srikeprice:  ', PE_req_old)
+                log_response('exit(bought) pe at srikeprice:  '+ str(PE_req_old))
                 #sell pe which is 80 to 95% of ce
                 #atemp =  script[script['Expiry']==expiry_format]
                 #atemp2=atemp[np.array(atemp['StrikeRate'])==req_list_PE_strikeprice[PE_index_strikeprice]]
@@ -273,9 +273,9 @@ while True:
                 strategy.adjustment_pe('banknifty',[str(Current_PE_strikeprice)],[str(req_list_PE_strikeprice[PE_index_strikeprice])],str(lots),expiry,'D')
                 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
                 log_response(ind_time)
-                log_response('re entry(Sold) pe at strikeprice: ',req_list_PE_strikeprice[PE_index_strikeprice])
+                log_response('re entry(Sold) pe at strikeprice: '+ str(req_list_PE_strikeprice[PE_index_strikeprice]))
                 PE_req = req_list_PE[PE_index_strikeprice]
-                log_response('New PE_req is : ',PE_req)
+                log_response('New PE_req is : '+ str(PE_req))
                 loop_control=1
                 break
         
@@ -285,10 +285,10 @@ while True:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response(ind_time)
         log_response(positions)
-        log_response('Current CE Strikeprice: ',Current_CE_strikeprice)
-        log_response('ce_lastrate: ', ce_lastrate)
-        log_response('Current PE Strikeprice: ',Current_PE_strikeprice)
-        log_response('pe_lastrate: ',pe_lastrate)
+        log_response('Current CE Strikeprice: '+str(Current_CE_strikeprice))
+        log_response('ce_lastrate: '+ str(ce_lastrate))
+        log_response('Current PE Strikeprice: '+ str(Current_PE_strikeprice))
+        log_response('pe_lastrate: '+ str(pe_lastrate))
         #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in ce_lastrate will be far lower than the increase in pe_lastrate when stock price decreases from the price it is now trading
         CE_req_old = CE_req['StrikePrice']
         for k in range(0,len(positions)):
@@ -318,7 +318,7 @@ while True:
                 #Client.place_order(test_order)
                 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
                 log_response(ind_time)
-                log_response('exit(bought) ce at srikeprice:  ', CE_req_old)
+                log_response('exit(bought) ce at srikeprice:  '+ str(CE_req_old))
                 #sell pe which is 80 to 95% of ce
                 #atemp =  script[script['Expiry']==expiry_format]
                 #atemp2=atemp[np.array(atemp['StrikeRate'])==req_list_CE_strikeprice[CE_index_strikeprice]]
@@ -328,9 +328,9 @@ while True:
                 strategy.adjustment_ce('banknifty',[str(Current_CE_strikeprice)],[str(req_list_CE_strikeprice[CE_index_strikeprice])],str(lots),expiry,'D')
                 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
                 log_response(ind_time)
-                log_response('re entry(Sold) ce at strikeprice: ',req_list_CE_strikeprice[CE_index_strikeprice])
+                log_response('re entry(Sold) ce at strikeprice: '+ str(req_list_CE_strikeprice[CE_index_strikeprice]))
                 CE_req = req_list_CE[CE_index_strikeprice]
-                log_response('New CE_req is : ',CE_req)
+                log_response('New CE_req is : '+ str(CE_req))
                 loop_control=1
                 break
     now=datetime.now()
