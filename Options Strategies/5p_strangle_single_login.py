@@ -11,7 +11,7 @@ import requests
 from pytz import timezone 
 from cred import *
 import os
-def new_short_straddle():  #do not try running this function seperately. this is just an add on to strangle. 
+def new_short_straddle(main_str_format_pe, main_str_format_ce):  #do not try running this function seperately. this is just an add on to strangle. 
     
     while True:
         brk=0                
@@ -344,7 +344,7 @@ while True:
             if Total_value_new>Stop_loss :
                 brk=1
                 print('stoplosshit')
-                new_short_straddle()           
+                new_short_straddle(main_str_format_pe, main_str_format_ce)           
     if brk==1:
         break
 
