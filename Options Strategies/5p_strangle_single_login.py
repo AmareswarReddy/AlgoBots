@@ -199,12 +199,17 @@ while True:
         req_list_PE=[{"Exch":"N","ExchType":"D","Symbol": main_str_pe+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"PE"}]+req_list_PE
         req_list_CE=req_list_CE+[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100+i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100+i*100),"OptionType":"CE"}] 
         req_list_CE=[{"Exch":"N","ExchType":"D","Symbol":main_str_ce+str(round(x/100)*100-i*100)+".00","Expiry":expiry,"StrikePrice":str(round(x/100)*100-i*100),"OptionType":"CE"}]+req_list_CE
+    Current_PE_strikeprice=0
+    Current_CE_strikeprice=0
     positions = strategy.positions()
     for i in range(0, len(positions)):
         if positions[i]['ScripName'][:25] == main_str_format_pe and  positions[i]['SellQty']-positions[i]['BuyQty']-positions[i]['NetQty']>0 :
             Current_PE_strikeprice=positions[i]['ScripName'][25:30]
         elif positions[i]['ScripName'][:25] == main_str_format_ce and  positions[i]['SellQty']-positions[i]['BuyQty']-positions[i]['NetQty']>0 :
             Current_CE_strikeprice = positions[i]['ScripName'][25:30]
+    if Current_PE_strikeprice==0 and Current_CE_strikeprice==0:
+        print('quiting the program since no positions are active')
+        quit()
     for i in range(0,len(req_list_CE)):
         if req_list_CE[i]['StrikePrice']==Current_CE_strikeprice:
             CE_req=req_list_CE[i]
@@ -233,7 +238,6 @@ while True:
         log_response('ce_lastrate: '+str(ce_lastrate))
         log_response('Current PE Strikeprice: '+str(Current_PE_strikeprice))
         log_response('pe_lastrate: '+str(pe_lastrate))
-
         #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in pe_lastrate will be far lower than the increase in ce_lastrate when stock price increases from the price it is now trading
         PE_req_old = PE_req['StrikePrice']
         for k in range(0,len(positions)):
@@ -252,11 +256,6 @@ while True:
                 for j in range(0,49):
                     live_PE_lastrate=live_PE_lastrate+[live_PE['Data'][j]['LastRate']]
                 PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-0.85*ce_lastrate))
-                margin=strategy.margin()
-                if margin[0]['AvailableMargin']<lots*20000:
-                    #close all positions
-                    print('no margin fund for any more adjustments')
-                    quit()
                 #exit pe
                 #test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 #Client.place_order(test_order)
@@ -277,9 +276,7 @@ while True:
                 log_response('New PE_req is : '+str(PE_req))
                 loop_control=1
                 break
-        
-
-
+            
     elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>0:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response(ind_time)
@@ -307,11 +304,6 @@ while True:
                 for j in range(0,49):
                     live_CE_lastrate=live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
                 CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-0.85*pe_lastrate))
-                margin=strategy.margin()
-                if margin[0]['AvailableMargin']<lots*20000:
-                    #close all positions
-                    print('no margin for any more adjustments')
-                    quit()
                 #exit pe
                 #test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=positions[awesome_ammu]['ScripCode'], quantity=lots,price=0,is_intraday=False,atmarket=True)
                 #Client.place_order(test_order)
