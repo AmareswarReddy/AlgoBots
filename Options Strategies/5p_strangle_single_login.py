@@ -210,14 +210,19 @@ while True:
     if Current_PE_strikeprice==0 and Current_CE_strikeprice==0:
         print('quiting the program since no positions are active')
         quit()
-    for i in range(0,len(req_list_CE)):
-        if req_list_CE[i]['StrikePrice']==Current_CE_strikeprice:
-            CE_req=req_list_CE[i]
-            break
-    for j in range(0,len(req_list_PE)):
-        if req_list_PE[j]['StrikePrice']==Current_PE_strikeprice:
-            PE_req=req_list_PE[j]
-            break
+    CE_req={'Exch': 'N',
+                    'ExchType': 'D',
+                    'Symbol': main_str_ce+str(Current_CE_strikeprice)+'.00',
+                    'Expiry': expiry,
+                    'StrikePrice': str(Current_CE_strikeprice),
+                    'OptionType': 'CE'}
+
+    PE_req={'Exch': 'N',
+                    'ExchType': 'D',
+                    'Symbol': main_str_pe+str(Current_PE_strikeprice)+'.00',
+                    'Expiry': expiry,
+                    'StrikePrice': str(Current_PE_strikeprice),
+                    'OptionType': 'PE'}
     req_list_=[CE_req,PE_req]
     if loop_control==1 and CE_req['StrikePrice']==CE_req_old and PE_req['StrikePrice']==PE_req_old:
         print('Sorry for the inconvenience caused. Some of the orders were not executed. Please do the trades manually')
@@ -276,7 +281,7 @@ while True:
                 log_response('New PE_req is : '+str(PE_req))
                 loop_control=1
                 break
-            
+
     elif pe_lastrate>=2*ce_lastrate and int(CE_req['StrikePrice'])-int(PE_req['StrikePrice'])>0:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response(ind_time)
