@@ -1,16 +1,14 @@
 #%%
 
 # Navigate to Below Link and obtain auth_code
-#https://api.fyers.in/api/v2/generate-authcode?client_id=3XWQKG835V-100&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F&response_type=code&state=None&scope=&nonce=private
-auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE2NDEzMTE3MTcsImV4cCI6MTY0MTM0MTcxNywibmJmIjoxNjQxMzExMTE3LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJYQzA0MTY1Iiwibm9uY2UiOiJwcml2YXRlIiwiYXBwX2lkIjoiM1hXUUtHODM1ViIsInV1aWQiOiIxMTk5MTViMTRlMzY0YmRlODFlMDY5ODAzYzZlNmQ2ZiIsImlwQWRkciI6IjAuMC4wLjAiLCJzY29wZSI6IiJ9.wYg9KmfTyc-PV2vhNqu-6WVvf12pb61asGE7zRPYjYI"
+#https://api.fyers.in/api/v2/generate-authcode?client_id=TTHF3EHNQM-100&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F&response_type=code&state=None&scope=&nonce=private
+auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE2NDMwNDAzMDksImV4cCI6MTY0MzA3MDMwOSwibmJmIjoxNjQzMDM5NzA5LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJYUDE1MzI3Iiwibm9uY2UiOiJwcml2YXRlIiwiYXBwX2lkIjoiVFRIRjNFSE5RTSIsInV1aWQiOiI5YTMxYjFmZDBjYjk0YzdlYTM0ZjMwNDY1OTcyN2ZhYSIsImlwQWRkciI6IjAuMC4wLjAiLCJzY29wZSI6IiJ9.0S0DK788cT-y2HaeiiL4wi8AeSjk_bFG4U2DHqiI2cw"
 
 # Update scripmaster file every week
 import numpy as np
 import pandas as pd
+import calendar
 from time import sleep, strftime
-from py5paisa import FivePaisaClient
-from py5paisa.strategy import *
-from cred import *
 from datetime import datetime 
 import requests
 from pytz import timezone 
@@ -20,8 +18,8 @@ from fyers_api import accessToken
 
 
 
-client_id = "3XWQKG835V-100"
-secret_key = "B3NTA5RP9Q"
+client_id = "TTHF3EHNQM-100"
+secret_key = "SE5N0EKNVY"
 redirect_uri = "http://localhost:8000/"
 response_type = "code"
 grant_type = "authorization_code"
@@ -39,17 +37,53 @@ response_token = session.generate_token()
 print(response_token)
 
 access_token = response_token['access_token']
-
-fyers = fyersModel.FyersModel(client_id=client_id, token=access_token,log_path="/home/Desktop/apiV2")
-
-
-
+print(access_token)
+fyers = fyersModel.FyersModel(client_id=client_id, token=access_token,log_path="/Users/vinayreddy/Desktop/logs/")
 #%%
+month_mapping = {
+    '01' : '1', 
+'02' : '2' ,
+'03' : '3', 
+'04' : '4', 
+'05' : '5' ,
+'06' : '6' ,
+'07' : '7' ,
+'08' : '8' ,
+'09' : '9' ,
+'10':  'O' ,
+'11' : 'N', 
+'12' : 'D'
+}
+month_end_mapping = {
+    '01' : 'JAN', 
+'02' : 'FEB' ,
+'03' : 'MAR', 
+'04' : 'APR', 
+'05' : 'MAY' ,
+'06' : 'JUN' ,
+'07' : 'JUL' ,
+'08' : 'AUG' ,
+'09' : 'SEP' ,
+'10':  'OCT' ,
+'11' : 'NOV', 
+'12' : 'DEC'
+}
 expiry = str(input('enter the expiry(Eg: 20210916 ) : '))
+is_last_week=str(input('is last week Eg(y or n ):'))
 money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
 lots = int(np.floor(money_in_account/1.5)*25)
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
-main_str="BANKNIFTY"+expiry[2:4]+str(int(expiry[4:6]))+expiry[-2:]
+if is_last_week=='n':
+    main_str="BANKNIFTY"+expiry[2:4]+month_mapping[expiry[4:6]]+expiry[-2:]
+elif is_last_week=='y':
+    main_str="BANKNIFTY"+expiry[2:4]+month_end_mapping[expiry[4:6]]
+
+#%%
+def Is_last_week(is_last_week):
+    a=calendar.monthcalendar(int(expiry[:4]),int(expiry[4:6]))
+    return 0
+
+#%%
 def new_short_straddle():  #do not try running this function seperately. this is just an add on to strangle.  
     while True:
         brk=0                
@@ -61,7 +95,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
             elif pos[i]['symbol'][4:18] == main_str and pos[i]['symbol'][23:]=='CE' and pos[i]['sellQty']-pos[i]['buyQty']-pos[i]['netQty']>0  :
                 ce_index=i
         data = [{ "symbol":pos[pe_index]['symbol'],
-                      "qty":25*lots,
+                      "qty":lots,
                       "type":2,  
                       "side":1, 
                       "productType":"CNC",   
@@ -75,7 +109,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
                     },
                     {
                       "symbol":pos[ce_index]['symbol'],
-                      "qty":25*lots,
+                      "qty":lots,
                       "type":2,  
                       "side":1, 
                       "productType":"CNC",   
@@ -93,7 +127,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
         a=fyers.quotes(req_list_)
         x=a['d'][0]['v']['lp']
         data=[{ "symbol":'NSE:'+main_str+str(round(x/100)*100)+'CE',
-           "qty":25*lots,
+           "qty":lots,
            "type":2,  
            "side":-1, 
            "productType":"CNC",   
@@ -107,7 +141,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
          },
          {
            "symbol":'NSE:'+main_str+str(round(x/100)*100)+'PE',
-           "qty":25*lots,
+           "qty":lots,
            "type":2,  
            "side":-1, 
            "productType":"CNC",   
@@ -160,9 +194,9 @@ req_list_CE={'symbols':"NSE:"+main_str+str(round(x/100)*100)+"CE"}
 req_list_PE_strikeprice=[round(x/100)*100]
 req_list_CE_strikeprice=[round(x/100)*100]
 for i in range(1,25):
-    req_list_PE['symbol']="NSE:"+main_str+str(round(x/100)*100+i*100)+"PE,"+req_list_PE['symbol']+",NSE:"+main_str+str(round(x/100)*100-i*100)+"PE"
+    req_list_PE['symbols']="NSE:"+main_str+str(round(x/100)*100+i*100)+"PE,"+req_list_PE['symbols']+",NSE:"+main_str+str(round(x/100)*100-i*100)+"PE"
     req_list_PE_strikeprice=[round(x/100)*100+i*100]+req_list_PE_strikeprice+[round(x/100)*100-i*100]
-    req_list_CE['symbol']="NSE:"+main_str+str(round(x/100)*100-i*100)+"CE,"+req_list_CE['symbol']+",NSE:"+main_str+str(round(x/100)*100+i*100)+"CE"
+    req_list_CE['symbols']="NSE:"+main_str+str(round(x/100)*100-i*100)+"CE,"+req_list_CE['symbols']+",NSE:"+main_str+str(round(x/100)*100+i*100)+"CE"
     req_list_CE_strikeprice=[round(x/100)*100-i*100]+req_list_CE_strikeprice+[round(x/100)*100+i*100]
 live_PE=fyers.quotes(req_list_PE)
 live_PE_lastrate=[]
@@ -189,7 +223,7 @@ if day==0:
     #short_strangle(<symbol>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
     #strategy.short_strangle("banknifty",[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
     data = [{ "symbol":'NSE:'+main_str+str(CE_hedge)+'CE',
-              "qty":25*lots,
+              "qty":lots,
               "type":2,  
               "side":1, 
               "productType":"CNC",   
@@ -203,7 +237,7 @@ if day==0:
             },
             {
               "symbol":'NSE:'+main_str+str(PE_hedge)+'PE',
-              "qty":25*lots,
+              "qty":lots,
               "type":2,  
               "side":1, 
               "productType":"CNC",   
@@ -217,7 +251,7 @@ if day==0:
             },
             {
             "symbol":'NSE:'+main_str+str(CE_upper)+'CE',
-            "qty":25*lots,
+            "qty":lots,
             "type":2,  
             "side":-1, 
             "productType":"CNC",   
@@ -231,7 +265,7 @@ if day==0:
             },
             {
             "symbol":'NSE:'+main_str+str(PE_lower)+'CE',
-            "qty":25*lots,
+            "qty":lots,
             "type":2,  
             "side":-1, 
             "productType":"CNC",   
@@ -261,8 +295,8 @@ while True:
     req_list_PE={"symbols":"NSE:"+main_str+str(round(x/100)*100)+"PE"}  
     req_list_CE={'symbols':"NSE:"+main_str+str(round(x/100)*100)+"CE"}
     for i in range(1,25):
-        req_list_PE['symbol']="NSE:"+main_str+str(round(x/100)*100+i*100)+"PE,"+req_list_PE['symbol']+",NSE:"+main_str+str(round(x/100)*100-i*100)+"PE"
-        req_list_CE['symbol']="NSE:"+main_str+str(round(x/100)*100-i*100)+"CE,"+req_list_CE['symbol']+",NSE:"+main_str+str(round(x/100)*100+i*100)+"CE"
+        req_list_PE['symbols']="NSE:"+main_str+str(round(x/100)*100+i*100)+"PE,"+req_list_PE['symbols']+",NSE:"+main_str+str(round(x/100)*100-i*100)+"PE"
+        req_list_CE['symbols']="NSE:"+main_str+str(round(x/100)*100-i*100)+"CE,"+req_list_CE['symbols']+",NSE:"+main_str+str(round(x/100)*100+i*100)+"CE"
     pos = fyers.positions()['netPositions']
     for i in range(0, len(pos)):
         if pos[i]['symbol'][4:18] == main_str and pos[i]['symbol'][23:]=='PE' and pos[i]['sellQty']-pos[i]['buyQty']-pos[i]['netQty']>0  :
@@ -316,7 +350,7 @@ while True:
                 print(ind_time)
                 print('exit(bought) pe at srikeprice:  ', PE_req_old)
                 data=[  { "symbol":pos[awesome_ammu]['symbol'],
-                                "qty":25*lots,
+                                "qty":lots,
                                 "type":2,  
                                 "side":1, 
                                 "productType":"CNC",   
@@ -329,7 +363,7 @@ while True:
                                 "takeProfit":0
                             },
                             { "symbol":'NSE:'+main_str+str(req_list_PE_strikeprice[PE_index_strikeprice])+'PE',
-                              "qty":25*lots,
+                              "qty":lots,
                               "type":2,  
                               "side":-1, 
                               "productType":"CNC",   
@@ -383,7 +417,7 @@ while True:
                 print(ind_time)
                 print('exit(bought) pe at srikeprice:  ', CE_req_old)
                 data=[{ "symbol":pos[awesome_ammu]['symbol'],
-                                "qty":25*lots,
+                                "qty":lots,
                                 "type":2,  
                                 "side":1, 
                                 "productType":"CNC",   
@@ -396,7 +430,7 @@ while True:
                                 "takeProfit":0
                             },
                             { "symbol":'NSE:'+main_str+str(req_list_CE_strikeprice[CE_index_strikeprice])+'CE',
-                              "qty":25*lots,
+                              "qty":lots,
                               "type":2,  
                               "side":-1, 
                               "productType":"CNC",   
