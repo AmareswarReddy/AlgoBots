@@ -66,7 +66,7 @@ lots = int(np.floor(money_in_account/1.5)*25)
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
 while True:
     now=datetime.now(timezone("Asia/Kolkata"))
-    if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=16:
+    if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=18:
         break
     elif int(now.strftime('%H'))>9:
         break
@@ -90,7 +90,9 @@ main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
+#%%
 # Client login credentials
+'''
 cred={
     "APP_NAME":"5P56936208",
     "APP_SOURCE":"2179",
@@ -99,9 +101,18 @@ cred={
     "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
     "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
     }
-
-#%%
 strategy=strategies(user="vinaykumar7295@gmail.com", passw="vinay1@A", dob="19700701",cred=cred)
+'''
+#%%
+cred={
+    "APP_NAME":"5P53784053",
+    "APP_SOURCE":"8023",
+    "USER_ID":"y4JUrjToSOR",
+    "PASSWORD":"y0tc7unqQAV",
+    "USER_KEY":"DrmeltLdZo82SKaxWJoeMALor1Xaiqk5",
+    "ENCRYPTION_KEY":"ANb7Y0ouVD5iX0jcPGwPMIEyQnwPjxuI"
+    }
+strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob="19950820",cred=cred)
 #%%
 
 # if the 
