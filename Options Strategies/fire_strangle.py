@@ -2,7 +2,7 @@
 
 # Navigate to Below Link and obtain auth_code
 #https://api.fyers.in/api/v2/generate-authcode?client_id=TTHF3EHNQM-100&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F&response_type=code&state=None&scope=&nonce=private
-auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE2NDMwNDAzMDksImV4cCI6MTY0MzA3MDMwOSwibmJmIjoxNjQzMDM5NzA5LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJYUDE1MzI3Iiwibm9uY2UiOiJwcml2YXRlIiwiYXBwX2lkIjoiVFRIRjNFSE5RTSIsInV1aWQiOiI5YTMxYjFmZDBjYjk0YzdlYTM0ZjMwNDY1OTcyN2ZhYSIsImlwQWRkciI6IjAuMC4wLjAiLCJzY29wZSI6IiJ9.0S0DK788cT-y2HaeiiL4wi8AeSjk_bFG4U2DHqiI2cw"
+auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE2NDMwODYwOTcsImV4cCI6MTY0MzExNjA5NywibmJmIjoxNjQzMDg1NDk3LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJYUDE1MzI3Iiwibm9uY2UiOiJwcml2YXRlIiwiYXBwX2lkIjoiVFRIRjNFSE5RTSIsInV1aWQiOiI2NTA2OWMxNGRmNTE0NWQzOWIzNTg3NmI1ZDk4ZmNiNSIsImlwQWRkciI6IjAuMC4wLjAiLCJzY29wZSI6IiJ9.lzedr0u8L--2XGRpJnybsUNzMWkgtP-wQLrqpioaAsQ"
 
 # Update scripmaster file every week
 import numpy as np
@@ -38,7 +38,7 @@ print(response_token)
 
 access_token = response_token['access_token']
 print(access_token)
-fyers = fyersModel.FyersModel(client_id=client_id, token=access_token,log_path="/Users/vinayreddy/Desktop/logs/")
+fyers = fyersModel.FyersModel(client_id=client_id, token=access_token,log_path="/Users/amareswarreddy/Desktop/logs")
 #%%
 month_mapping = {
     '01' : '1', 
@@ -94,35 +94,9 @@ def new_short_straddle():  #do not try running this function seperately. this is
                 pe_index=i
             elif pos[i]['symbol'][4:18] == main_str and pos[i]['symbol'][23:]=='CE' and pos[i]['sellQty']-pos[i]['buyQty']-pos[i]['netQty']>0  :
                 ce_index=i
-        data = [{ "symbol":pos[pe_index]['symbol'],
-                      "qty":lots,
-                      "type":2,  
-                      "side":1, 
-                      "productType":"CNC",   
-                      "limitPrice":0,
-                      "stopPrice":0 ,
-                      "disclosedQty":0, 
-                      "validity":"DAY", 
-                      "offlineOrder":"False", 
-                      "stopLoss":0,  
-                      "takeProfit":0
-                    },
-                    {
-                      "symbol":pos[ce_index]['symbol'],
-                      "qty":lots,
-                      "type":2,  
-                      "side":1, 
-                      "productType":"CNC",   
-                      "limitPrice":0,
-                      "stopPrice":0 ,
-                      "disclosedQty":0, 
-                      "validity":"DAY", 
-                      "offlineOrder":"False", 
-                      "stopLoss":0,  
-                      "takeProfit":0
-                    }]
-        fyers.place_basket_orders(data)
-
+        
+        fyers.exit_positions({'id':pos[pe_index]['id']})
+        fyers.exit_positions({'id':pos[ce_index]['id']})
         req_list_={"symbols":"NSE:NIFTYBANK-INDEX"}        
         a=fyers.quotes(req_list_)
         x=a['d'][0]['v']['lp']
@@ -130,7 +104,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
            "qty":lots,
            "type":2,  
            "side":-1, 
-           "productType":"CNC",   
+           "productType":"Margin",   
            "limitPrice":0,
            "stopPrice":0 ,
            "disclosedQty":0, 
@@ -144,7 +118,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
            "qty":lots,
            "type":2,  
            "side":-1, 
-           "productType":"CNC",   
+           "productType":"Margin",   
            "limitPrice":0,
            "stopPrice":0 ,
            "disclosedQty":0, 
@@ -226,7 +200,7 @@ if day==0:
               "qty":lots,
               "type":2,  
               "side":1, 
-              "productType":"CNC",   
+              "productType":"Margin",   
               "limitPrice":0,
               "stopPrice":0 ,
               "disclosedQty":0, 
@@ -240,7 +214,7 @@ if day==0:
               "qty":lots,
               "type":2,  
               "side":1, 
-              "productType":"CNC",   
+              "productType":"Margin",   
               "limitPrice":0,
               "stopPrice":0 ,
               "disclosedQty":0, 
@@ -254,7 +228,7 @@ if day==0:
             "qty":lots,
             "type":2,  
             "side":-1, 
-            "productType":"CNC",   
+            "productType":"Margin",   
             "limitPrice":0,
             "stopPrice":0 ,
             "disclosedQty":0, 
@@ -264,11 +238,11 @@ if day==0:
             "takeProfit":0
             },
             {
-            "symbol":'NSE:'+main_str+str(PE_lower)+'CE',
+            "symbol":'NSE:'+main_str+str(PE_lower)+'PE',
             "qty":lots,
             "type":2,  
             "side":-1, 
-            "productType":"CNC",   
+            "productType":"Margin",   
             "limitPrice":0,
             "stopPrice":0 ,
             "disclosedQty":0, 
@@ -289,6 +263,7 @@ loop_control=0
 brk=0
 turn=0
 while True:
+    sleep(3)
     req={"symbols":"NSE:NIFTYBANK-INDEX"}        
     a=fyers.quotes(req)
     x=a['d'][0]['v']['lp']     #int
@@ -302,11 +277,11 @@ while True:
         if pos[i]['symbol'][4:18] == main_str and pos[i]['symbol'][23:]=='PE' and pos[i]['sellQty']-pos[i]['buyQty']-pos[i]['netQty']>0  :
             pe_index=i
             Current_PE_strikeprice=pos[i]['symbol'][18:23]
-            CE_req='NSE:'+main_str+Current_CE_strikeprice+'CE'
+            PE_req='NSE:'+main_str+Current_PE_strikeprice+'PE'
         elif pos[i]['symbol'][4:18] == main_str and pos[i]['symbol'][23:]=='CE' and pos[i]['sellQty']-pos[i]['buyQty']-pos[i]['netQty']>0  :
             ce_index=i
-            Current_CE_strikeprice=pos[i]['symbol'][18:23]
-            PE_req='NSE:'+main_str+Current_PE_strikeprice+'PE'
+            Current_CE_strikeprice=pos[i]['symbol'][18:23]  
+            CE_req='NSE:'+main_str+Current_CE_strikeprice+'CE'
     req_list_={'symbols':CE_req+','+PE_req}
     if loop_control==1 and CE_req[18:23]==CE_req_old and PE_req[18:23]==PE_req_old:
         print('Sorry for the inconvenience caused. Some of the orders were not executed. Please do the trades manually')
@@ -349,24 +324,12 @@ while True:
                 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
                 print(ind_time)
                 print('exit(bought) pe at srikeprice:  ', PE_req_old)
-                data=[  { "symbol":pos[awesome_ammu]['symbol'],
-                                "qty":lots,
-                                "type":2,  
-                                "side":1, 
-                                "productType":"CNC",   
-                                "limitPrice":0,
-                                "stopPrice":0 ,
-                                "disclosedQty":0, 
-                                "validity":"DAY", 
-                                "offlineOrder":"False", 
-                                "stopLoss":0,  
-                                "takeProfit":0
-                            },
+                data=[  
                             { "symbol":'NSE:'+main_str+str(req_list_PE_strikeprice[PE_index_strikeprice])+'PE',
                               "qty":lots,
                               "type":2,  
                               "side":-1, 
-                              "productType":"CNC",   
+                              "productType":"Margin",   
                               "limitPrice":0,
                               "stopPrice":0 ,
                               "disclosedQty":0, 
@@ -376,11 +339,12 @@ while True:
                               "takeProfit":0
                             }]
                 #sell pe which is 80 to 95% of ce
+                fyers.exit_positions({'id':pos[awesome_ammu]['id']})
                 fyers.place_basket_orders(data)
                 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
                 print(ind_time)
                 print('re entry(Sold) pe at strikeprice: ',req_list_PE_strikeprice[PE_index_strikeprice])
-                PE_req = req_list_PE[PE_index_strikeprice]
+                PE_req = nice[PE_index_strikeprice]
                 print('New PE_req is : ',PE_req)
                 loop_control=1
                 break
@@ -416,24 +380,12 @@ while True:
                 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
                 print(ind_time)
                 print('exit(bought) pe at srikeprice:  ', CE_req_old)
-                data=[{ "symbol":pos[awesome_ammu]['symbol'],
-                                "qty":lots,
-                                "type":2,  
-                                "side":1, 
-                                "productType":"CNC",   
-                                "limitPrice":0,
-                                "stopPrice":0 ,
-                                "disclosedQty":0, 
-                                "validity":"DAY", 
-                                "offlineOrder":"False", 
-                                "stopLoss":0,  
-                                "takeProfit":0
-                            },
+                data=[
                             { "symbol":'NSE:'+main_str+str(req_list_CE_strikeprice[CE_index_strikeprice])+'CE',
                               "qty":lots,
                               "type":2,  
                               "side":-1, 
-                              "productType":"CNC",   
+                              "productType":"Margin",   
                               "limitPrice":0,
                               "stopPrice":0 ,
                               "disclosedQty":0, 
@@ -442,7 +394,9 @@ while True:
                               "stopLoss":0,  
                               "takeProfit":0
                             }]
+                fyers.exit_positions({'id':pos[awesome_ammu]['id']})
                 fyers.place_basket_orders(data)
+
                 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
                 print(ind_time)
                 print('re entry(Sold) pe at strikeprice: ',req_list_CE_strikeprice[CE_index_strikeprice])
