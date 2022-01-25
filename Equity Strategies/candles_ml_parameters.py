@@ -1,4 +1,4 @@
-"""
+'''
 url = 'https://anaconda.org/conda-forge/libta-lib/0.4.0/download/linux-64/libta-lib-0.4.0-h516909a_0.tar.bz2'
 !curl -L $url | tar xj -C /usr/lib/x86_64-linux-gnu/ lib --strip-components=1
 url = 'https://anaconda.org/conda-forge/ta-lib/0.4.19/download/linux-64/ta-lib-0.4.19-py37ha21ca33_2.tar.bz2'
@@ -10,7 +10,7 @@ url = 'https://anaconda.org/conda-forge/ta-lib/0.4.19/download/linux-64/ta-lib-0
 !pip install pyswarms
 
 import talib
-"""
+'''
 #%%
 from indicators import indicators as ind
 import pandas as pd
@@ -31,7 +31,7 @@ cred={
     "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
     "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
     }
-Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwarvinay1@A',dob='19700701', cred=cred)
+Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='vinay1@A',dob='19700701', cred=cred)
 Client.login()
 #%%
 scripcode=999920005

@@ -1,3 +1,4 @@
+#%%
 import pandas as pd
 from ta.utils import dropna
 from ta.volatility import BollingerBands
@@ -8,14 +9,14 @@ from py5paisa.strategy import *
 from datetime import datetime 
 import numpy as np
 cred={
-    "APP_NAME":"5P59470899",
-    "APP_SOURCE":"6176",
-    "USER_ID":"1v73mtvQk3L",
-    "PASSWORD":"8DASLLALpZH",
-    "USER_KEY":"nNaWVqHIXsgi6FEPnjBknpPPjK1LOHQL",
-    "ENCRYPTION_KEY":"HSE2AS6SIEH0UgwfpmwiymkdiRId7eZU"
-}
-Client = FivePaisaClient(email="p.amareswar20@dmsiitd.org", passwd="Amarreddy@123456", dob="19930714", cred=cred)
+    "APP_NAME":"5P56936208",
+    "APP_SOURCE":"2179",
+    "USER_ID":"w6MJ1dw5Yd0",
+    "PASSWORD":"V7JkGTUudjt",
+    "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
+    "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
+    }
+Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='vinay1@A',dob='19700701', cred=cred)
 Client.login()
 
 #Section 1
@@ -203,6 +204,7 @@ Dummy_variables = pd.get_dummies(df['candlestick_pattern'])
 concated_dummy_columns = pd.concat([df,Dummy_variables], axis=1)
 concated_dummy_columns.tail()
 
+#Section 4
 #simple expected candle
 # function that helps to take trades for the next candle
 def f(df,candle_name):
@@ -407,3 +409,4 @@ for i in range(2,len(df['candlestick_pattern'])-1):
             today_profit=today_profit+df['Open'][i+1]-df['Close'][i+1]
 print(today_profit)
 print(trades_taken)
+# %%
