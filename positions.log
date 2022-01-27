@@ -1,0 +1,59 @@
+  GNU nano 4.8                                                                                   positions.log                                                                                              
+2022-01-27 03:48:00.390 | INFO     | py5paisa.logging:log_response:16 - Logged in!!
+2022-01-27 03:51:15.847 | INFO     | py5paisa.logging:log_response:16 - Logged in!!
+2022-01-27 03:52:16.780 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:22:16.780681
+2022-01-27 03:52:16.780 | INFO     | py5paisa.logging:log_response:16 - [{'BodQty': 25, 'BookedPL': 0, 'BuyAvgRate': 14.3, 'BuyQty': 25, 'BuyValue': 357.5, 'Exch': 'N', 'ExchType': 'D', 'LTP': 2.3, 'MTOM>
+2022-01-27 03:52:16.781 | INFO     | py5paisa.logging:log_response:16 - Current CE Strikeprice: 37400
+2022-01-27 03:52:16.781 | INFO     | py5paisa.logging:log_response:16 - ce_lastrate: 141.2
+2022-01-27 03:52:16.781 | INFO     | py5paisa.logging:log_response:16 - Current PE Strikeprice: 36800
+2022-01-27 03:52:16.781 | INFO     | py5paisa.logging:log_response:16 - pe_lastrate: 70.45
+2022-01-27 03:52:24.472 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:22:24.472493
+2022-01-27 03:52:24.472 | INFO     | py5paisa.logging:log_response:16 - exit(bought) pe at srikeprice:  36800
+2022-01-27 03:52:25.757 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:22:25.757151
+2022-01-27 03:52:25.757 | INFO     | py5paisa.logging:log_response:16 - re entry(Sold) pe at strikeprice: 37000
+2022-01-27 03:52:25.757 | INFO     | py5paisa.logging:log_response:16 - New PE_req is : {'Exch': 'N', 'ExchType': 'D', 'Symbol': 'BANKNIFTY 27 JAN 2022 PE 37000.00', 'Expiry': '20220127', 'StrikePrice': >
+2022-01-27 03:54:13.728 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:24:13.728807
+2022-01-27 03:54:13.729 | INFO     | py5paisa.logging:log_response:16 - [{'BodQty': 25, 'BookedPL': -298.75, 'BuyAvgRate': 14.3, 'BuyQty': 25, 'BuyValue': 357.5, 'Exch': 'N', 'ExchType': 'D', 'LTP': 2.25>
+2022-01-27 03:54:13.729 | INFO     | py5paisa.logging:log_response:16 - Current CE Strikeprice: 39600
+2022-01-27 03:54:13.729 | INFO     | py5paisa.logging:log_response:16 - ce_lastrate: 2.25
+2022-01-27 03:54:13.729 | INFO     | py5paisa.logging:log_response:16 - Current PE Strikeprice: 37700
+2022-01-27 03:54:13.729 | INFO     | py5paisa.logging:log_response:16 - pe_lastrate: 484.25
+2022-01-27 03:54:21.104 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:24:21.104548
+2022-01-27 03:54:21.104 | INFO     | py5paisa.logging:log_response:16 - [{'BodQty': 25, 'BookedPL': -298.75, 'BuyAvgRate': 14.3, 'BuyQty': 25, 'BuyValue': 357.5, 'Exch': 'N', 'ExchType': 'D', 'LTP': 2.25>
+2022-01-27 03:54:21.105 | INFO     | py5paisa.logging:log_response:16 - Current CE Strikeprice: 37700
+2022-01-27 03:54:21.105 | INFO     | py5paisa.logging:log_response:16 - ce_lastrate: 51.05
+2022-01-27 03:54:21.105 | INFO     | py5paisa.logging:log_response:16 - Current PE Strikeprice: 37000
+2022-01-27 03:54:21.105 | INFO     | py5paisa.logging:log_response:16 - pe_lastrate: 109.75
+2022-01-27 03:54:34.213 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:24:34.213896
+2022-01-27 03:54:34.214 | INFO     | py5paisa.logging:log_response:16 - [{'BodQty': 25, 'BookedPL': -298.75, 'BuyAvgRate': 14.3, 'BuyQty': 25, 'BuyValue': 357.5, 'Exch': 'N', 'ExchType': 'D', 'LTP': 2.3,>
+2022-01-27 03:54:34.214 | INFO     | py5paisa.logging:log_response:16 - Current CE Strikeprice: 39600
+2022-01-27 03:54:34.214 | INFO     | py5paisa.logging:log_response:16 - ce_lastrate: 2.25
+2022-01-27 03:54:34.214 | INFO     | py5paisa.logging:log_response:16 - Current PE Strikeprice: 37000
+2022-01-27 03:54:34.214 | INFO     | py5paisa.logging:log_response:16 - pe_lastrate: 100
+2022-01-27 03:54:53.890 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:24:53.890695
+2022-01-27 03:54:53.890 | INFO     | py5paisa.logging:log_response:16 - [{'BodQty': 25, 'BookedPL': -298.75, 'BuyAvgRate': 14.3, 'BuyQty': 25, 'BuyValue': 357.5, 'Exch': 'N', 'ExchType': 'D', 'LTP': 2.35>
+2022-01-27 03:54:53.891 | INFO     | py5paisa.logging:log_response:16 - Current CE Strikeprice: 37400
+2022-01-27 03:54:53.891 | INFO     | py5paisa.logging:log_response:16 - ce_lastrate: 179.15
+2022-01-27 03:54:53.891 | INFO     | py5paisa.logging:log_response:16 - Current PE Strikeprice: 37000
+2022-01-27 03:54:53.891 | INFO     | py5paisa.logging:log_response:16 - pe_lastrate: 87.85
+2022-01-27 03:54:54.619 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:24:54.619352
+2022-01-27 03:54:54.619 | INFO     | py5paisa.logging:log_response:16 - [{'BodQty': 25, 'BookedPL': -298.75, 'BuyAvgRate': 14.3, 'BuyQty': 25, 'BuyValue': 357.5, 'Exch': 'N', 'ExchType': 'D', 'LTP': 2.35>
+2022-01-27 03:54:54.619 | INFO     | py5paisa.logging:log_response:16 - Current CE Strikeprice: 37400
+2022-01-27 03:54:54.619 | INFO     | py5paisa.logging:log_response:16 - ce_lastrate: 176.55
+2022-01-27 03:54:54.620 | INFO     | py5paisa.logging:log_response:16 - Current PE Strikeprice: 37000
+2022-01-27 03:54:54.620 | INFO     | py5paisa.logging:log_response:16 - pe_lastrate: 87.85
+2022-01-27 03:55:02.464 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:25:02.464749
+2022-01-27 03:55:02.465 | INFO     | py5paisa.logging:log_response:16 - exit(bought) pe at srikeprice:  37000
+2022-01-27 03:55:03.941 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:25:03.941320
+2022-01-27 03:55:03.941 | INFO     | py5paisa.logging:log_response:16 - re entry(Sold) pe at strikeprice: 37200
+2022-01-27 03:55:03.941 | INFO     | py5paisa.logging:log_response:16 - New PE_req is : {'Exch': 'N', 'ExchType': 'D', 'Symbol': 'BANKNIFTY 27 JAN 2022 PE 37200.00', 'Expiry': '20220127', 'StrikePrice': >
+2022-01-27 03:55:11.561 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:25:11.561380
+2022-01-27 03:55:11.561 | INFO     | py5paisa.logging:log_response:16 - [{'BodQty': 25, 'BookedPL': -298.75, 'BuyAvgRate': 14.3, 'BuyQty': 25, 'BuyValue': 357.5, 'Exch': 'N', 'ExchType': 'D', 'LTP': 2.3,>
+2022-01-27 03:55:11.561 | INFO     | py5paisa.logging:log_response:16 - Current CE Strikeprice: 37700
+2022-01-27 03:55:11.561 | INFO     | py5paisa.logging:log_response:16 - ce_lastrate: 56.9
+2022-01-27 03:55:11.562 | INFO     | py5paisa.logging:log_response:16 - Current PE Strikeprice: 37200
+2022-01-27 03:55:11.562 | INFO     | py5paisa.logging:log_response:16 - pe_lastrate: 157.4
+2022-01-27 03:55:17.427 | INFO     | py5paisa.logging:log_response:16 - 2022-01-27 09:25:17.427634
+2022-01-27 03:55:17.427 | INFO     | py5paisa.logging:log_response:16 - [{'BodQty': 25, 'BookedPL': -298.75, 'BuyAvgRate': 14.3, 'BuyQty': 25, 'BuyValue': 357.5, 'Exch': 'N', 'ExchType': 'D', 'LTP': 2.4,>
+2022-01-27 03:55:17.428 | INFO     | py5paisa.logging:log_response:16 - Current CE Strikeprice: 39600
+2022-01-27 03:55:17.428 | INFO     | py5paisa.logging:log_response:16 - ce_lastrate: 2.25
