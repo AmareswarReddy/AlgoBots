@@ -2,7 +2,7 @@
 
 # Navigate to Below Link and obtain auth_code
 #https://api.fyers.in/api/v2/generate-authcode?client_id=TTHF3EHNQM-100&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F&response_type=code&state=None&scope=&nonce=private
-auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE2NDMwODYwOTcsImV4cCI6MTY0MzExNjA5NywibmJmIjoxNjQzMDg1NDk3LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJYUDE1MzI3Iiwibm9uY2UiOiJwcml2YXRlIiwiYXBwX2lkIjoiVFRIRjNFSE5RTSIsInV1aWQiOiI2NTA2OWMxNGRmNTE0NWQzOWIzNTg3NmI1ZDk4ZmNiNSIsImlwQWRkciI6IjAuMC4wLjAiLCJzY29wZSI6IiJ9.lzedr0u8L--2XGRpJnybsUNzMWkgtP-wQLrqpioaAsQ"
+auth_code = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhcGkubG9naW4uZnllcnMuaW4iLCJpYXQiOjE2NDM4NTc5NjYsImV4cCI6MTY0Mzg4Nzk2NiwibmJmIjoxNjQzODU3MzY2LCJhdWQiOiJbXCJ4OjBcIiwgXCJ4OjFcIiwgXCJ4OjJcIiwgXCJkOjFcIiwgXCJkOjJcIiwgXCJ4OjFcIiwgXCJ4OjBcIl0iLCJzdWIiOiJhdXRoX2NvZGUiLCJkaXNwbGF5X25hbWUiOiJYUDE1MzI3Iiwibm9uY2UiOiJwcml2YXRlIiwiYXBwX2lkIjoiVFRIRjNFSE5RTSIsInV1aWQiOiJkY2I3MjVjNjFkYjI0MWU4OTM0YjA2NTYxZTUyZGM2MSIsImlwQWRkciI6IjAuMC4wLjAiLCJzY29wZSI6IiJ9.2HYqDTEI4SB--7QWaa4Ox-Ah6G9Nppne2xLxk3wm2ZA"
 
 # Update scripmaster file every week
 import numpy as np
@@ -38,7 +38,8 @@ print(response_token)
 
 access_token = response_token['access_token']
 print(access_token)
-fyers = fyersModel.FyersModel(client_id=client_id, token=access_token,log_path="/Users/amareswarreddy/Desktop/logs")
+#fyers = fyersModel.FyersModel(client_id=client_id, token=access_token,log_path="/Users/amareswarreddy/Desktop/logs")
+fyers = fyersModel.FyersModel(client_id=client_id, token=access_token,log_path="/Users/vinayreddy/Desktop/logs")
 #%%
 month_mapping = {
     '01' : '1', 
@@ -133,6 +134,7 @@ def new_short_straddle():  #do not try running this function seperately. this is
         while True :
             b=fyers.quotes({'symbol':'NSE:'+main_str+str(round(x/100)*100)+'PE'})
             c=fyers.quotes({'symbol':'NSE:'+main_str+str(round(x/100)*100)+'CE'})
+            sleep(3)
             ce_lastrate=b['d'][0]['v']['lp']
             pe_lastrate=c['d'][0]['v']['lp']
             Total_value_new=ce_lastrate+pe_lastrate
@@ -196,6 +198,12 @@ PE_hedge=req_list_PE_strikeprice[PE_hedge_index_strikeprice]
 if day==0:
     #short_strangle(<symbol>,<List of sell strike price>,<qty>,<expiry>,<Order Type>)
     #strategy.short_strangle("banknifty",[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
+    while True:
+        now=datetime.now(timezone("Asia/Kolkata"))
+        if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=18:
+            break
+        elif int(now.strftime('%H'))>9:
+            break
     data = [{ "symbol":'NSE:'+main_str+str(CE_hedge)+'CE',
               "qty":lots,
               "type":2,  
@@ -256,6 +264,13 @@ if day==0:
     CE_req = 'NSE:'+main_str+str(CE_upper)+'CE'
     PE_req = 'NSE:'+main_str+str(PE_lower)+'PE'
 #%%
+if day==1:
+    while True:
+        now=datetime.now(timezone("Asia/Kolkata"))
+        if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=18:
+            break
+        elif int(now.strftime('%H'))>9:
+            break
 Total_value_old=float('inf')
 PE_req_old = ' '
 CE_req_old = ' '
@@ -326,17 +341,17 @@ while True:
                 print('exit(bought) pe at srikeprice:  ', PE_req_old)
                 data=[  
                             { "symbol":'NSE:'+main_str+str(req_list_PE_strikeprice[PE_index_strikeprice])+'PE',
-                              "qty":lots,
-                              "type":2,  
-                              "side":-1, 
-                              "productType":"Margin",   
-                              "limitPrice":0,
-                              "stopPrice":0 ,
-                              "disclosedQty":0, 
-                              "validity":"DAY", 
-                              "offlineOrder":"False", 
-                              "stopLoss":0,  
-                              "takeProfit":0
+                            "qty":lots,
+                            "type":2,  
+                            "side":-1, 
+                            "productType":"Margin",   
+                            "limitPrice":0,
+                            "stopPrice":0 ,
+                            "disclosedQty":0, 
+                            "validity":"DAY", 
+                            "offlineOrder":"False", 
+                            "stopLoss":0,  
+                            "takeProfit":0
                             }]
                 #sell pe which is 80 to 95% of ce
                 fyers.exit_positions({'id':pos[awesome_ammu]['id']})
@@ -344,7 +359,7 @@ while True:
                 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
                 print(ind_time)
                 print('re entry(Sold) pe at strikeprice: ',req_list_PE_strikeprice[PE_index_strikeprice])
-                PE_req = nice[PE_index_strikeprice]
+                PE_req = 'NSE:'+main_str+str(req_list_PE_strikeprice[PE_index_strikeprice])+'PE'#req_list_PE_strikeprice[PE_index_strikeprice]
                 print('New PE_req is : ',PE_req)
                 loop_control=1
                 break
@@ -361,7 +376,7 @@ while True:
         #the above step is taken because the delta(change in option price per unit change in stock price) will become so low that the further decrease in ce_lastrate will be far lower than the increase in pe_lastrate when stock price decreases from the price it is now trading
         CE_req_old = CE_req[18:23]
         nice=req_list_["symbols"].split(',')
-        for k in range(0,len(positions)):
+        for k in range(0,len(pos)):
             if nice[0]==pos[k]['symbol']  and loop_control==0:
                 awesome_ammu=k
                 a=fyers.quotes(req)
@@ -382,17 +397,17 @@ while True:
                 print('exit(bought) pe at srikeprice:  ', CE_req_old)
                 data=[
                             { "symbol":'NSE:'+main_str+str(req_list_CE_strikeprice[CE_index_strikeprice])+'CE',
-                              "qty":lots,
-                              "type":2,  
-                              "side":-1, 
-                              "productType":"Margin",   
-                              "limitPrice":0,
-                              "stopPrice":0 ,
-                              "disclosedQty":0, 
-                              "validity":"DAY", 
-                              "offlineOrder":"False", 
-                              "stopLoss":0,  
-                              "takeProfit":0
+                            "qty":lots,
+                            "type":2,  
+                            "side":-1, 
+                            "productType":"Margin",   
+                            "limitPrice":0,
+                            "stopPrice":0 ,
+                            "disclosedQty":0, 
+                            "validity":"DAY", 
+                            "offlineOrder":"False", 
+                            "stopLoss":0,  
+                            "takeProfit":0
                             }]
                 fyers.exit_positions({'id':pos[awesome_ammu]['id']})
                 fyers.place_basket_orders(data)
@@ -401,7 +416,7 @@ while True:
                 print(ind_time)
                 print('re entry(Sold) pe at strikeprice: ',req_list_CE_strikeprice[CE_index_strikeprice])
                 nice=req_list_CE['symbols'].split(',')
-                CE_req = nice[CE_index_strikeprice]
+                CE_req = 'NSE:'+main_str+str(req_list_CE_strikeprice[CE_index_strikeprice])+'CE'#req_list_PE_strikeprice[PE_index_strikeprice]req_list_CE_strikeprice[CE_index_strikeprice]
                 print('New PE_req is : ',CE_req)
                 loop_control=1
                 break         
@@ -412,7 +427,7 @@ while True:
         elif turn==1:
             Total_value_new=ce_lastrate+pe_lastrate
             if Total_value_new<Total_value_old:
-                Stop_loss=Total_value_new*1.15
+                Stop_loss=Total_value_new*1.2
                 Total_value_old=Total_value_new
             if Total_value_new>Stop_loss :
                 brk=1
@@ -420,5 +435,7 @@ while True:
                 new_short_straddle()           
     if brk==1:
         break
+
+# %%
 
 # %%
