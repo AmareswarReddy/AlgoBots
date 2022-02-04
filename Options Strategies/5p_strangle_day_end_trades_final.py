@@ -43,7 +43,7 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
             pe_lastrate=b['Data'][1]['LastRate']
             Total_value_new=ce_lastrate+pe_lastrate
             if Total_value_new<Total_value_old:
-                Stop_loss=Total_value_new*1.12
+                Stop_loss=Total_value_new*1.2
                 Total_value_old=Total_value_new
             if Total_value_new>Stop_loss :
                 brk=1
@@ -146,9 +146,9 @@ for j in range(0,49):
 live_PE_lastrate=[np.inf if x==0 else x for x in live_PE_lastrate]
 live_CE_lastrate=[np.inf if x==0 else x for x in live_CE_lastrate]
 CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-115))
-CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-20))
+CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-10))
 PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-115))
-PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-20))
+PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-10))
 CE_upper=req_list_CE_strikeprice[CE_index_strikeprice]
 CE_hedge=req_list_CE_strikeprice[CE_hedge_index_strikeprice]
 PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
@@ -242,9 +242,9 @@ def day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2):
         live_PE_lastrate=[np.inf if x==0 else x for x in live_PE_lastrate]
         live_CE_lastrate=[np.inf if x==0 else x for x in live_CE_lastrate]
         CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-115))
-        CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-20))
+        CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-10))
         PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-115))
-        PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-20))
+        PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-10))
         CE_upper=req_list_CE_strikeprice[CE_index_strikeprice]
         CE_hedge=req_list_CE_strikeprice[CE_hedge_index_strikeprice]
         PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
@@ -278,7 +278,7 @@ while True:
 
     now=datetime.now(timezone("Asia/Kolkata"))
     if int(now.strftime('%H'))==15 and int(now.strftime('%M'))>=12 and int(now.strftime('%M'))<=20:
-        day_end_trades(ce_mem,pe_mem,lots)
+        day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2)
         break
 
     if x<int(pe_mem) and money_heist==0:
