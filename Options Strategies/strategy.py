@@ -261,8 +261,7 @@ class strategies:
         sc=self.get_scripcode(self.symbol,self.sell_strike[j],self.expiry,'PE')
         sell_scrip.append(sc)
         for s in buy_scrip:
-            for i in range(0,int(qty)/25):
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=s, quantity='25', price=0,is_intraday=self.intraday(self.intra),atmarket=True,)
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=s, quantity=qty, price=0,is_intraday=self.intraday(self.intra),atmarket=True,)
             order_status=self.Client.place_order(test_order)
             if order_status['Message']=='Success':
                 continue
@@ -295,8 +294,7 @@ class strategies:
         sc=self.get_scripcode(self.symbol,self.sell_strike[j],self.expiry,'CE')
         sell_scrip.append(sc)
         for s in buy_scrip:
-            for i in range(0,int(qty)/25):
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=s, quantity='25', price=0,is_intraday=self.intraday(self.intra),atmarket=True)
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=s, quantity=qty, price=0,is_intraday=self.intraday(self.intra),atmarket=True)
             order_status=self.Client.place_order(test_order)
             if order_status['Message']=='Success':
                 continue
@@ -305,6 +303,44 @@ class strategies:
         for s in sell_scrip:
             for i in range(0,int(qty)/25):
                 test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=s, quantity='25', price=0,is_intraday=self.intraday(self.intra),atmarket=True)
+            order_status=self.Client.place_order(test_order)
+            if order_status['Message']=='Success':
+                continue
+            else:
+                break
+            
+    def square_off_ce(self,symbol,buy_strike,qty,expiry,intra):
+        buy_strike.sort()
+        self.symbol=symbol
+        self.buy_strike=buy_strike
+        self.qty=qty
+        self.expiry=expiry
+        self.intra=intra
+        buy_scrip=[]
+        i=0
+        sc=self.get_scripcode(self.symbol,self.buy_strike[i],self.expiry,'CE')
+        buy_scrip.append(sc)
+        for s in buy_scrip:
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=s, quantity=qty, price=0,is_intraday=self.intraday(self.intra),atmarket=True)
+            order_status=self.Client.place_order(test_order)
+            if order_status['Message']=='Success':
+                continue
+            else:
+                break
+
+    def square_off_pe(self,symbol,buy_strike,qty,expiry,intra):
+        buy_strike.sort()
+        self.symbol=symbol
+        self.buy_strike=buy_strike
+        self.qty=qty
+        self.expiry=expiry
+        self.intra=intra
+        buy_scrip=[]
+        i=0
+        sc=self.get_scripcode(self.symbol,self.buy_strike[i],self.expiry,'PE')
+        buy_scrip.append(sc)
+        for s in buy_scrip:
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code=s, quantity=qty, price=0,is_intraday=self.intraday(self.intra),atmarket=True,)
             order_status=self.Client.place_order(test_order)
             if order_status['Message']=='Success':
                 continue
