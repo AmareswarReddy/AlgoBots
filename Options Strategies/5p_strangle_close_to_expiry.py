@@ -40,7 +40,7 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
         pe_lastrate=b['Data'][1]['LastRate']
         Total_value_old=ce_lastrate+pe_lastrate
         while True :
-            if Total_value_old>150: # value 150 is anticipated optimised parameter
+            if Total_value_old>200: # value 150 is anticipated optimised parameter
                 b=strategy.fetch_market_feed(req_list2)
                 ce_lastrate=b['Data'][0]['LastRate']
                 pe_lastrate=b['Data'][1]['LastRate']
@@ -55,7 +55,7 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
                     print(ind_time)
                     print('#########                                         stoplosshit                                         #########')
                     break
-            elif Total_value_old<=150: # value 150 is anticipated
+            elif Total_value_old<=200: # value 150 is anticipated
                 # individual stoploss shall be implimented and we will square off this time unlike taking new positions so that we don't lose more money
                 control1=0
                 control2=0
@@ -237,7 +237,7 @@ def day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2):
     strategy.long_strangle("banknifty",[str(pe_mem),str(ce_mem)],lots,expiry,'D')
     while True:
         now=datetime.now(timezone("Asia/Kolkata"))
-        if int(now.strftime('%H'))==15 and int(now.strftime('%M'))>=27:
+        if int(now.strftime('%H'))==15 and int(now.strftime('%M'))>=29:
             break
     sleep(33)
     if expiry2==0:
@@ -306,7 +306,7 @@ while True:
     pe_lastrate=b['Data'][1]['LastRate']
 
     now=datetime.now(timezone("Asia/Kolkata"))
-    if int(now.strftime('%H'))==15 and int(now.strftime('%M'))>=12 and int(now.strftime('%M'))<=20:
+    if int(now.strftime('%H'))==15 and int(now.strftime('%M'))>=16 and int(now.strftime('%M'))<=20:
         day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2)
         break
 

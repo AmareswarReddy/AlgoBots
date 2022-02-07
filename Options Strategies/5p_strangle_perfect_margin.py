@@ -281,7 +281,7 @@ while True:
 
     now=datetime.now(timezone("Asia/Kolkata"))
     if int(now.strftime('%H'))==15 and int(now.strftime('%M'))>=12 and int(now.strftime('%M'))<=20:
-        day_end_trades(ce_mem,pe_mem,lots)
+        day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2)
         break
 
     if x<int(pe_mem) and money_heist==0:
