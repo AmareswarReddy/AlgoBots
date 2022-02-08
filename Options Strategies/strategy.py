@@ -268,7 +268,7 @@ class strategies:
             else:
                 break
         for s in sell_scrip:
-            for i in range(0,int(qty/25)):
+            for i in range(0,int(int(qty)/25)):
                 test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=s, quantity='25', price=0,is_intraday=self.intraday(self.intra),atmarket=True)
             order_status=self.Client.place_order(test_order)
             if order_status['Message']=='Success':
@@ -301,7 +301,7 @@ class strategies:
             else:
                 break
         for s in sell_scrip:
-            for i in range(0,int(qty/25)):
+            for i in range(0,int(int(qty)/25)):
                 test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code=s, quantity='25', price=0,is_intraday=self.intraday(self.intra),atmarket=True)
             order_status=self.Client.place_order(test_order)
             if order_status['Message']=='Success':
