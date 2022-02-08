@@ -86,8 +86,7 @@ expiry = str(input('enter the current expiry(Eg: "20210916" ) : '))
 expiry2=0
 if expiry==d:
     expiry2=str(input('enter the next expiry (Eg: "20210916" ) : '))
-money_in_account = float(input('enter the amount of money in the account in lakhs(Eg: 2) :'))
-lots = int(np.floor(money_in_account/1.5)*25)
+lots = int(input('enter the amount of lots(Eg: 25) :'))
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
 while True:
     now=datetime.now(timezone("Asia/Kolkata"))
