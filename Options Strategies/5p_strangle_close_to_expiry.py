@@ -39,6 +39,7 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
         ce_lastrate=b['Data'][0]['LastRate']
         pe_lastrate=b['Data'][1]['LastRate']
         Total_value_old=ce_lastrate+pe_lastrate
+        Stop_loss=Total_value_old*1.2
         while True :
             if Total_value_old>200: # value 150 is anticipated optimised parameter
                 b=strategy.fetch_market_feed(req_list2)
@@ -427,6 +428,4 @@ while True:
                 new_short_straddle(main_str_format_pe, main_str_format_ce,main_str_pe,main_str_ce,pe_mem,ce_mem)           
     if brk==1:
         break
-# %%
-
 # %%
