@@ -60,6 +60,11 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
                 # individual stoploss shall be implimented and we will square off this time unlike taking new positions so that we don't lose more money
                 control1=0
                 control2=0
+                b=strategy.fetch_market_feed(req_list2)
+                ce_lastrate=b['Data'][0]['LastRate']
+                pe_lastrate=b['Data'][1]['LastRate']
+                Stop_loss1=ce_lastrate*1.2
+                Stop_loss2=pe_lastrate*1.2
                 while True:
                     b=strategy.fetch_market_feed(req_list2)
                     ce_lastrate=b['Data'][0]['LastRate']
