@@ -40,8 +40,9 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
         pe_lastrate=b['Data'][1]['LastRate']
         Total_value_old=ce_lastrate+pe_lastrate
         Stop_loss=Total_value_old*1.2
+        test=0
         while True :
-            if Total_value_old>200: # value 150 is anticipated optimised parameter
+            if Total_value_old>200 and test==0: # value 150 is anticipated optimised parameter
                 b=strategy.fetch_market_feed(req_list2)
                 ce_lastrate=b['Data'][0]['LastRate']
                 pe_lastrate=b['Data'][1]['LastRate']
@@ -60,29 +61,29 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
                 # individual stoploss shall be implimented and we will square off this time unlike taking new positions so that we don't lose more money
                 control1=0
                 control2=0
+                test=1
                 b=strategy.fetch_market_feed(req_list2)
                 ce_lastrate=b['Data'][0]['LastRate']
                 pe_lastrate=b['Data'][1]['LastRate']
+                ce_lastrate_old=ce_lastrate
+                pe_lastrate_old=pe_lastrate
                 Stop_loss1=ce_lastrate*1.2
                 Stop_loss2=pe_lastrate*1.2
                 while True:
                     b=strategy.fetch_market_feed(req_list2)
                     ce_lastrate=b['Data'][0]['LastRate']
                     pe_lastrate=b['Data'][1]['LastRate']
-                    ce_lastrate_old=ce_lastrate
                     if ce_lastrate<ce_lastrate_old and control1==0:
                         Stop_loss1=ce_lastrate*1.2
                         ce_lastrate_old=ce_lastrate
-                    if ce_lastrate>Stop_loss1 :
+                    if ce_lastrate>Stop_loss1 and control1==0:
                         control1=1
                         #square off call option
                         strategy.square_off_ce('banknifty',[str(req_list_CE_strikeprice)],str(lots),expiry,'D')
-
-                    pe_lastrate_old=pe_lastrate
                     if pe_lastrate<pe_lastrate_old and control2==0:
                         Stop_loss2=pe_lastrate*1.2
                         pe_lastrate_old=pe_lastrate
-                    if pe_lastrate>Stop_loss2 :
+                    if pe_lastrate>Stop_loss2 and control2==0:
                         control2=1
                         #square off put option
                         strategy.square_off_pe('banknifty',[str(req_list_PE_strikeprice)],str(lots),expiry,'D')
