@@ -73,13 +73,16 @@ for i in range(0,30):
                 ]
     directory_ce[str(temp)]=str((round(x/100)*100)+i*100)
 dict1=Client.Request_Feed('oi','s',req_list)
-    
+
+print("Hello Baby 1") 
 def on_message(ws,message):
             message=json.loads(message)
             a=message
             a['Token']
             print(a)
-Client.Streming_data(dict1, on_message)
 
+Client.Streming_data(dict1, on_message)
+print("Hello Baby")
+a = 5
 # Note : Pass Dictionary in Parameter Field
 # %%
