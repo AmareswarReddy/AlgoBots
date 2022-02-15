@@ -316,7 +316,7 @@ while True:
         day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2)
         break
 
-    if x<int(pe_mem) and money_heist==0:
+    if x<int(pe_mem) and money_heist==0 and (int(ce_mem)-int(pe_mem))>0:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         positions=strategy.positions()
         log_response(ind_time)
@@ -331,7 +331,7 @@ while True:
         ce_mem=str(pe_mem)
         money_heist=1
     
-    elif x>int(ce_mem) and money_heist==0:
+    elif x>int(ce_mem) and money_heist==0 and (int(ce_mem)-int(pe_mem))>0:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         positions=strategy.positions()
         log_response(ind_time)
