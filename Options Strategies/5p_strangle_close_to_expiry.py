@@ -1,5 +1,4 @@
 #%%
-# Update scripmaster file every week
 import numpy as np
 import pandas as pd
 from time import sleep, strftime
@@ -52,11 +51,11 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
                     Total_value_old=Total_value_new
                 if Total_value_new>Stop_loss :
                     brk=1
-                if brk==1:
-                    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-                    print(ind_time)
-                    print('#########                                         stoplosshit                                         #########')
-                    break
+            if brk==1:
+                ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+                print(ind_time)
+                print('#########                                         stoplosshit                                         #########')
+                break
             elif Total_value_old<=200: # value 150 is anticipated
                 # individual stoploss shall be implimented and we will square off this time unlike taking new positions so that we don't lose more money
                 control1=0
@@ -78,14 +77,14 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
                         ce_lastrate_old=ce_lastrate
                     if ce_lastrate>Stop_loss1 and control1==0:
                         control1=1
-                        #square off call option
+                        print('square off call option')
                         strategy.square_off_ce('banknifty',[str(req_list_CE_strikeprice)],str(lots),expiry,'D')
                     if pe_lastrate<pe_lastrate_old and control2==0:
                         Stop_loss2=pe_lastrate*1.2
                         pe_lastrate_old=pe_lastrate
                     if pe_lastrate>Stop_loss2 and control2==0:
                         control2=1
-                        #square off put option
+                        print('square off put option')
                         strategy.square_off_pe('banknifty',[str(req_list_PE_strikeprice)],str(lots),expiry,'D')
 
 #inputs to the code
@@ -99,7 +98,7 @@ while True:
     now=datetime.now(timezone("Asia/Kolkata"))
     if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=17:
         break
-    elif int(now.strftime('%H'))>9:
+    elif int(now.strftime('%H'))>7:
         break
 # formatting the input data 
 temp={1:'JAN',
@@ -123,7 +122,7 @@ main_str_format_ce=main_str_format+"CE "
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 #%%
 # Client login credentials
-
+'''
 cred={
     "APP_NAME":"5P56936208",
     "APP_SOURCE":"2179",
@@ -134,6 +133,7 @@ cred={
     }
 strategy=strategies(user="vinaykumar7295@gmail.com", passw="vinay1@A", dob="19700701",cred=cred)
 '''
+
 cred={
     "APP_NAME":"5P53784053",
     "APP_SOURCE":"8023",
@@ -143,7 +143,21 @@ cred={
     "ENCRYPTION_KEY":"ANb7Y0ouVD5iX0jcPGwPMIEyQnwPjxuI"
     }
 strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob="19950820",cred=cred)
-'''
+
+#%%
+cred={
+    "APP_NAME":"5P55115625",
+    "APP_SOURCE":"8899",
+    "USER_ID":"qZS8Qd5THYc",
+    "PASSWORD":"O4X41D47h1g",
+    "USER_KEY":"BDYHVFfDodmHw3RXeWzuc2acdOwczZ64",
+    "ENCRYPTION_KEY":"ymueoJS7gS0bljQMYBTKStoWquugglDV"
+    }
+#%%
+strategy=strategies(user="vinathi.bujji@gmail.com", passw="vinay1@A", dob="19940830",cred=cred)
+#%%
+Client=FivePaisaClient(email='vinathi.bujji@gmail.com', passwd='vinay1@A', dob='19940830',cred=cred)
+Client.login()
 #%%
 
 # if the 
