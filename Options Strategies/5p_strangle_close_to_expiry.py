@@ -145,6 +145,7 @@ cred={
 strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob="19950820",cred=cred)
 
 #%%
+'''
 cred={
     "APP_NAME":"5P55115625",
     "APP_SOURCE":"8899",
@@ -158,6 +159,7 @@ strategy=strategies(user="vinathi.bujji@gmail.com", passw="vinay1@A", dob="19940
 #%%
 Client=FivePaisaClient(email='vinathi.bujji@gmail.com', passwd='vinay1@A', dob='19940830',cred=cred)
 Client.login()
+'''
 #%%
 
 # if the 
@@ -326,10 +328,11 @@ while True:
     pe_lastrate=b['Data'][1]['LastRate']
 
     now=datetime.now(timezone("Asia/Kolkata"))
+    '''
     if int(now.strftime('%H'))==15 and int(now.strftime('%M'))>=16 and int(now.strftime('%M'))<=20:
         day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2)
         break
-
+    '''
     if x<int(pe_mem) and money_heist==0 and (int(ce_mem)-int(pe_mem))>0:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         positions=strategy.positions()
