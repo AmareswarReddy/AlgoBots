@@ -96,7 +96,7 @@ lots = int(input('enter the amount of lots(Eg: 25) :'))
 day=int(input('enter the no. of days ellapsed since strategy implimentation :'))
 while True:
     now=datetime.now(timezone("Asia/Kolkata"))
-    if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=17:
+    if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=20:
         break
     elif int(now.strftime('%H'))>9:
         break
