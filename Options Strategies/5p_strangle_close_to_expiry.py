@@ -98,7 +98,7 @@ while True:
     now=datetime.now(timezone("Asia/Kolkata"))
     if int(now.strftime('%H'))==9 and int(now.strftime('%M'))>=17:
         break
-    elif int(now.strftime('%H'))>7:
+    elif int(now.strftime('%H'))>9:
         break
 # formatting the input data 
 temp={1:'JAN',
@@ -122,7 +122,7 @@ main_str_format_ce=main_str_format+"CE "
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 #%%
 # Client login credentials
-'''
+
 cred={
     "APP_NAME":"5P56936208",
     "APP_SOURCE":"2179",
@@ -131,8 +131,8 @@ cred={
     "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
     "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
     }
-strategy=strategies(user="vinaykumar7295@gmail.com", passw="vinay1@A", dob="19700701",cred=cred)
-'''
+strategy=strategies(user="vinaykumar7295@gmail.com", passw="godofwar1@A", dob="19700701",cred=cred)
+#%%
 
 cred={
     "APP_NAME":"5P53784053",
@@ -154,9 +154,7 @@ cred={
     "USER_KEY":"BDYHVFfDodmHw3RXeWzuc2acdOwczZ64",
     "ENCRYPTION_KEY":"ymueoJS7gS0bljQMYBTKStoWquugglDV"
     }
-#%%
 strategy=strategies(user="vinathi.bujji@gmail.com", passw="vinay1@A", dob="19940830",cred=cred)
-#%%
 Client=FivePaisaClient(email='vinathi.bujji@gmail.com', passwd='vinay1@A', dob='19940830',cred=cred)
 Client.login()
 '''
@@ -292,9 +290,9 @@ def day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2):
             live_CE_lastrate = live_CE_lastrate+[live_CE['Data'][j]['LastRate']]
         live_PE_lastrate=[np.inf if x==0 else x for x in live_PE_lastrate]
         live_CE_lastrate=[np.inf if x==0 else x for x in live_CE_lastrate]
-        CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-115))
+        CE_index_strikeprice=np.argmin(np.abs(np.array(live_CE_lastrate)-110))
         CE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_CE_lastrate)-10))
-        PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-115))
+        PE_index_strikeprice=np.argmin(np.abs(np.array(live_PE_lastrate)-110))
         PE_hedge_index_strikeprice = np.argmin(np.abs(np.array(live_PE_lastrate)-10))
         CE_upper=req_list_CE_strikeprice[CE_index_strikeprice]
         CE_hedge=req_list_CE_strikeprice[CE_hedge_index_strikeprice]
