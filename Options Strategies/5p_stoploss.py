@@ -34,16 +34,19 @@ main_str_ce = main_str+"CE "
 main_str_format_pe=main_str_format+"PE "
 main_str_format_ce=main_str_format+"CE "
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
-
+#%%
 cred={
-    "APP_NAME":"5P56936208",
-    "APP_SOURCE":"2179",
-    "USER_ID":"w6MJ1dw5Yd0",
-    "PASSWORD":"V7JkGTUudjt",
-    "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
-    "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
+    "APP_NAME":"5P55115625",
+    "APP_SOURCE":'8899',
+    "USER_ID":"qZS8Qd5THYc",
+    "PASSWORD":"O4X41D47h1g",
+    "USER_KEY":"BDYHVFfDodmHw3RXeWzuc2acdOwczZ64",
+    "ENCRYPTION_KEY":"jhxJH0k6BIUL6VnXYPIAcqTZLqYWhkLc"
     }
 strategy=strategies(user="vinathi.bujji@gmail.com", passw="alliswell1@A", dob="19940830",cred=cred)
+Client=FivePaisaClient(email='vinathi.bujji@gmail.com', passwd='alliswell1@A', dob='19940830',cred=cred)
+Client.login()
+#%%
 '''
 cred={
     "APP_NAME":"5P53784053",
@@ -55,6 +58,7 @@ cred={
     }
 strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob="19950820",cred=cred)
 '''
+#%%
 while True:
     req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     a=strategy.fetch_market_feed(req_list_)
@@ -79,7 +83,7 @@ while True:
     req_list2=[req_list_CE,req_list_PE]
     req_list_PE_strikeprice=round(x/100)*100
     req_list_CE_strikeprice=round(x/100)*100
-    strategy.short_strangle("banknifty",[str(req_list_CE_strikeprice),str(req_list_PE_strikeprice)],lots,expiry,'D')
+    strategy.short_strangle("banknifty",[str(req_list_CE_strikeprice),str(req_list_PE_strikeprice)],lots,expiry,'D',tag='alliswell')
     b=strategy.fetch_market_feed(req_list2)
     ce_lastrate=b['Data'][0]['LastRate']
     pe_lastrate=b['Data'][1]['LastRate']
@@ -99,11 +103,11 @@ while True:
         if ce_lastrate>Stop_loss1 and control1==0:
             control1=1
             print('square off call option',ce_lastrate)
-            strategy.square_off_ce('banknifty',[str(req_list_CE_strikeprice)],str(lots),expiry,'D')
+            strategy.square_off_ce('banknifty',[str(req_list_CE_strikeprice)],str(lots),expiry,'D',tag='noneiswell')
         if ce_lastrate<=ce_temp/2 and control1==0:
             control1=1
             print('square off call option',ce_lastrate)
-            strategy.square_off_ce('banknifty',[str(req_list_CE_strikeprice)],str(lots),expiry,'D')
+            strategy.square_off_ce('banknifty',[str(req_list_CE_strikeprice)],str(lots),expiry,'D',tag='nothingiswell')
 
         if pe_lastrate<pe_lastrate_old and control2==0:
             Stop_loss2=pe_lastrate*1.2
@@ -111,11 +115,11 @@ while True:
         if pe_lastrate>Stop_loss2 and control2==0:
             control2=1
             print('square off put option',pe_lastrate)
-            strategy.square_off_pe('banknifty',[str(req_list_PE_strikeprice)],str(lots),expiry,'D')
+            strategy.square_off_pe('banknifty',[str(req_list_PE_strikeprice)],str(lots),expiry,'D',tag='eyd')
         if pe_lastrate<=pe_temp/2 and control2==0:
             control2=1
             print('square off put option',pe_lastrate)
-            strategy.square_off_pe('banknifty',[str(req_list_PE_strikeprice)],str(lots),expiry,'D')
+            strategy.square_off_pe('banknifty',[str(req_list_PE_strikeprice)],str(lots),expiry,'D',tag='eter')
 
         if control1==1 and control2==1:
             break
