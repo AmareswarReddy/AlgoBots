@@ -31,8 +31,8 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
         req_list2=[req_list_CE,req_list_PE]
         req_list_PE_strikeprice=round(x/100)*100
         req_list_CE_strikeprice=round(x/100)*100
-        strategy.adjustment_ce('banknifty',[str(ce_memory)],[str(req_list_CE_strikeprice)],str(lots),expiry,'D',tag='xdrtyujbvc')
-        strategy.adjustment_pe('banknifty',[str(pe_memory)],[str(req_list_PE_strikeprice)],str(lots),expiry,'D',tag='qsdfvbnjkop')
+        strategy.adjustment_ce('banknifty',[str(ce_memory)],[str(req_list_CE_strikeprice)],str(lots),expiry,'D')
+        strategy.adjustment_pe('banknifty',[str(pe_memory)],[str(req_list_PE_strikeprice)],str(lots),expiry,'D')
         ce_mem=str(req_list_CE_strikeprice)
         pe_mem=str(req_list_PE_strikeprice)
         b=strategy.fetch_market_feed(req_list2)
@@ -79,14 +79,14 @@ def new_short_straddle(main_str_format_pe,main_str_format_ce,main_str_pe,main_st
                     if ce_lastrate>Stop_loss1 and control1==0:
                         control1=1
                         print('square off call option')
-                        strategy.square_off_ce('banknifty',[str(req_list_CE_strikeprice)],str(lots),expiry,'D',tag='wert')
+                        strategy.square_off_ce('banknifty',[str(req_list_CE_strikeprice)],str(lots),expiry,'D')
                     if pe_lastrate<pe_lastrate_old and control2==0:
                         Stop_loss2=pe_lastrate*1.2
                         pe_lastrate_old=pe_lastrate
                     if pe_lastrate>Stop_loss2 and control2==0:
                         control2=1
                         print('square off put option')
-                        strategy.square_off_pe('banknifty',[str(req_list_PE_strikeprice)],str(lots),expiry,'D',tag='trew')
+                        strategy.square_off_pe('banknifty',[str(req_list_PE_strikeprice)],str(lots),expiry,'D')
 
 #inputs to the code
 expiry = str(input('enter the current expiry(Eg: "20210916" ) : '))
@@ -124,7 +124,7 @@ main_str_format_ce=main_str_format+"CE "
 expiry_format= expiry[:4]+'-'+expiry[4:6]+'-'+expiry[6:]
 #%%
 # Client login credentials
-'''
+
 cred={
     "APP_NAME":"5P56936208",
     "APP_SOURCE":"2179",
@@ -135,7 +135,7 @@ cred={
     }
 strategy=strategies(user="vinaykumar7295@gmail.com", passw="godofwar1@A", dob="19700701",cred=cred)
 #%%
-
+'''
 cred={
     "APP_NAME":"5P53784053",
     "APP_SOURCE":"8023",
@@ -145,7 +145,7 @@ cred={
     "ENCRYPTION_KEY":"ANb7Y0ouVD5iX0jcPGwPMIEyQnwPjxuI"
     }
 strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob="19950820",cred=cred)
-'''
+
 #%%
 
 cred={
@@ -157,21 +157,18 @@ cred={
     "ENCRYPTION_KEY":"ymueoJS7gS0bljQMYBTKStoWquugglDV"
     }
 strategy=strategies(user="vinathi.bujji@gmail.com", passw="alliswell1@A", dob="19940830",cred=cred)
-Client=FivePaisaClient(email='vinathi.bujji@gmail.com', passwd='alliswell1@A', dob='19940830',cred=cred)
+Client=FivePaisaClient(email='vinathi.bujji@gmail.com', passwd='alliswell@A', dob='19940830',cred=cred)
 Client.login()
-
+'''
 #%%
 
 # if the 
 if day!=0:
-    pos=strategy.positions()
-    for i in range(0, len(pos)):
-        if pos[i]['ScripName'][:25] == main_str_format_pe and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0 :
-            Current_PE_strikeprice=pos[i]['ScripName'][25:30]
-            pe_mem=Current_PE_strikeprice
-        elif pos[i]['ScripName'][:25] == main_str_format_ce and  pos[i]['SellQty']-pos[i]['BuyQty']-pos[i]['NetQty']>0:
-            Current_CE_strikeprice=pos[i]['ScripName'][25:30]
-            ce_mem=Current_CE_strikeprice
+
+    Current_PE_strikeprice=input('enter "PE" strikeprice')
+    pe_mem=Current_PE_strikeprice
+    Current_CE_strikeprice=input('enter "CE" strikeprice')
+    ce_mem=Current_CE_strikeprice
 
 req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
 a=strategy.fetch_market_feed(req_list_)
@@ -205,7 +202,7 @@ CE_hedge=req_list_CE_strikeprice[CE_hedge_index_strikeprice]
 PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
 PE_hedge=req_list_PE_strikeprice[PE_hedge_index_strikeprice]
 if day==0:
-    strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D',tag='megatron')
+    strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
     sleep(3)
     pe_mem=PE_lower
     ce_mem=CE_upper
@@ -263,7 +260,7 @@ def day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2):
             break
     sleep(33)
     if expiry2==0:
-        strategy.short_strangle("banknifty",[str(pe_mem),str(ce_mem)],lots,expiry,'D',tag='hdh')
+        strategy.short_strangle("banknifty",[str(pe_mem),str(ce_mem)],lots,expiry,'D')
     else :
         expiry=expiry2
         main_str="BANKNIFTY "+expiry[-2:]+" "+temp[int(expiry[4:6])]+" "+expiry[:4]+" "
@@ -300,7 +297,7 @@ def day_end_trades(ce_mem,pe_mem,lots,expiry,expiry2):
         CE_hedge=req_list_CE_strikeprice[CE_hedge_index_strikeprice]
         PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
         PE_hedge=req_list_PE_strikeprice[PE_hedge_index_strikeprice]
-        strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D',tag='hs')
+        strategy.iron_condor("banknifty",[str(CE_hedge),str(PE_hedge)],[str(PE_lower),str(CE_upper)],str(lots),expiry,'D')
 
 
 while True:
@@ -342,7 +339,7 @@ while True:
         log_response('ce_lastrate: '+str(ce_lastrate))
         log_response('Current PE Strikeprice: '+str(pe_mem))
         log_response('pe_lastrate: '+str(pe_lastrate))
-        strategy.adjustment_ce('banknifty',[str(ce_mem)],[str(pe_mem)],str(lots),expiry,'D',tag='tdueq')
+        strategy.adjustment_ce('banknifty',[str(ce_mem)],[str(pe_mem)],str(lots),expiry,'D')
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response('re entry(Sold) ce at strikeprice: '+str(pe_mem))
         ce_mem=str(pe_mem)
@@ -357,7 +354,7 @@ while True:
         log_response('ce_lastrate: '+str(ce_lastrate))
         log_response('Current PE Strikeprice: '+str(pe_mem))
         log_response('pe_lastrate: '+str(pe_lastrate))
-        strategy.adjustment_pe('banknifty',[str(pe_mem)],[str(ce_mem)],str(lots),expiry,'D',tag='red')
+        strategy.adjustment_pe('banknifty',[str(pe_mem)],[str(ce_mem)],str(lots),expiry,'D')
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response('re entry(Sold) pe at strikeprice: '+str(ce_mem))
         pe_mem=str(ce_mem)
@@ -392,7 +389,7 @@ while True:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response(ind_time)
         log_response('exit(bought) pe at srikeprice:  '+str(PE_req_old))
-        strategy.adjustment_pe('banknifty',[str(pe_mem)],[str(req_list_PE_strikeprice[PE_index_strikeprice])],str(lots),expiry,'D',tag='dhhvcgh')
+        strategy.adjustment_pe('banknifty',[str(pe_mem)],[str(req_list_PE_strikeprice[PE_index_strikeprice])],str(lots),expiry,'D')
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response(ind_time)
         log_response('re entry(Sold) pe at strikeprice: '+str(req_list_PE_strikeprice[PE_index_strikeprice]))
@@ -429,7 +426,7 @@ while True:
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response(ind_time)
         log_response('exit(bought) ce at srikeprice:  '+str(CE_req_old))
-        strategy.adjustment_ce('banknifty',[str(ce_mem)],[str(req_list_CE_strikeprice[CE_index_strikeprice])],str(lots),expiry,'D',tag='qwerty')
+        strategy.adjustment_ce('banknifty',[str(ce_mem)],[str(req_list_CE_strikeprice[CE_index_strikeprice])],str(lots),expiry,'D')
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
         log_response(ind_time)
         log_response('re entry(Sold) ce at strikeprice: '+str(req_list_CE_strikeprice[CE_index_strikeprice]))
