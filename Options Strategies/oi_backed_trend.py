@@ -113,7 +113,7 @@ def projected():
             end_ce=end_ce+df['CE'].iloc[k]['openInterest']*max((i-ss[k]),0)
         data=data+[init_ce-end_ce-init_pe+end_pe]
     index=np.argmin(np.abs(data))
-    return   np.array(df['strikePrice'])[0]+10*index
+    return   np.array(df['strikePrice'])[0]+10*(index+1)
         #print(init_ce-end_ce-init_pe+end_pe)
 
 
