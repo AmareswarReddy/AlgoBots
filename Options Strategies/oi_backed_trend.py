@@ -11,6 +11,7 @@ from datetime import date
 import requests
 from pytz import timezone 
 from cred import *
+expiry=input('enter the expiry Eg:"07-Apr-2022"')
 cred={
     "APP_NAME":"5P55115625",
     "APP_SOURCE":'8899',
@@ -21,31 +22,7 @@ cred={
     }
 strategy=strategies(user="vinathi.bujji@gmail.com", passw="alliswell1@A", dob="19940830",cred=cred)
 
-
-
-headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; '
-            'x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
-
-
-main_url = "https://www.nseindia.com/"
-response = requests.get(main_url, headers=headers)
-'''print(response.status_code)'''
-cookies = response.cookies
-
-url = "https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY"
-bank_nifty_oi_data = requests.get(url, headers=headers, cookies=cookies)
-'''print(bank_nifty_oi_data.status_code)'''
-'''print("BN OI data", bank_nifty_oi_data.text)'''
-
-url = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
-nifty_oi_data = requests.get(url, headers=headers, cookies=cookies)
-'''print(nifty_oi_data.status_code)'''
-'''print("Nifty OI data", nifty_oi_data.text)'''
-
-a=json.loads(bank_nifty_oi_data.text)
-k=pd.DataFrame(a['records']['data'])
-df=k[k.expiryDate=='07-Apr-2022']
-df.drop(['expiryDate'],axis=1)
+#%%
 def pe_oi(strikeprice):
     return df[df['strikePrice']==strikeprice]['PE'].iloc[0]['openInterest']
 def ce_oi(strikeprice):
@@ -118,9 +95,49 @@ def complex_trend():
             return "A strong move on either side is a possibility"
         if pe_net_change>0 and ce_net_change>0:
             return "stable market begins"    
-# %%
-print(simple_trend())
-print(complex_trend())
+def projected():
+    i=np.array(df['strikePrice'])[0]
+    end=np.array(df['strikePrice'])[-1]
+    ss=np.array(df['strikePrice'])
+    data=[]
+    while i<end:
+        i=i+10
+        init_ce=0
+        init_pe=0
+        end_pe=0
+        end_ce=0
+        for k in range(0,len(np.array(df['strikePrice']))):
+            init_pe=init_pe+df['PE'].iloc[k]['lastPrice']*df['PE'].iloc[k]['openInterest']
+            init_ce=init_ce+df['CE'].iloc[k]['lastPrice']*df['CE'].iloc[k]['openInterest']
+            end_pe=end_pe+df['PE'].iloc[k]['openInterest']*max((ss[k]-i),0)
+            end_ce=end_ce+df['CE'].iloc[k]['openInterest']*max((i-ss[k]),0)
+        data=data+[init_ce-end_ce-init_pe+end_pe]
+    index=np.argmin(np.abs(data))
+    return   np.array(df['strikePrice'])[0]+10*index
+        #print(init_ce-end_ce-init_pe+end_pe)
 
 
+
+while True:
+    headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; '
+                'x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
+    main_url = "https://www.nseindia.com/"
+    response = requests.get(main_url, headers=headers)
+    '''print(response.status_code)'''
+    cookies = response.cookies
+    url = "https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY"
+    bank_nifty_oi_data = requests.get(url, headers=headers, cookies=cookies)
+    '''print(bank_nifty_oi_data.status_code)'''
+    '''print("BN OI data", bank_nifty_oi_data.text)'''
+    url = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
+    nifty_oi_data = requests.get(url, headers=headers, cookies=cookies)
+    '''print(nifty_oi_data.status_code)'''
+    '''print("Nifty OI data", nifty_oi_data.text)'''
+    a=json.loads(bank_nifty_oi_data.text)
+    k=pd.DataFrame(a['records']['data'])
+    df=k[k.expiryDate==expiry]
+    df.drop(['expiryDate'],axis=1)
+    print(simple_trend())
+    print(complex_trend())
+    print(projected())
 # %%

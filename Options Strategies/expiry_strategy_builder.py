@@ -26,7 +26,7 @@ def readJson(symbol, fromDate, toDate,expiry):
     return data
 symbol = 'BANKNIFTY'
 fromDate = '2021-03-18'
-fromTime = '09:20:00'
+fromTime = '09:30:00'
 toDate = '2021-03-25'
 toTime='15:35:00'
 expiry = '25MAR2021'
@@ -68,9 +68,6 @@ CE_upper=req_list_CE_strikeprice[CE_index_strikeprice]
 PE_lower=req_list_PE_strikeprice[PE_index_strikeprice]
 
 #strategy implimentation
-
-
-
 profit=[0]
 booked_profit=0
 Total_value_old=float('inf')

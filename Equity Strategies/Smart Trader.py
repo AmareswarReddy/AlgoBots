@@ -12,7 +12,7 @@ password = 'amar@0987'
 #Subject: Hi there
 
 #Add Emails to this List
-receiver_email_list= ["amareshnlr@gmail.com", "p.amareswar20@dmsiitd.org", "vinaykumar7295@gmail.com"]
+receiver_email_list= ["amareshnlr@gmail.com", "p.amareswar20@dmsiitd.org", "partyofwizard@gmail.com"]
 #This message is sent from Python."""
 
 def sendEmail(message):

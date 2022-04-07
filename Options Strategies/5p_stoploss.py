@@ -60,6 +60,10 @@ strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob=
 '''
 #%%
 while True:
+    while True:
+        now=datetime.now(timezone("Asia/Kolkata"))
+        if int(now.strftime('%H'))==9 and int(now.strftime('%M'))==30:
+            break
     req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     a=strategy.fetch_market_feed(req_list_)
     x=a['Data'][0]['LastRate']
@@ -109,7 +113,7 @@ while True:
             print('square off call option',ce_lastrate)
             strategy.square_off_ce('banknifty',[str(req_list_CE_strikeprice)],str(lots),expiry,'D',tag='nothingiswell')
 
-        if pe_lastrate<pe_lastrate_old and control2==0:
+        if pe_lastrate<pe_lastrate_old and control2 == 0:
             Stop_loss2=pe_lastrate*1.2
             pe_lastrate_old=pe_lastrate
         if pe_lastrate>Stop_loss2 and control2==0:
@@ -121,7 +125,7 @@ while True:
             print('square off put option',pe_lastrate)
             strategy.square_off_pe('banknifty',[str(req_list_PE_strikeprice)],str(lots),expiry,'D',tag='eter')
 
-        if control1==1 and control2==1:
+        if control1==1 and control2 ==1:
             break
 
 # %%

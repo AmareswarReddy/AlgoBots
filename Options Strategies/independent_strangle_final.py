@@ -145,7 +145,7 @@ cred={
     "ENCRYPTION_KEY":"ANb7Y0ouVD5iX0jcPGwPMIEyQnwPjxuI"
     }
 strategy=strategies(user="chandinimadduru123@gmail.com", passw="amar@0987", dob="19950820",cred=cred)
-
+'''
 #%%
 
 cred={
@@ -154,12 +154,12 @@ cred={
     "USER_ID":"qZS8Qd5THYc",
     "PASSWORD":"O4X41D47h1g",
     "USER_KEY":"BDYHVFfDodmHw3RXeWzuc2acdOwczZ64",
-    "ENCRYPTION_KEY":"ymueoJS7gS0bljQMYBTKStoWquugglDV"
+    "ENCRYPTION_KEY":"jhxJH0k6BIUL6VnXYPIAcqTZLqYWhkLc"
     }
 strategy=strategies(user="vinathi.bujji@gmail.com", passw="alliswell1@A", dob="19940830",cred=cred)
-Client=FivePaisaClient(email='vinathi.bujji@gmail.com', passwd='alliswell@A', dob='19940830',cred=cred)
+Client=FivePaisaClient(email='vinathi.bujji@gmail.com', passwd='alliswell1@A', dob='19940830',cred=cred)
 Client.login()
-'''
+
 #%%
 
 # if the 
