@@ -39,6 +39,45 @@ data=Client.historical_data('N','C',scripcode,'1d','2018-06-01','2022-04-09')
 df=ind(data)
 
 
+#%%
+def avg_V(data,a):
+    data['avg_V'] = 0
+    vol = data['Volume'].copy()
+    avg_Volume = data['avg_V'].copy()
+    avg_Volume.iloc[a-1] = vol.iloc[0:a].sum()/a
+    for i in range(a,avg_Volume.size):
+        avg_Volume.iloc[i]=(vol.iloc[i]-avg_Volume.iloc[i-1])*(2/(a+1))+avg_Volume.iloc[i-1]
+    del data['avg_V']
+    return avg_Volume         
+#%%
+df['avg_Vol']=avg_V(df,14)
+#%%
+def is_doji(df,i):
+    a=abs(df.iloc[i]['Open']-df.iloc[i]['Close'])
+    b=df.iloc[i]['Close']-df.iloc[i]['Low']
+    c=df.iloc[i]['Volume']/df.iloc[i]['avg_Vol']
+    rsi=df.iloc[i]['MFI']
+    if a/b <0.5 and c>2:
+        return 'yes'
+
 # %%
-for i in range(0,len(df['Open'])):
-    
+entries=[]
+control=0
+for i in range(20,len(df['Open'])):
+    if is_doji(df,i)=='yes' and control==0:
+        entry=df.iloc[i]['Close']
+        control=1
+        print(i)
+        entries=entries+[i]
+    if control==1 and df.iloc[i]['RSI']>80:
+        exit=df.iloc[i]['Close']
+        print(i)
+        control=0
+x=np.zeros(len(df['Open']))
+for i in entries:
+    x[i]=1000
+plt.plot(np.linspace(1,len(x),len(x)),np.array(df['Close']))
+plt.scatter(np.linspace(1,len(x),len(x)),x)
+plt.show()
+
+# %%
