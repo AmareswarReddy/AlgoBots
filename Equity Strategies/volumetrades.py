@@ -15,8 +15,7 @@ scrip_codes = script[(script['Exch']=='N') & (script['ExchType']=='C') & (script
 scripcode_to_Symbol = {}
 for index, row in scrip_codes.iterrows():
     scripcode_to_Symbol[row['Scripcode']] = row['Name']
-    
- #Get only NIFTY200  stocks
+    #Get only NIFTY200  stocks
 nifty200 = pd.read_csv("ind_nifty200list (2).csv")
 top200 = scrip_codes[scrip_codes['Name'].isin(nifty200['Symbol'])]
 #%%
@@ -26,7 +25,7 @@ cred={
     "USER_ID":"w6MJ1dw5Yd0",
     "PASSWORD":"V7JkGTUudjt",
     "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
-    "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
+    "ENCRYPTION_KEY":"HEgo6erh7qmqnDjRXIbaRTSNyfI6eofO"
     }
 Client = FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwarvinay1@A',dob='19700701', cred=cred)
 Client.login()

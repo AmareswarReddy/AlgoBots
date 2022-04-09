@@ -84,8 +84,10 @@ def complex_trend():
             return "strong downtrend about to start in a while"
         if pe_net_change<0 and ce_net_change<0:
             return "A strong move on either side is a possibility"
-        if pe_net_change>0 and ce_net_change>0:
-            return "stable market begins"
+        if pe_net_change>0 and ce_net_change>0 and pe_net_change>ce_net_change:
+            return "slightly uptrend"
+        if pe_net_change>0 and ce_net_change>0 and pe_net_change<ce_net_change:
+            return "slightly downtrend"
     if x_change<=0 :
         if pe_net_change>0 and ce_net_change<0:
             return "strong uptrend about to start in a while"
@@ -93,8 +95,10 @@ def complex_trend():
             return "downtrend at it's peak"
         if pe_net_change<0 and ce_net_change<0:
             return "A strong move on either side is a possibility"
-        if pe_net_change>0 and ce_net_change>0:
-            return "stable market begins"    
+        if pe_net_change>0 and ce_net_change>0 and pe_net_change>ce_net_change:
+            return "slightly uptrend"    
+        if pe_net_change>0 and ce_net_change>0 and pe_net_change<ce_net_change:
+            return "slightly downtrend"
 def projected():
     i=np.array(df['strikePrice'])[0]
     end=np.array(df['strikePrice'])[-1]
@@ -115,7 +119,6 @@ def projected():
     index=np.argmin(np.abs(data))
     return   np.array(df['strikePrice'])[0]+10*(index+1)
         #print(init_ce-end_ce-init_pe+end_pe)
-
 
 
 while True:
@@ -140,4 +143,3 @@ while True:
     print(simple_trend())
     print(complex_trend())
     print(projected())
-# %%
