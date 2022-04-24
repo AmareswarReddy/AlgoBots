@@ -131,9 +131,11 @@ cred={
     "USER_ID":"w6MJ1dw5Yd0",
     "PASSWORD":"V7JkGTUudjt",
     "USER_KEY":"8Q4SSCEo0bOgroVMFcNB0nTTB6CGPQuE",
-    "ENCRYPTION_KEY":"zeoxSiZ1pbQsOJ2vaMlOllCeJwNzRQeFlcjc0WGYyl5nLzoCRtWZI5Z2xwChp6Ip"
+    "ENCRYPTION_KEY":"HEgo6erh7qmqnDjRXIbaRTSNyfI6eofO"
     }
 strategy=strategies(user="vinaykumar7295@gmail.com", passw="godofwar1@A", dob="19700701",cred=cred)
+Client=FivePaisaClient(email='vinaykumar7295@gmail.com', passwd='godofwar1@A', dob='19700701',cred=cred)
+Client.login()
 #%%
 '''
 cred={
@@ -304,8 +306,8 @@ while True:
     req=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     a=strategy.fetch_market_feed(req)
     x=a['Data'][0]['LastRate']     #int
-    if check(main_str_format_pe,main_str_format_ce) =='q':
-        quit()
+    '''if check(main_str_format_pe,main_str_format_ce) =='q':'''
+    '''    quit()'''
     CE_req={'Exch': 'N',
                     'ExchType': 'D',
                     'Symbol': main_str_ce+str(ce_mem)+'.00',

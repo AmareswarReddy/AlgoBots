@@ -20,7 +20,7 @@ cred={
     "USER_KEY":"BDYHVFfDodmHw3RXeWzuc2acdOwczZ64",
     "ENCRYPTION_KEY":"jhxJH0k6BIUL6VnXYPIAcqTZLqYWhkLc"
     }
-strategy=strategies(user="vinathi.bujji@gmail.com", passw="alliswell1@A", dob="19940830",cred=cred)
+strategy=strategies(user="vinathi.bujji@gmail.com", passw="kittu1@A", dob="19940830",cred=cred)
 
 #%%
 def pe_oi(strikeprice):
@@ -143,3 +143,5 @@ while True:
     print(simple_trend())
     print(complex_trend())
     print(projected())
+
+# %%
