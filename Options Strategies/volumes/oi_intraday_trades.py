@@ -226,7 +226,7 @@ while True:
         total_oi_towards_PE=0
         for element in list_of_strikes:
             total_oi_towards_CE = total_oi_towards_CE+int(c_data[c_data['StrikeRate']==element]['OpenInterest'])
-        required_total_oi_towards_PE=total_oi_towards_CE*2
+        required_total_oi_towards_PE=total_oi_towards_CE*2.5
         vinay=0
         while True:
             total_oi_towards_PE = total_oi_towards_PE+int(p_data[p_data['StrikeRate']==at_strike+vinay]['OpenInterest'])
@@ -277,7 +277,7 @@ while True:
         total_oi_towards_PE=0
         for element in list_of_strikes:
             total_oi_towards_PE = total_oi_towards_PE+int(p_data[p_data['StrikeRate']==element]['OpenInterest'])
-        required_total_oi_towards_CE=total_oi_towards_PE*2
+        required_total_oi_towards_CE=total_oi_towards_PE*2.5
         vinay=0 
         while True:
             total_oi_towards_CE = total_oi_towards_CE+int(c_data[c_data['StrikeRate']==at_strike+vinay]['OpenInterest'])
@@ -325,15 +325,15 @@ sleep(69)
 if control==1:
     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="ta")
     status = prime_client['login'].place_order(test_order)
-if put_trade_taken==1:
-    test_order_put = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
-    status_put = prime_client['login'].place_order(test_order_put)
+    if put_trade_taken==1:
+        test_order_put = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+        status_put = prime_client['login'].place_order(test_order_put)
 elif control==2:
     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="ta1")
     status = prime_client['login'].place_order(test_order)
-if call_trade_taken==1:
-    test_order_call = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
-    status_call = prime_client['login'].place_order(test_order_call)
+    if call_trade_taken==1:
+        test_order_call = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+        status_call = prime_client['login'].place_order(test_order_call)
 
 sleep(60*26)
 proj=projected()
