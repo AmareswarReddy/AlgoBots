@@ -1,0 +1,4 @@
+--Command  to copy files from AWS server to local machine
+--File name is appened to the end of server name
+scp  -i "SmartAIKey.pem" ubuntu@ec2-3-109-1-60.ap-south-1.compute.amazonaws.com:/home/ubuntu/oi_indicator.pkl  ./
+
