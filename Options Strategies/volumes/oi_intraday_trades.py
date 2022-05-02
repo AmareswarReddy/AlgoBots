@@ -14,7 +14,7 @@ from pytz import timezone
 from cred import *
 #Eg sample inputs: orders_track={} ,scrip_name='36500_CE_B',lots=3,price=234
 def orders(orders_track,scrip_name,lots,price):
-    a=orders_track
+    a=orders_track.copy()
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     keys=list(orders_track.keys())
     if scrip_name in keys:
@@ -33,9 +33,7 @@ def net_profit(orders_track):
         temp_price=0
         for k in range(0,len(orders_track[i])):
             temp_price=temp_price+orders_track[i][k]['price']*orders_track[i][k]['lots']
-        if temp[2]=='B':
-            temp_price=-temp_price
-        net=net+temp_price
+        net=net+temp_price*(-1*(temp[2]=='B')+(temp[2]=='S'))
     return net
 
 def client_login(client,lots):
@@ -79,7 +77,7 @@ lots=int(input('lots (Eg:3):'))
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    
+
 prime_client=client_login(client=client_name,lots=lots)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY")
 current_expiry_time_stamp=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -367,7 +365,7 @@ while True:
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     if int(ind_time[11:13])==15:
         break
-    live_orders_track=orders_track
+    live_orders_track=orders_track.copy()
     for amar in list(orders_track.keys()):
         temp_scrip=amar.split('_')
         lot_size=0
@@ -375,9 +373,9 @@ while True:
             lot_size=lot_size+orders_track[amar][k]['lots']
         orders_track[amar]
         if temp_scrip[2]=='B':
-            live_orders_track=orders(orders_track=orders_track,scrip_name=amar[:-1]+'S',lots=lot_size,price=p_lastrate*(temp_scrip[1]=='PE')+c_lastrate*(temp_scrip[1]=='CE'))
+            live_orders_track=orders(orders_track=live_orders_track,scrip_name=amar[:-1]+'S',lots=lot_size,price=p_lastrate*(temp_scrip[1]=='PE')+c_lastrate*(temp_scrip[1]=='CE'))
         else :
-            live_orders_track=orders(orders_track=orders_track,scrip_name=amar[:-1]+'B',lots=lot_size,price=p_lastrate*(temp_scrip[1]=='PE')+c_lastrate*(temp_scrip[1]=='CE'))
+            live_orders_track=orders(orders_track=live_orders_track,scrip_name=amar[:-1]+'B',lots=lot_size,price=p_lastrate*(temp_scrip[1]=='PE')+c_lastrate*(temp_scrip[1]=='CE'))
     if net_profit(orders_track=live_orders_track)>100*prime_client['lots']:
         break
 
