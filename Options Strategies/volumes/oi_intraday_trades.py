@@ -18,7 +18,7 @@ def orders(orders_track,scrip_name,lots,price):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     keys=list(orders_track.keys())
     if scrip_name in keys:
-        a[scrip_name]=orders_track[scrip_name]+[{'timestamp':ind_time,'lots':lots,'price':price}]
+        a[scrip_name]=a[scrip_name]+[{'timestamp':ind_time,'lots':lots,'price':price}]
     else:
         a[scrip_name]=[{'timestamp':ind_time,'lots':lots,'price':price}]
     return a
@@ -217,11 +217,17 @@ trend_indicator={
             'spotprice':[]
             }
 control=0
+tim=0
 orders_track={}
 while True:
-    expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY")
-    current_expiry_time_stamp=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
-    option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp)['Options'])
+    while True:
+        try :
+            expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY")
+            current_expiry_time_stamp=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
+            option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp)['Options'])
+            break
+        except Exception :
+            pass
     req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]      
     a=prime_client['login'].fetch_market_feed(req_list_)
     x=a['Data'][0]['LastRate']
@@ -240,7 +246,7 @@ while True:
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
     #strategy
-    if proj-x>0 and control==0:
+    if proj-x>50 and control==0:
         strike = int(np.ceil(proj/100)*100)
         scrip=int(c_data[c_data['StrikeRate']==strike]['ScripCode'])
         c_lastrate=float(c_data[c_data['StrikeRate']==strike]['LastRate'])
@@ -261,12 +267,12 @@ while True:
                 break
         put_scrip=int(p_data[p_data['StrikeRate']==put_strike]['ScripCode'])
         p_lastrate=float(p_data[p_data['StrikeRate']==put_strike]['LastRate'])
-        test_order_put = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order_put = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
         status = prime_client['login'].place_order(test_order)
         status_put = prime_client['login'].place_order(test_order_put)
         if status['Message']=='Success' and status_put['Message']=='Success':
             orders_track=orders(orders_track=orders_track,scrip_name=str(strike)+'_CE_S',lots=prime_client['lots'],price=c_lastrate)
-            orders_track=orders(orders_track=orders_track,scrip_name=str(put_strike)+'_PE_S',lots=prime_client['lots'],price=p_lastrate)
+            orders_track=orders(orders_track=orders_track,scrip_name=str(put_strike)+'_PE_B',lots=prime_client['lots'],price=p_lastrate)
             put_trade_taken=1
             control=1
             proj1=strike
@@ -281,10 +287,10 @@ while True:
         c_lastrate=float(c_data[c_data['StrikeRate']==strike]['LastRate'])
         orders_track=orders(orders_track=orders_track,scrip_name=str(strike)+'_CE_B',lots=prime_client['lots'],price=c_lastrate)
         if put_trade_taken==1:
-            test_order_put = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+            test_order_put = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
             status_put = prime_client['login'].place_order(test_order_put)
             p_lastrate=float(p_data[p_data['StrikeRate']==put_strike]['LastRate'])
-            orders_track=orders(orders_track=orders_track,scrip_name=str(put_strike)+'_PE_B',lots=prime_client['lots'],price=p_lastrate)
+            orders_track=orders(orders_track=orders_track,scrip_name=str(put_strike)+'_PE_S',lots=prime_client['lots'],price=p_lastrate)
             put_trade_taken=0
         control=0
     if control==1 and proj-x<-10:
@@ -294,13 +300,13 @@ while True:
         c_lastrate=float(c_data[c_data['StrikeRate']==strike]['LastRate'])
         orders_track=orders(orders_track=orders_track,scrip_name=str(strike)+'_CE_B',lots=prime_client['lots'],price=c_lastrate)
         if put_trade_taken==1:
-            test_order_put = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+            test_order_put = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
             status_put = prime_client['login'].place_order(test_order_put)
             p_lastrate=float(p_data[p_data['StrikeRate']==put_strike]['LastRate'])
-            orders_track=orders(orders_track=orders_track,scrip_name=str(put_strike)+'_PE_B',lots=prime_client['lots'],price=p_lastrate)
+            orders_track=orders(orders_track=orders_track,scrip_name=str(put_strike)+'_PE_S',lots=prime_client['lots'],price=p_lastrate)
             put_trade_taken=0
         control=0
-    if proj-x<0 and control==0:
+    if proj-x<-50 and control==0:
         strike = int(np.floor(proj/100)*100)
         scrip=int(p_data[p_data['StrikeRate']==strike]['ScripCode'])
         p_lastrate=float(p_data[p_data['StrikeRate']==strike]['LastRate'])
@@ -321,12 +327,12 @@ while True:
                 break
         call_scrip=int(c_data[c_data['StrikeRate']==call_strike]['ScripCode'])
         c_lastrate=float(c_data[c_data['StrikeRate']==call_strike]['LastRate'])
-        test_order_call = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order_call = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
         status = prime_client['login'].place_order(test_order)
         status_call = prime_client['login'].place_order(test_order_call)
         if status['Message']=='Success' and status_call['Message']=='Success':
             orders_track=orders(orders_track=orders_track,scrip_name=str(strike)+'_PE_S',lots=prime_client['lots'],price=p_lastrate)
-            orders_track=orders(orders_track=orders_track,scrip_name=str(call_strike)+'_CE_S',lots=prime_client['lots'],price=c_lastrate)
+            orders_track=orders(orders_track=orders_track,scrip_name=str(call_strike)+'_CE_B',lots=prime_client['lots'],price=c_lastrate)
             call_trade_taken=1
             control=2
             proj2=strike
@@ -341,10 +347,10 @@ while True:
         p_lastrate=float(p_data[p_data['StrikeRate']==strike]['LastRate'])
         orders_track=orders(orders_track=orders_track,scrip_name=str(strike)+'_PE_B',lots=prime_client['lots'],price=p_lastrate)
         if call_trade_taken==1:
-            test_order_call = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+            test_order_call = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
             status_call = prime_client['login'].place_order(test_order_call)
             c_lastrate=float(c_data[c_data['StrikeRate']==call_strike]['LastRate'])
-            orders_track=orders(orders_track=orders_track,scrip_name=str(call_strike)+'_CE_B',lots=prime_client['lots'],price=c_lastrate)
+            orders_track=orders(orders_track=orders_track,scrip_name=str(call_strike)+'_CE_S',lots=prime_client['lots'],price=c_lastrate)
             call_trade_taken=0
         if status['Message']=='Success':
             control=0 
@@ -355,15 +361,15 @@ while True:
         p_lastrate=float(p_data[p_data['StrikeRate']==strike]['LastRate'])
         orders_track=orders(orders_track=orders_track,scrip_name=str(strike)+'_PE_B',lots=prime_client['lots'],price=p_lastrate)
         if call_trade_taken==1:
-            test_order_call = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+            test_order_call = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
             status_call = prime_client['login'].place_order(test_order_call)
             c_lastrate=float(c_data[c_data['StrikeRate']==call_strike]['LastRate'])
-            orders_track=orders(orders_track=orders_track,scrip_name=str(call_strike)+'_CE_B',lots=prime_client['lots'],price=c_lastrate)
+            orders_track=orders(orders_track=orders_track,scrip_name=str(call_strike)+'_CE_S',lots=prime_client['lots'],price=c_lastrate)
             call_trade_taken=0
         if status['Message']=='Success':
             control=0 
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    if int(ind_time[11:13])==15:
+    if int(ind_time[11:13])==15 and int(ind_time[14:16])==25 :
         break
     live_orders_track=orders_track.copy()
     for amar in list(orders_track.keys()):
@@ -373,28 +379,41 @@ while True:
             lot_size=lot_size+orders_track[amar][k]['lots']
         orders_track[amar]
         if temp_scrip[2]=='B':
+            strike = int(temp_scrip[0])
+            c_lastrate=float(c_data[c_data['StrikeRate']==strike]['LastRate'])
+            p_lastrate=float(p_data[p_data['StrikeRate']==strike]['LastRate'])
             live_orders_track=orders(orders_track=live_orders_track,scrip_name=amar[:-1]+'S',lots=lot_size,price=p_lastrate*(temp_scrip[1]=='PE')+c_lastrate*(temp_scrip[1]=='CE'))
         else :
+            strike = int(temp_scrip[0])
+            c_lastrate=float(c_data[c_data['StrikeRate']==strike]['LastRate'])
+            p_lastrate=float(p_data[p_data['StrikeRate']==strike]['LastRate'])
             live_orders_track=orders(orders_track=live_orders_track,scrip_name=amar[:-1]+'B',lots=lot_size,price=p_lastrate*(temp_scrip[1]=='PE')+c_lastrate*(temp_scrip[1]=='CE'))
-    if net_profit(orders_track=live_orders_track)>100*prime_client['lots']:
+    
+    ammu=net_profit(orders_track=live_orders_track)
+    print(ammu)
+    if (tim-ammu)!=0:
+        print(orders_track)
+        print(live_orders_track)
+        tim=ammu
+    if ammu>100*prime_client['lots']:
         break
 
 
-sleep(69)
+sleep(11)
 if control==1:
     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="ta")
     status = prime_client['login'].place_order(test_order)
     if put_trade_taken==1:
-        test_order_put = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order_put = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =put_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
         status_put = prime_client['login'].place_order(test_order_put)
 elif control==2:
     test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="ta1")
     status = prime_client['login'].place_order(test_order)
     if call_trade_taken==1:
-        test_order_call = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order_call = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =call_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
         status_call = prime_client['login'].place_order(test_order_call)
 
-sleep(60*26)
+sleep(5)
 proj=projected()
 req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
 a=prime_client['login'].fetch_market_feed(req_list_)
