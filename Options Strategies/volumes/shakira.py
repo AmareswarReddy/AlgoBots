@@ -51,8 +51,11 @@ def client_login(client,lots):
     client_list[client]['login']=FivePaisaClient(email=user, passwd=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login'].login()
     return client_list[client]
-client_name=input('enter the client name Eg: vinathi,bhaskar ')
-lots=int(input('lots (Eg:3):'))
+#client_name=input('enter the client name Eg: vinathi,bhaskar ')
+import sys
+client_name   = sys.argv[1]
+lots=int(sys.argv[2])
+#lots=int(input('lots (Eg:3):'))
 
 
 def proj_BN(bank_rates,bank_weights):
