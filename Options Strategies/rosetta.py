@@ -50,7 +50,7 @@ def client_login(client):
     client_list[client]['strategy']=strategies(user=user, passw=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login']=FivePaisaClient(email=user, passwd=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login'].login()
-    client_list[client]['lots']=round((prime_client['login'].margin()[0]['AvailableMargin']-100000)/200000)
+    client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-100000)/200000)
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
@@ -151,8 +151,8 @@ orders_track={}
 proj,c_striker,p_striker=rosetta_strikes(option_chain)
 c_data=option_chain[option_chain['CPType']=='CE']
 p_data=option_chain[option_chain['CPType']=='PE']
-c_scrip=int(c_data[c_data['StrikeRate']==c_striker+100]['ScripCode'])
-p_scrip=int(p_data[p_data['StrikeRate']==p_striker-100]['ScripCode'])
+c_scrip=int(c_data[c_data['StrikeRate']==c_striker]['ScripCode'])
+p_scrip=int(p_data[p_data['StrikeRate']==p_striker]['ScripCode'])
 test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
 status = prime_client['login'].place_order(test_order)
 test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
@@ -214,12 +214,14 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         p_data=option_chain[option_chain['CPType']=='PE']
         c_data=option_chain[option_chain['CPType']=='CE']
         p_scrip=int(p_data[p_data['StrikeRate']==p_striker]['ScripCode'])
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=p_lots_track-initial_lots, price=0 ,is_intraday=False,remote_order_id="tag")
+        if p_lots_track-initial_lots>0:
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=p_lots_track-initial_lots, price=0 ,is_intraday=False,remote_order_id="tag")
+            p_lots_track_temp=initial_lots
         prime_client['login'].place_order(test_order)
         c_scrip=int(c_data[c_data['StrikeRate']==c_striker]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=initial_lots-c_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
         status=prime_client['login'].place_order(test_order)
-        p_lots_track_temp=initial_lots
+        
         rosetta_quotient1_temp=0.3
         if status['Message']=='Success':
             c_lots_track_temp=initial_lots
@@ -241,12 +243,13 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         p_data=option_chain[option_chain['CPType']=='PE']
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==c_striker]['ScripCode'])
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=c_lots_track-initial_lots, price=0 ,is_intraday=False,remote_order_id="tag")
+        if c_lots_track-initial_lots>0:
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=c_lots_track-initial_lots, price=0 ,is_intraday=False,remote_order_id="tag")
+            c_lots_track_temp=initial_lots
         prime_client['login'].place_order(test_order)
         p_scrip=int(p_data[p_data['StrikeRate']==p_striker]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=initial_lots-p_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
         status=prime_client['login'].place_order(test_order)
-        c_lots_track_temp=initial_lots
         rosetta_quotient1_temp=-0.3
         if status['Message']=='Success':
             p_lots_track_temp=initial_lots
@@ -266,7 +269,7 @@ while True:
             break
         except Exception :
             pass
-    
+    proj,Cyi,Phf=rosetta_strikes(option_chain)
     project_k=banknifty_lastrate-proj
     print('Niftybank:  ',project_k)
     x=banknifty_lastrate
@@ -282,3 +285,5 @@ while True:
 
     c_striker,p_striker = decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track)
     p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots)
+
+# %%
