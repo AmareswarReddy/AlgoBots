@@ -50,7 +50,7 @@ def client_login(client):
     client_list[client]['strategy']=strategies(user=user, passw=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login']=FivePaisaClient(email=user, passwd=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login'].login()
-    client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-100000)/200000)
+    client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-100000)/180000)
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
@@ -176,8 +176,21 @@ def decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lot
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*c_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
         c_scrip=int(c_data[c_data['StrikeRate']==C]['ScripCode'])
+        sleep(5)
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*c_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
-        prime_client['login'].place_order(test_order)
+        status1=prime_client['login'].place_order(test_order)
+        if status1!='Success':
+            com=c_lots_track
+            shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
+            while shrink<=com :
+                if shrink!=0:
+                    test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*(shrink), price=0 ,is_intraday=False,remote_order_id="tag")
+                    prime_client['login'].place_order(test_order_k1)
+                    com=com-shrink
+                    sleep(2)
+                    shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
+            test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*(com), price=0 ,is_intraday=False,remote_order_id="tag")
+            prime_client['login'].place_order(test_order_k1)
         c_temp=C
     if abs(P-p_striker)>dynamic_crossover:
         p_data=option_chain[option_chain['CPType']=='PE']
@@ -186,7 +199,20 @@ def decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lot
         prime_client['login'].place_order(test_order)
         p_scrip=int(p_data[p_data['StrikeRate']==P]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*p_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
-        prime_client['login'].place_order(test_order)
+        sleep(5)
+        status1=prime_client['login'].place_order(test_order)
+        if status1!='Success':
+            com=p_lots_track
+            shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
+            while shrink<=com :
+                if shrink!=0:
+                    test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*(shrink), price=0 ,is_intraday=False,remote_order_id="tag")
+                    prime_client['login'].place_order(test_order_k1)
+                    com=com-shrink
+                    sleep(2)
+                    shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
+            test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*(com), price=0 ,is_intraday=False,remote_order_id="tag")
+            prime_client['login'].place_order(test_order_k1)
         p_temp=P
     return c_temp,p_temp
 
@@ -230,11 +256,12 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
             com=initial_lots-c_lots_track
             shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
             while shrink<=com:
-                test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*(shrink), price=0 ,is_intraday=False,remote_order_id="tag")
-                prime_client['login'].place_order(test_order_k1)
-                com=com-shrink
-                sleep(5)
-                shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
+                if shrink!=0:
+                    test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*(shrink), price=0 ,is_intraday=False,remote_order_id="tag")
+                    prime_client['login'].place_order(test_order_k1)
+                    com=com-shrink
+                    sleep(5)
+                    shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
             test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*(com), price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order_k1)
     if (proj-x)/dynamic_crossover<rosetta_quotient2 and c_lots_track>5 and p_lots_track>=c_lots_track:  
@@ -272,11 +299,12 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
             com=initial_lots-p_lots_track
             shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
             while shrink<=com:
-                test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*(shrink), price=0 ,is_intraday=False,remote_order_id="tag")
-                prime_client['login'].place_order(test_order_k1)
-                com=com-shrink
-                sleep(5)
-                shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
+                if shrink!=0:
+                    test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*(shrink), price=0 ,is_intraday=False,remote_order_id="tag")
+                    prime_client['login'].place_order(test_order_k1)
+                    com=com-shrink
+                    sleep(5)
+                    shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
             test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*(com), price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order_k1)
     return p_lots_track_temp,c_lots_track_temp,rosetta_quotient1_temp,rosetta_quotient2_temp    
@@ -314,3 +342,5 @@ while True:
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         break
     sleep(5)
+
+# %%
