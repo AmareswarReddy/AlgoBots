@@ -304,7 +304,29 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
             test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*(com), price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order_k1)
     return p_lots_track_temp,c_lots_track_temp,rosetta_quotient1_temp,rosetta_quotient2_temp    
-    
+
+
+def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track):
+    if c_lots_track!=p_lots_track:
+        c_data=option_chain[option_chain['CPType']=='CE']
+        c_scrip=int(c_data[c_data['StrikeRate']==c_striker]['ScripCode'])
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*c_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order)
+        p_data=option_chain[option_chain['CPType']=='PE']
+        p_scrip=int(p_data[p_data['StrikeRate']==p_striker]['ScripCode'])
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*p_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order)
+    if c_lots_track>p_lots_track:
+        c_data=option_chain[option_chain['CPType']=='CE']
+        c_scrip=int(c_data[c_data['StrikeRate']==c_striker+500]['ScripCode'])
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*c_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order)
+    if p_lots_track>c_lots_track:
+        p_data=option_chain[option_chain['CPType']=='PE']
+        p_scrip=int(p_data[p_data['StrikeRate']==p_striker-500]['ScripCode'])
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*p_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order)
+    return 0
 #%%
 while True:
     re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
@@ -335,7 +357,8 @@ while True:
     c_striker,p_striker = decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track)
     p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
+    if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
+        decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track)
         break
     sleep(5)
 
