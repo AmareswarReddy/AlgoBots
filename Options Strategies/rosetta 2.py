@@ -62,7 +62,7 @@ client_name   = 'vinathi'
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-#%%
+
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -157,8 +157,8 @@ test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code 
 status = prime_client['login'].place_order(test_order)
 test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*prime_client['lots'], price=0 ,is_intraday=False,remote_order_id="tag")
 status = prime_client['login'].place_order(test_order)
-rosetta_quotient1=0.3
-rosetta_quotient2=-0.3
+rosetta_quotient1=min(1/np.floor(prime_client['lots']/5),0.4)
+rosetta_quotient2=-min(1/np.floor(prime_client['lots']/5),0.4)
 breaker=0
 c_lots_track=prime_client['lots']
 p_lots_track=prime_client['lots']
@@ -216,6 +216,7 @@ def decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lot
 
 
 def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots):
+    v=min(1/np.floor(prime_client['lots']/5),0.4)
     c_lots_track_temp=c_lots_track
     p_lots_track_temp=p_lots_track
     rosetta_quotient1_temp=rosetta_quotient1
@@ -231,10 +232,10 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25, price=0 ,is_intraday=False,remote_order_id="tag")
         status=prime_client['login'].place_order(test_order)
         p_lots_track_temp=p_lots_track-5
-        rosetta_quotient1_temp=rosetta_quotient1+0.2
+        rosetta_quotient1_temp=rosetta_quotient1+v
         if status['Message']=='Success':
             c_lots_track_temp=c_lots_track+1
-    if (proj-x)/dynamic_crossover>0.2 and p_lots_track>c_lots_track:  
+    if (proj-x)/dynamic_crossover>v/2 and p_lots_track>c_lots_track:  
         p_data=option_chain[option_chain['CPType']=='PE']
         c_data=option_chain[option_chain['CPType']=='CE']
         p_scrip=int(p_data[p_data['StrikeRate']==p_striker]['ScripCode'])
@@ -246,7 +247,7 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*(initial_lots-c_lots_track), price=0 ,is_intraday=False,remote_order_id="tag")
         status=prime_client['login'].place_order(test_order)
         
-        rosetta_quotient1_temp=0.3
+        rosetta_quotient1_temp=v
         if status['Message']=='Success':
             c_lots_track_temp=initial_lots
         elif status['Message']!='Success':
@@ -271,11 +272,11 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25, price=0 ,is_intraday=False,remote_order_id="tag")
         status=prime_client['login'].place_order(test_order)
         c_lots_track_temp=c_lots_track-5
-        rosetta_quotient2_temp=rosetta_quotient2-0.2
+        rosetta_quotient2_temp=rosetta_quotient2-v
         if status['Message']=='Success':
             p_lots_track_temp=p_lots_track+1
             
-    if (proj-x)/dynamic_crossover<-0.2 and p_lots_track<c_lots_track:  
+    if (proj-x)/dynamic_crossover<-v/2 and p_lots_track<c_lots_track:  
         p_data=option_chain[option_chain['CPType']=='PE']
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==c_striker]['ScripCode'])
@@ -288,7 +289,7 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*(initial_lots-p_lots_track), price=0 ,is_intraday=False,remote_order_id="tag")
         
         status=prime_client['login'].place_order(test_order)
-        rosetta_quotient1_temp=-0.3
+        rosetta_quotient2_temp=-v
         if status['Message']=='Success':
             p_lots_track_temp=initial_lots
         elif status['Message']!='Success':

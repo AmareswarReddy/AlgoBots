@@ -53,8 +53,8 @@ def client_login(client,lots):
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
-client_name   = sys.argv[1]
-lots=int(sys.argv[2])
+client_name   = 'vinathi'
+lots=1
 #lots=int(input('lots (Eg:3):'))
 
 
@@ -530,3 +530,5 @@ if proj-x<0 :
 
 indicator_data=pd.DataFrame(trend_indicator)
 indicator_data.to_pickle('./oi_indicator.pkl')
+
+# %%
