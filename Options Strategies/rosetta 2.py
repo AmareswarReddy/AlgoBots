@@ -62,7 +62,7 @@ client_name   = 'vinathi'
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-
+#%%
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -215,14 +215,15 @@ def decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lot
     return c_temp,p_temp
 
 
-def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots):
+def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots,direction_chooser):
     v=min(1/np.floor(prime_client['lots']/5),0.4)
     c_lots_track_temp=c_lots_track
     p_lots_track_temp=p_lots_track
     rosetta_quotient1_temp=rosetta_quotient1
     rosetta_quotient2_temp=rosetta_quotient2
     proj,C,P=rosetta_strikes(option_chain)
-    if (proj-x)/dynamic_crossover>rosetta_quotient1 and p_lots_track>5 and p_lots_track<=c_lots_track:  
+    decider=((proj-x)/dynamic_crossover)*direction_chooser
+    if decider>rosetta_quotient1 and p_lots_track>5 and p_lots_track<=c_lots_track:  
         p_data=option_chain[option_chain['CPType']=='PE']
         c_data=option_chain[option_chain['CPType']=='CE']
         p_scrip=int(p_data[p_data['StrikeRate']==p_striker]['ScripCode'])
@@ -235,7 +236,7 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         rosetta_quotient1_temp=rosetta_quotient1+v
         if status['Message']=='Success':
             c_lots_track_temp=c_lots_track+1
-    if (proj-x)/dynamic_crossover>v/2 and p_lots_track>c_lots_track:  
+    if decider>v/2 and p_lots_track>c_lots_track:  
         p_data=option_chain[option_chain['CPType']=='PE']
         c_data=option_chain[option_chain['CPType']=='CE']
         p_scrip=int(p_data[p_data['StrikeRate']==p_striker]['ScripCode'])
@@ -262,7 +263,7 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
                 shrink=round(prime_client['login'].margin()[0]['AvailableMargin']/180000)
             test_order_k1 = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25*(com), price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order_k1)
-    if (proj-x)/dynamic_crossover<rosetta_quotient2 and c_lots_track>5 and p_lots_track>=c_lots_track:  
+    if decider<rosetta_quotient2 and c_lots_track>5 and p_lots_track>=c_lots_track:  
         p_data=option_chain[option_chain['CPType']=='PE']
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==c_striker]['ScripCode'])
@@ -276,7 +277,7 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         if status['Message']=='Success':
             p_lots_track_temp=p_lots_track+1
             
-    if (proj-x)/dynamic_crossover<-v/2 and p_lots_track<c_lots_track:  
+    if decider<-v/2 and p_lots_track<c_lots_track:  
         p_data=option_chain[option_chain['CPType']=='PE']
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==c_striker]['ScripCode'])
@@ -328,11 +329,21 @@ def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_tra
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*p_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
     return 0
+
+def is_monday():
+    date = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d')
+    day_name= ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
+    day = datetime.strptime(date, '%Y-%m-%d').weekday()
+    if day_name[day]=='Monday' or day_name[day]=='Tuesday':
+        return -1
+    else:
+        return 1
+direction_chooser=is_monday()
 #%%
 while True:
     re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     aa=prime_client['login'].fetch_market_feed(re)
-    banknifty_lastrate=aa['Data'][0]['LastRate']
+    x=aa['Data'][0]['LastRate']
     while True:
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
@@ -342,9 +353,8 @@ while True:
         except Exception :
             pass
     proj,Cyi,Phf=rosetta_strikes(option_chain)
-    project_k=banknifty_lastrate-proj
+    project_k=(x-proj)*direction_chooser
     print('Niftybank:  ',project_k)
-    x=banknifty_lastrate
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
@@ -354,7 +364,6 @@ while True:
     p1=int(p_data[p_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
     p2=int(p_data[p_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
     dynamic_crossover=(c1+c2+p1+p2)/4
-
     c_striker,p_striker = decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track)
     p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
