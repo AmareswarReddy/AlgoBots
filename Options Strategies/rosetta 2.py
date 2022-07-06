@@ -121,7 +121,34 @@ def rosetta_strikes(option_chain):
     b=np.array(option_chain['StrikeRate'])[0]+index1*increment
     c=np.array(option_chain['StrikeRate'])[0]+index2*increment
     return  a,round(b/100)*100,round(c/100)*100
+def is_monday():
+    date = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d')
+    day_name= ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
+    day = datetime.strptime(date, '%Y-%m-%d').weekday()
+    if day_name[day]=='Monday':
+        return -1
+    else:
+        return 1
 
+def past_picture(indicator,project_k,b_lastrate,x):
+    indicator=indicator+[project_k]
+    b_lastrate=b_lastrate+[x]
+    n=len(b_lastrate)
+    div_factor=0
+    local_div_factor=0
+    if n>1:
+        for i in range(0,n):
+            a=(b_lastrate[n-i]-b_lastrate[n-i-1])/b_lastrate[n-i-1]
+            b=(indicator[n-i]-indicator[n-i-1])/indicator[n-i-1]
+            div_factor=div_factor+b/a
+        div_factor=div_factor/n
+    if n>121:
+        for i in range(n-120,n):
+            a=(b_lastrate[n-i]-b_lastrate[n-i-1])/b_lastrate[n-i-1]
+            b=(indicator[n-i]-indicator[n-i-1])/indicator[n-i-1]
+            local_div_factor=div_factor+b/a
+        local_div_factor=local_div_factor/n
+    return indicator,b_lastrate,div_factor,local_div_factor
 
 def strike_list(strike1,strike2):
     k=[]
@@ -137,17 +164,6 @@ def strike_list(strike1,strike2):
             a=a+100
     return k
 
-trend_indicator={
-            'timestamp':[],
-            'simple':[],
-            'complex':[],
-            'projected':[],
-            'spotprice':[]
-            }
-control=0
-tim=0
-orders_track={}
-
 proj,c_striker,p_striker=rosetta_strikes(option_chain)
 c_data=option_chain[option_chain['CPType']=='CE']
 p_data=option_chain[option_chain['CPType']=='PE']
@@ -159,7 +175,7 @@ test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code 
 status = prime_client['login'].place_order(test_order)
 rosetta_quotient1=min(1/np.floor(prime_client['lots']/5),0.4)
 rosetta_quotient2=-min(1/np.floor(prime_client['lots']/5),0.4)
-breaker=0
+direction_chooser=is_monday()
 c_lots_track=prime_client['lots']
 p_lots_track=prime_client['lots']
 initial_lots=prime_client['lots']
@@ -330,16 +346,9 @@ def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_tra
         prime_client['login'].place_order(test_order)
     return 0
 
-def is_monday():
-    date = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d')
-    day_name= ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
-    day = datetime.strptime(date, '%Y-%m-%d').weekday()
-    if day_name[day]=='Monday' or day_name[day]=='Tuesday':
-        return -1
-    else:
-        return 1
-direction_chooser=is_monday()
 #%%
+indicator=[]
+b_lastrate=[]
 while True:
     re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     aa=prime_client['login'].fetch_market_feed(re)
@@ -365,11 +374,14 @@ while True:
     p2=int(p_data[p_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
     dynamic_crossover=(c1+c2+p1+p2)/4
     c_striker,p_striker = decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track)
-    p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots)
+    p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots,direction_chooser)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
         decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track)
         break
-    sleep(5)
+    indicator,b_lastrate,div_factor,local_div_factor=past_picture(indicator,project_k,b_lastrate,x)
+    print('total divergence :',div_factor)
+    print('local divergence :',local_div_factor)
+    sleep(4)
 
 # %%
