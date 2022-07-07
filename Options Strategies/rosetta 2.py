@@ -62,7 +62,7 @@ client_name   = 'vinathi'
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-#%%
+
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -136,17 +136,17 @@ def past_picture(indicator,project_k,b_lastrate,x):
     n=len(b_lastrate)
     div_factor=0
     local_div_factor=0
-    if n>1:
-        for i in range(0,n):
-            a=(b_lastrate[n-i]-b_lastrate[n-i-1])/b_lastrate[n-i-1]
-            b=(indicator[n-i]-indicator[n-i-1])/indicator[n-i-1]
-            div_factor=div_factor+b/a
+    if n>2:
+        for i in range(1,n):
+            a=(b_lastrate[n-1]-b_lastrate[n-i-1])/b_lastrate[n-i-1]
+            b=(indicator[n-1]-indicator[n-i-1])/indicator[n-i-1]
+            div_factor=div_factor+b+a
         div_factor=div_factor/n
     if n>121:
         for i in range(n-120,n):
-            a=(b_lastrate[n-i]-b_lastrate[n-i-1])/b_lastrate[n-i-1]
-            b=(indicator[n-i]-indicator[n-i-1])/indicator[n-i-1]
-            local_div_factor=div_factor+b/a
+            a=(b_lastrate[n-1]-b_lastrate[n-i-1])/b_lastrate[n-i-1]
+            b=(indicator[n-1]-indicator[n-i-1])/indicator[n-i-1]
+            local_div_factor=div_factor+b+a
         local_div_factor=local_div_factor/n
     return indicator,b_lastrate,div_factor,local_div_factor
 
