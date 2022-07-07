@@ -62,7 +62,7 @@ client_name   = 'vinathi'
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-
+#%%
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -130,7 +130,7 @@ def is_monday():
     else:
         return 1
 
-def past_picture(indicator,project_k,b_lastrate,x):
+def past_picture(indicator,project_k,b_lastrate,x,delta):
     indicator=indicator+[project_k]
     b_lastrate=b_lastrate+[x]
     n=len(b_lastrate)
@@ -138,16 +138,16 @@ def past_picture(indicator,project_k,b_lastrate,x):
     local_div_factor=0
     if n>2:
         for i in range(1,n):
-            a=(b_lastrate[n-1]-b_lastrate[n-i-1])/b_lastrate[n-i-1]
-            b=(indicator[n-1]-indicator[n-i-1])/indicator[n-i-1]
-            div_factor=div_factor+b+a
+            a=(b_lastrate[n-1]-b_lastrate[n-i-1])
+            b=(indicator[n-1]-indicator[n-i-1])
+            div_factor=div_factor+b+a*delta
         div_factor=div_factor/n
     if n>121:
         for i in range(n-120,n):
-            a=(b_lastrate[n-1]-b_lastrate[n-i-1])/b_lastrate[n-i-1]
-            b=(indicator[n-1]-indicator[n-i-1])/indicator[n-i-1]
-            local_div_factor=div_factor+b+a
-        local_div_factor=local_div_factor/n
+            a=(b_lastrate[n-1]-b_lastrate[n-i-1])
+            b=(indicator[n-1]-indicator[n-i-1])
+            local_div_factor=div_factor+b+a*delta
+        local_div_factor=local_div_factor/120
     return indicator,b_lastrate,div_factor,local_div_factor
 
 def strike_list(strike1,strike2):
@@ -373,13 +373,14 @@ while True:
     p1=int(p_data[p_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
     p2=int(p_data[p_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
     dynamic_crossover=(c1+c2+p1+p2)/4
+    delta=(c2-c1+p1-p2)/200
     c_striker,p_striker = decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track)
     p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots,direction_chooser)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
         decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track)
         break
-    indicator,b_lastrate,div_factor,local_div_factor=past_picture(indicator,project_k,b_lastrate,x)
+    indicator,b_lastrate,div_factor,local_div_factor=past_picture(indicator,project_k,b_lastrate,x,delta)
     print('total divergence :',div_factor)
     print('local divergence :',local_div_factor)
     sleep(4)
