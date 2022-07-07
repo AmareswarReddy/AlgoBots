@@ -373,7 +373,7 @@ while True:
     p1=int(p_data[p_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
     p2=int(p_data[p_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
     dynamic_crossover=(c1+c2+p1+p2)/4
-    delta=(c2-c1+p1-p2)/200
+    delta=(c1-c2+p2-p1)/200
     c_striker,p_striker = decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track)
     p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots,direction_chooser)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
