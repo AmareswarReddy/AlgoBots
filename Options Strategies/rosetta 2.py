@@ -354,7 +354,6 @@ def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_tra
     return 0
 
 def decoy4(option_chain,exclusive_strike,div_factor,local_div_factor,instant_div_factor,tron,taken_trade):
-
     if instant_div_factor>5 and local_div_factor>0 and div_factor>0 and taken_trade==0:
         exclusive_strike=int(np.round(x/100)*100)
         c_data=option_chain[option_chain['CPType']=='CE']
@@ -424,7 +423,8 @@ while True:
     p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots,direction_chooser)
     diverge=diverge+[div_factor]
     l_diverge=l_diverge+[local_div_factor]
-    taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,div_factor,local_div_factor,instant_div_factor,tron,taken_trade)
+    if tron>0:
+        taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,div_factor,local_div_factor,instant_div_factor,tron,taken_trade)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
         decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track)
         break
