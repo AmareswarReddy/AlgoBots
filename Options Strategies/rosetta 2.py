@@ -56,7 +56,7 @@ def client_login(client):
 import sys
 client_name   = 'vinathi'
 #lots=int(input('lots (Eg:3):'))
-
+tron=int(input('entert the number of lots for buying :'))
 
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -136,6 +136,7 @@ def past_picture(indicator,project_k,b_lastrate,x,delta):
     n=len(b_lastrate)
     div_factor=0
     local_div_factor=0
+    instant_div_factor=0
     if n>2:
         for i in range(1,n):
             a=(b_lastrate[n-1]-b_lastrate[n-i-1])
@@ -148,7 +149,13 @@ def past_picture(indicator,project_k,b_lastrate,x,delta):
             b=(indicator[n-1]-indicator[n-i-1])
             local_div_factor=div_factor+b+a*delta
         local_div_factor=local_div_factor/120
-    return indicator,b_lastrate,div_factor,local_div_factor
+    if n>31:
+        for i in range(n-30,n):
+            a=(b_lastrate[n-1]-b_lastrate[n-i-1])
+            b=(indicator[n-1]-indicator[n-i-1])
+            instant_div_factor=instant_div_factor+b+a*delta
+        instant_div_factor=instant_div_factor/30
+    return indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor
 
 def strike_list(strike1,strike2):
     k=[]
@@ -346,9 +353,43 @@ def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_tra
         prime_client['login'].place_order(test_order)
     return 0
 
+def decoy4(option_chain,exclusive_strike,div_factor,local_div_factor,instant_div_factor,tron,taken_trade):
+
+    if instant_div_factor>5 and local_div_factor>0 and div_factor>0 and taken_trade==0:
+        exclusive_strike=int(np.round(x/100)*100)
+        c_data=option_chain[option_chain['CPType']=='CE']
+        c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order) 
+        taken_trade=1
+    elif instant_div_factor<0 and taken_trade==1:
+        c_data=option_chain[option_chain['CPType']=='CE']
+        c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order)
+        taken_trade=0
+    if instant_div_factor<5 and local_div_factor<0 and div_factor<0 and taken_trade==0:
+        exclusive_strike=int(np.round(x/100)*100)
+        p_data=option_chain[option_chain['CPType']=='PE']
+        p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order) 
+        taken_trade=-1
+    elif instant_div_factor>0 and taken_trade==-1:
+        p_data=option_chain[option_chain['CPType']=='PE']
+        p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order)
+        taken_trade=0
+    return taken_trade,exclusive_strike
+
 #%%
 indicator=[]
 b_lastrate=[]
+diverge=[]
+l_diverge=[]
+exclusive_strike=0
+taken_trade=0
 while True:
     re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     aa=prime_client['login'].fetch_market_feed(re)
@@ -365,6 +406,11 @@ while True:
     project_k=(x-proj)*direction_chooser
     print('Niftybank:  ',project_k)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x,delta)
+    print('total divergence :',div_factor)
+    print('local divergence :',local_div_factor)
+    print('instant divergence :',instant_div_factor)
+    print('')
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
     #strategy
@@ -376,13 +422,17 @@ while True:
     delta=(c1-c2+p2-p1)/200
     c_striker,p_striker = decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track)
     p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots,direction_chooser)
-    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    diverge=diverge+[div_factor]
+    l_diverge=l_diverge+[local_div_factor]
+    taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,div_factor,local_div_factor,instant_div_factor,tron,taken_trade)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
         decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track)
         break
-    indicator,b_lastrate,div_factor,local_div_factor=past_picture(indicator,project_k,b_lastrate,x,delta)
-    print('total divergence :',div_factor)
-    print('local divergence :',local_div_factor)
     sleep(4)
 
+
+plt.plot(b_lastrate,color='red')
+plt.plot(diverge,'-.')
+plt.plot(l_diverge,'black')
+plt.show()
 # %%
