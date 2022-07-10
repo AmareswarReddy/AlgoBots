@@ -130,8 +130,8 @@ def is_monday():
     else:
         return 1
 
-def past_picture(indicator,project_k,b_lastrate,x,delta):
-    indicator=indicator+[project_k]
+def past_picture(indicator,project_k,b_lastrate,x,delta,direction_chooser):
+    indicator=indicator+[project_k*direction_chooser]
     b_lastrate=b_lastrate+[x]
     n=len(b_lastrate)
     div_factor=0
@@ -331,7 +331,7 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
     return p_lots_track_temp,c_lots_track_temp,rosetta_quotient1_temp,rosetta_quotient2_temp    
 
 
-def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track):
+def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track,taken_trade,exclusive_strike,tron):
     if c_lots_track!=p_lots_track:
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==c_striker]['ScripCode'])
@@ -350,6 +350,16 @@ def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_tra
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==p_striker-500]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25*p_lots_track, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order)
+    if taken_trade==-1:
+        p_data=option_chain[option_chain['CPType']=='PE']
+        p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order)
+    elif taken_trade==1:
+        c_data=option_chain[option_chain['CPType']=='CE']
+        c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
     return 0
 
@@ -405,7 +415,7 @@ while True:
     project_k=(x-proj)*direction_chooser
     print('Niftybank:  ',project_k)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x,delta)
+    indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x,delta,direction_chooser)
     print('total divergence :',div_factor)
     print('local divergence :',local_div_factor)
     print('instant divergence :',instant_div_factor)
@@ -426,7 +436,7 @@ while True:
     if tron>0:
         taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,div_factor,local_div_factor,instant_div_factor,tron,taken_trade)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
-        decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track)
+        decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track,taken_trade,exclusive_strike,tron)
         break
     sleep(4)
 
