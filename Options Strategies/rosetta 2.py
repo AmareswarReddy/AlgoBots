@@ -121,17 +121,10 @@ def rosetta_strikes(option_chain):
     b=np.array(option_chain['StrikeRate'])[0]+index1*increment
     c=np.array(option_chain['StrikeRate'])[0]+index2*increment
     return  a,round(b/100)*100,round(c/100)*100
-def is_monday():
-    date = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d')
-    day_name= ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday','Sunday']
-    day = datetime.strptime(date, '%Y-%m-%d').weekday()
-    if day_name[day]=='Monday':
-        return -1
-    else:
-        return 1
 
-def past_picture(indicator,project_k,b_lastrate,x,delta,direction_chooser):
-    indicator=indicator+[project_k*direction_chooser]
+
+def past_picture(indicator,project_k,b_lastrate,x,delta):
+    indicator=indicator+[project_k]
     b_lastrate=b_lastrate+[x]
     n=len(b_lastrate)
     div_factor=0
@@ -182,7 +175,6 @@ test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code 
 status = prime_client['login'].place_order(test_order)
 rosetta_quotient1=min(1/np.floor(prime_client['lots']/5),0.4)
 rosetta_quotient2=-min(1/np.floor(prime_client['lots']/5),0.4)
-direction_chooser=is_monday()
 c_lots_track=prime_client['lots']
 p_lots_track=prime_client['lots']
 initial_lots=prime_client['lots']
@@ -238,14 +230,14 @@ def decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lot
     return c_temp,p_temp
 
 
-def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots,direction_chooser):
-    v=min(1/np.floor(prime_client['lots']/5),0.4)
+def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots):
+    v=min(1/np.floor(prime_client['lots']/5),0.3)
     c_lots_track_temp=c_lots_track
     p_lots_track_temp=p_lots_track
     rosetta_quotient1_temp=rosetta_quotient1
     rosetta_quotient2_temp=rosetta_quotient2
     proj,C,P=rosetta_strikes(option_chain)
-    decider=((proj-x)/dynamic_crossover)*direction_chooser
+    decider=((proj-x)/dynamic_crossover)
     if decider>rosetta_quotient1 and p_lots_track>5 and p_lots_track<=c_lots_track:  
         p_data=option_chain[option_chain['CPType']=='PE']
         c_data=option_chain[option_chain['CPType']=='CE']
@@ -256,7 +248,7 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip , quantity=25, price=0 ,is_intraday=False,remote_order_id="tag")
         status=prime_client['login'].place_order(test_order)
         p_lots_track_temp=p_lots_track-5
-        rosetta_quotient1_temp=rosetta_quotient1+v
+        rosetta_quotient1_temp=rosetta_quotient1+v/2
         if status['Message']=='Success':
             c_lots_track_temp=c_lots_track+1
     if decider>v/2 and p_lots_track>c_lots_track:  
@@ -296,7 +288,7 @@ def decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_l
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip , quantity=25, price=0 ,is_intraday=False,remote_order_id="tag")
         status=prime_client['login'].place_order(test_order)
         c_lots_track_temp=c_lots_track-5
-        rosetta_quotient2_temp=rosetta_quotient2-v
+        rosetta_quotient2_temp=rosetta_quotient2-v/2
         if status['Message']=='Success':
             p_lots_track_temp=p_lots_track+1
             
@@ -412,14 +404,10 @@ while True:
         except Exception :
             pass
     proj,Cyi,Phf=rosetta_strikes(option_chain)
-    project_k=(x-proj)*direction_chooser
+    project_k=(x-proj)
     print('Niftybank:  ',project_k)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x,delta,direction_chooser)
-    print('total divergence :',div_factor)
-    print('local divergence :',local_div_factor)
-    print('instant divergence :',instant_div_factor)
-    print('')
+    
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
     #strategy
@@ -429,8 +417,13 @@ while True:
     p2=int(p_data[p_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
     dynamic_crossover=(c1+c2+p1+p2)/4
     delta=(c1-c2+p2-p1)/200
+    indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x,delta)
+    print('total divergence :',div_factor)
+    print('local divergence :',local_div_factor)
+    print('instant divergence :',instant_div_factor)
+    print('')
     c_striker,p_striker = decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track)
-    p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots,direction_chooser)
+    p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots)
     diverge=diverge+[div_factor]
     l_diverge=l_diverge+[local_div_factor]
     if tron>0:
