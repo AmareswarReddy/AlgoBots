@@ -389,6 +389,7 @@ indicator=[]
 b_lastrate=[]
 diverge=[]
 l_diverge=[]
+inst_diverge=[]
 exclusive_strike=0
 taken_trade=0
 while True:
@@ -426,6 +427,7 @@ while True:
     p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots)
     diverge=diverge+[div_factor]
     l_diverge=l_diverge+[local_div_factor]
+    inst_diverge=inst_diverge+[instant_div_factor]
     if tron>0:
         taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,div_factor,local_div_factor,instant_div_factor,tron,taken_trade)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
@@ -434,8 +436,16 @@ while True:
     sleep(4)
 
 
-plt.plot(b_lastrate,color='red')
-plt.plot(diverge,'-.')
-plt.plot(l_diverge,'black')
-plt.show()
+
+left_data = [5, 4, 3, 2, 1]
+right_data = [0.1, 0.2, 0.4, 0.8, 1.6]
+
+fig, ax_left = plt.subplots()
+ax_right = ax_left.twinx()
+
+ax_left.plot(b_lastrate, color='blue')
+ax_right.plot(diverge, color='red')
+ax_right.plot(l_diverge, color='white')
+ax_right.plot(inst_diverge, color='white')
+
 # %%
