@@ -347,28 +347,28 @@ def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_tra
         prime_client['login'].place_order(test_order)
     return 0
 
-def decoy4(option_chain,exclusive_strike,div_factor,local_div_factor,instant_div_factor,tron,taken_trade):
-    if instant_div_factor>5 and local_div_factor>0 and div_factor>0 and taken_trade==0:
+def decoy4(option_chain,exclusive_strike,local_div_factor,instant_div_factor,tron,taken_trade):
+    if instant_div_factor>local_div_factor+1 and local_div_factor!=0 and taken_trade==0:
         exclusive_strike=int(np.round(x/100)*100)
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=1
-    elif instant_div_factor<0 and taken_trade==1:
+    elif instant_div_factor<local_div_factor and taken_trade==1:
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
         taken_trade=0
-    if instant_div_factor<5 and local_div_factor<0 and div_factor<0 and taken_trade==0:
+    if instant_div_factor< local_div_factor-1 and local_div_factor!=0 and taken_trade==0:
         exclusive_strike=int(np.round(x/100)*100)
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=-1
-    elif instant_div_factor>0 and taken_trade==-1:
+    elif instant_div_factor>local_div_factor and taken_trade==-1:
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
@@ -441,7 +441,7 @@ while True:
     l_diverge=l_diverge+[local_div_factor]
     inst_diverge=inst_diverge+[instant_div_factor]
     if tron>0:
-        taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,div_factor,local_div_factor,instant_div_factor,tron,taken_trade)
+        taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,local_div_factor,instant_div_factor,tron,taken_trade)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
         decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track,taken_trade,exclusive_strike,tron)
         break
@@ -454,5 +454,7 @@ ax_left.plot(b_lastrate, color='blue')
 ax_right.plot(diverge, color='red')
 ax_right.plot(l_diverge, color='white')
 ax_right.plot(inst_diverge, color='orange')
+
+# %%
 
 # %%
