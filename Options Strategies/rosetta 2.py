@@ -347,28 +347,28 @@ def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_tra
         prime_client['login'].place_order(test_order)
     return 0
 
-def decoy4(option_chain,exclusive_strike,local_div_factor,instant_div_factor,tron,taken_trade):
-    if instant_div_factor>local_div_factor+1 and local_div_factor!=0 and taken_trade==0:
+def decoy4(option_chain,exclusive_strike,tron,taken_trade,del_to_deal):
+    if del_to_deal>0 and local_div_factor!=0 and taken_trade==0:
         exclusive_strike=int(np.round(x/100)*100)
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=1
-    elif instant_div_factor<local_div_factor and taken_trade==1:
+    elif del_to_deal<0 and taken_trade==1:
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
         taken_trade=0
-    if instant_div_factor< local_div_factor-1 and local_div_factor!=0 and taken_trade==0:
+    if del_to_deal>0 and local_div_factor!=0 and taken_trade==0:
         exclusive_strike=int(np.round(x/100)*100)
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=-1
-    elif instant_div_factor>local_div_factor and taken_trade==-1:
+    elif del_to_deal<0 and taken_trade==-1:
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
@@ -404,8 +404,10 @@ b_lastrate=[]
 diverge=[]
 l_diverge=[]
 inst_diverge=[]
+to_deal=[]
 exclusive_strike=0
 taken_trade=0
+del_to_deal=0
 while True:
     re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     aa=prime_client['login'].fetch_market_feed(re)
@@ -440,13 +442,15 @@ while True:
     diverge=diverge+[div_factor]
     l_diverge=l_diverge+[local_div_factor]
     inst_diverge=inst_diverge+[instant_div_factor]
-    if tron>0:
-        taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,local_div_factor,instant_div_factor,tron,taken_trade)
+    to_deal=to_deal+[instant_div_factor-local_div_factor]
+    if len(to_deal)>2:
+        del_to_deal=to_deal[-1]-to_deal[-2]
+    if tron>0 and del_to_deal!=0:
+        taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,tron,taken_trade, del_to_deal)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
         decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track,taken_trade,exclusive_strike,tron)
         break
     option_chain_store=option_chain
-    sleep(2)
 
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
@@ -456,5 +460,32 @@ ax_right.plot(l_diverge, color='white')
 ax_right.plot(inst_diverge, color='orange')
 
 # %%
+profit=0
+c1=0
+c2=0
+pair1=[]
+pair2=[]
+ammu=0
+for iter in range(200,len(iso)):
+    if iso[iter]>0 and c1==0:
+        pair1=pair1+[b_lastrate[iter]]
+        c1=1
+    if iso[iter]<0 and c2==0:
+        pair2=pair2+[b_lastrate[iter]]
+        c2=1
+    if c1==1 and iso[iter]<0 :
+        pair1=pair1+[b_lastrate[iter]]
+        c1=0
+    if c2==1 and iso[iter]>0 :
+        pair2=pair2+[b_lastrate[iter]]
+        c2=0
+    if len(pair1)==2:
+        profit=profit+pair1[1]-pair1[0]
+        pair1=[]
+        ammu=ammu+1
+    if len(pair2)==2:
+        profit=profit+pair2[0]-pair2[1]
+        pair2=[]
+        ammu=ammu+1
 
 # %%
