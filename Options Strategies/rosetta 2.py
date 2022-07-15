@@ -50,7 +50,7 @@ def client_login(client):
     client_list[client]['strategy']=strategies(user=user, passw=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login']=FivePaisaClient(email=user, passwd=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login'].login()
-    client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-100000)/180000)
+    client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-200000)/180000)
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
@@ -348,27 +348,27 @@ def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_tra
     return 0
 
 def decoy4(option_chain,exclusive_strike,tron,taken_trade,del_to_deal):
-    if del_to_deal>0 and local_div_factor!=0 and taken_trade==0:
+    if del_to_deal>0.25 and local_div_factor!=0 and taken_trade==0:
         exclusive_strike=int(np.round(x/100)*100)
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=1
-    elif del_to_deal<0 and taken_trade==1:
+    elif del_to_deal<-0.25 and taken_trade==1:
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
         taken_trade=0
-    if del_to_deal>0 and local_div_factor!=0 and taken_trade==0:
+    if del_to_deal<-0.25 and local_div_factor!=0 and taken_trade==0:
         exclusive_strike=int(np.round(x/100)*100)
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=-1
-    elif del_to_deal<0 and taken_trade==-1:
+    elif del_to_deal>0.25 and taken_trade==-1:
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
@@ -460,6 +460,11 @@ ax_right.plot(l_diverge, color='white')
 ax_right.plot(inst_diverge, color='orange')
 
 # %%
+k=-np.array(l_diverge)+np.array(inst_diverge)
+iso=[]
+for i in range(1,len(k)):
+    iso=iso+[k[i]-k[i-1]]
+iso=[0]+iso
 profit=0
 c1=0
 c2=0
@@ -467,16 +472,16 @@ pair1=[]
 pair2=[]
 ammu=0
 for iter in range(200,len(iso)):
-    if iso[iter]>0 and c1==0:
+    if iso[iter]>0.25 and c1==0:
         pair1=pair1+[b_lastrate[iter]]
         c1=1
-    if iso[iter]<0 and c2==0:
+    if iso[iter]<-0.25 and c2==0:
         pair2=pair2+[b_lastrate[iter]]
         c2=1
-    if c1==1 and iso[iter]<0 :
+    if c1==1 and iso[iter]<-0.25 :
         pair1=pair1+[b_lastrate[iter]]
         c1=0
-    if c2==1 and iso[iter]>0 :
+    if c2==1 and iso[iter]>0.25 :
         pair2=pair2+[b_lastrate[iter]]
         c2=0
     if len(pair1)==2:
@@ -487,5 +492,6 @@ for iter in range(200,len(iso)):
         profit=profit+pair2[0]-pair2[1]
         pair2=[]
         ammu=ammu+1
-
+print(profit)
+print(ammu)
 # %%
