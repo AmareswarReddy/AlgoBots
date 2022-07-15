@@ -141,21 +141,21 @@ def past_picture(indicator,project_k,b_lastrate,x,delta):
     instant_div_factor=0
     if n>2:
         for i in range(1,n):
-            a=(b_lastrate[n-1]-b_lastrate[n-i-1])
-            b=(indicator[n-1]-indicator[n-i-1])
-            div_factor=div_factor+b+a*delta/2
+            a=(b_lastrate[n-1]-b_lastrate[i])
+            b=(indicator[n-1]-indicator[i])
+            div_factor=div_factor+b+a*delta/4
         div_factor=div_factor/n
     if n>121:
         for i in range(n-120,n):
-            a=(b_lastrate[n-1]-b_lastrate[n-i-1])
-            b=(indicator[n-1]-indicator[n-i-1])
-            local_div_factor=local_div_factor+b+a*delta/2
+            a=(b_lastrate[n-1]-b_lastrate[i])
+            b=(indicator[n-1]-indicator[i])
+            local_div_factor=local_div_factor+b+a*delta/4
         local_div_factor=local_div_factor/120
     if n>21:
         for i in range(n-20,n):
-            a=(b_lastrate[n-1]-b_lastrate[n-i-1])
-            b=(indicator[n-1]-indicator[n-i-1])
-            instant_div_factor=instant_div_factor+b+a*delta/2
+            a=(b_lastrate[n-1]-b_lastrate[i])
+            b=(indicator[n-1]-indicator[i])
+            instant_div_factor=instant_div_factor+b+a*delta/4
         instant_div_factor=instant_div_factor/20
     return indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor
 
