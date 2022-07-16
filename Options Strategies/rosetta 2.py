@@ -451,6 +451,7 @@ while True:
         decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track,taken_trade,exclusive_strike,tron)
         break
     option_chain_store=option_chain
+    sleep(2)
 
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
@@ -459,7 +460,7 @@ ax_right.plot(diverge, color='red')
 ax_right.plot(l_diverge, color='white')
 ax_right.plot(inst_diverge, color='orange')
 
-# %%
+
 k=-np.array(l_diverge)+np.array(inst_diverge)
 iso=[]
 for i in range(1,len(k)):
@@ -470,7 +471,7 @@ c1=0
 c2=0
 pair1=[]
 pair2=[]
-ammu=0
+number_of_trades=0
 for iter in range(200,len(iso)):
     if iso[iter]>0.25 and c1==0:
         pair1=pair1+[b_lastrate[iter]]
@@ -487,11 +488,12 @@ for iter in range(200,len(iso)):
     if len(pair1)==2:
         profit=profit+pair1[1]-pair1[0]
         pair1=[]
-        ammu=ammu+1
+        number_of_trades=number_of_trades+1
     if len(pair2)==2:
         profit=profit+pair2[0]-pair2[1]
         pair2=[]
-        ammu=ammu+1
-print(profit)
-print(ammu)
+        number_of_trades=number_of_trades+1
+print('total profit',profit)
+print('number of trades',number_of_trades)
+print('profit per trade',profit/number_of_trades)
 # %%
