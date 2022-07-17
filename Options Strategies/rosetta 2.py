@@ -95,7 +95,7 @@ def rosetta_strikes(option_chain):
     return  a,round(b/100)*100,round(c/100)*100
 
 
-def smart_ass(option_chain,series_t1,series_t2):
+def smart_ass(option_chain,c_delta_O,p_delta_O,e_ce,e_pe,i_ce,i_pe):
     pe_data=option_chain[option_chain['CPType']=='PE']
     ce_data=option_chain[option_chain['CPType']=='CE']
     i=np.array(pe_data['StrikeRate'])[0]
@@ -104,12 +104,15 @@ def smart_ass(option_chain,series_t1,series_t2):
     ss=np.array(pe_data['StrikeRate'])
     p_lastrate=np.array(pe_data['LastRate'])
     c_lastrate=np.array(ce_data['LastRate'])
-    p_openinterest=np.array(pe_data['OpenInterest'])
-    c_openinterest=np.array(ce_data['OpenInterest'])
     data=[]
     data1=[]
     data2=[]
+    c_war=[]
+    p_war=[]
+    c_truce=[]
+    p_truce=[]
     increment=(n-i)/15
+    kk=0
     while i<end:
         i=i+increment
         init_ce=0
@@ -117,20 +120,30 @@ def smart_ass(option_chain,series_t1,series_t2):
         end_pe=0
         end_ce=0
         for k in range(0,len(ss)):
-            init_pe=init_pe+p_lastrate[k]*p_openinterest[k]
-            init_ce=init_ce+c_lastrate[k]*c_openinterest[k]
-            end_pe=end_pe+p_openinterest[k]*max((ss[k]-i),0)
-            end_ce=end_ce+c_openinterest[k]*max((i-ss[k]),0)
-        data=data+[init_ce-end_ce-init_pe+end_pe]
-        data1=data1+[init_ce-end_ce]
-        data2=data2+[-init_pe+end_pe]
+            init_pe=init_pe+p_lastrate[k]*p_delta_O[k]
+            init_ce=init_ce+c_lastrate[k]*c_delta_O[k]
+            end_pe=end_pe+p_delta_O[k]*max((ss[k]-i),0)
+            end_ce=end_ce+c_delta_O[k]*max((i-ss[k]),0)
+        c_war=c_war+[init_ce]
+        p_war=p_war+[init_pe]
+        c_truce=c_truce+[end_ce]
+        p_truce=p_truce+[end_pe]
+        if e_ce!=0:
+            data=data+[init_ce+i_ce[kk]-e_ce[kk]-end_ce-i_pe[kk]-init_pe+e_pe[kk]+end_pe]
+            data1=data1+[init_ce+i_ce[kk]-end_ce-e_ce[kk]]
+            data2=data2+[-init_pe-i_pe[kk]+end_pe+e_pe[kk]]
+            kk=kk+1
+        else:
+            data=data+[init_ce-end_ce-init_pe+end_pe]
+            data1=data1+[init_ce-end_ce]
+            data2=data2+[-init_pe+end_pe]
     index=np.argmin(np.abs(data))
     index1=np.argmin(np.abs(data1))
     index2=np.argmin(np.abs(data2))
     a=np.array(option_chain['StrikeRate'])[0]+index*increment
     b=np.array(option_chain['StrikeRate'])[0]+index1*increment
     c=np.array(option_chain['StrikeRate'])[0]+index2*increment
-    return  a, series_t1, series_t2
+    return  a,round(b/100)*100,round(c/100)*100, np.array(c_truce)+e_ce,np.array(p_truce)+e_pe,np.array(c_war)+i_ce,np.array(p_war)+i_pe
 
 def past_picture(indicator,project_k,b_lastrate,x,delta):
     indicator=indicator+[project_k]
@@ -408,6 +421,7 @@ to_deal=[]
 exclusive_strike=0
 taken_trade=0
 del_to_deal=0
+ricker=0
 while True:
     re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     aa=prime_client['login'].fetch_market_feed(re)
@@ -426,6 +440,16 @@ while True:
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
+    try:
+        
+        c_data_store=option_chain_store[option_chain_store['CPType']=='CE']
+        p_data_store=option_chain_store[option_chain_store['CPType']=='PE']
+        c_delta_O=np.array(c_data['OpenInterest']-c_data_store['OpenInterest'])
+        p_delta_O=np.array(p_data['OpenInterest']-p_data_store['OpenInterest'])
+        vin,s1,s2, e_ce,e_pe,i_ce,i_pe=smart_ass(option_chain,c_delta_O,p_delta_O,e_ce,e_pe,i_ce,i_pe)
+        print('vinays_best_work',vin)
+    except Exception:
+        pass
     c1=int(c_data[c_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
     c2=int(c_data[c_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
     p1=int(p_data[p_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
@@ -436,7 +460,7 @@ while True:
     print('total divergence :',div_factor)
     print('local divergence :',local_div_factor)
     print('instant divergence :',instant_div_factor)
-    print('')
+    
     c_striker,p_striker = decoy1(option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track)
     p_lots_track,c_lots_track,rosetta_quotient1,rosetta_quotient2=decoy2(x,option_chain,c_striker,p_striker,dynamic_crossover,prime_client,c_lots_track,p_lots_track,rosetta_quotient1,rosetta_quotient2,initial_lots)
     diverge=diverge+[div_factor]
@@ -445,12 +469,17 @@ while True:
     to_deal=to_deal+[instant_div_factor-local_div_factor]
     if len(to_deal)>2:
         del_to_deal=to_deal[-1]-to_deal[-2]
+        print('new_indicator',del_to_deal)
+        print('')
     if tron>0 and del_to_deal!=0:
         taken_trade,exclusive_strike=decoy4(option_chain,exclusive_strike,tron,taken_trade, del_to_deal)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
         decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track,taken_trade,exclusive_strike,tron)
         break
     option_chain_store=option_chain
+    if ricker==0:
+        e_ce,e_pe,i_ce,i_pe=0,0,0,0
+        ricker=1
     sleep(2)
 
 fig, ax_left = plt.subplots()
@@ -491,7 +520,6 @@ for iter in range(200,len(iso)):
             profit=profit+pair1[1]-pair1[0]
         else:
             loss=loss+pair1[1]-pair1[0]
-        print(pair1)
         pair1=[]
         number_of_trades=number_of_trades+1
     if len(pair2)==2:
@@ -499,6 +527,7 @@ for iter in range(200,len(iso)):
             profit=profit+pair2[0]-pair2[1]
         else:
             loss=loss-(pair2[1]-pair2[0])
+            print(pair2)
         pair2=[]
         number_of_trades=number_of_trades+1
 print('total profit',profit)
