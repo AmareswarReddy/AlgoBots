@@ -348,27 +348,27 @@ def decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_tra
     return 0
 
 def decoy4(option_chain,exclusive_strike,tron,taken_trade,del_to_deal):
-    if del_to_deal>0.25 and local_div_factor!=0 and taken_trade==0:
+    if del_to_deal>0.5 and local_div_factor!=0 and taken_trade==0:
         exclusive_strike=int(np.round(x/100)*100)
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=1
-    elif del_to_deal<-0.25 and taken_trade==1:
+    elif del_to_deal<-0.5 and taken_trade==1:
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
         taken_trade=0
-    if del_to_deal<-0.25 and local_div_factor!=0 and taken_trade==0:
+    if del_to_deal<-0.5 and local_div_factor!=0 and taken_trade==0:
         exclusive_strike=int(np.round(x/100)*100)
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=-1
-    elif del_to_deal>0.25 and taken_trade==-1:
+    elif del_to_deal>0.5 and taken_trade==-1:
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*tron, price=0 ,is_intraday=False,remote_order_id="tag")
@@ -460,40 +460,50 @@ ax_right.plot(diverge, color='red')
 ax_right.plot(l_diverge, color='white')
 ax_right.plot(inst_diverge, color='orange')
 
-
+#%%
 k=-np.array(l_diverge)+np.array(inst_diverge)
 iso=[]
 for i in range(1,len(k)):
     iso=iso+[k[i]-k[i-1]]
 iso=[0]+iso
 profit=0
+loss=0
 c1=0
 c2=0
 pair1=[]
 pair2=[]
 number_of_trades=0
 for iter in range(200,len(iso)):
-    if iso[iter]>0.25 and c1==0:
+    if iso[iter]>0.5 and c1==0 :
         pair1=pair1+[b_lastrate[iter]]
         c1=1
-    if iso[iter]<-0.25 and c2==0:
+    if iso[iter]<-0.5 and c2==0 :
         pair2=pair2+[b_lastrate[iter]]
         c2=1
-    if c1==1 and iso[iter]<-0.25 :
+    if c1==1 and iso[iter]<-0.5 and k[iter]<0 :
         pair1=pair1+[b_lastrate[iter]]
         c1=0
-    if c2==1 and iso[iter]>0.25 :
+    if c2==1 and iso[iter]>0.5  :
         pair2=pair2+[b_lastrate[iter]]
         c2=0
     if len(pair1)==2:
-        profit=profit+pair1[1]-pair1[0]
+        if pair1[1]-pair1[0]>0:
+            profit=profit+pair1[1]-pair1[0]
+        else:
+            loss=loss+pair1[1]-pair1[0]
+        print(pair1)
         pair1=[]
         number_of_trades=number_of_trades+1
     if len(pair2)==2:
-        profit=profit+pair2[0]-pair2[1]
+        if pair2[1]-pair2[0]<0:
+            profit=profit+pair2[0]-pair2[1]
+        else:
+            loss=loss-(pair2[1]-pair2[0])
         pair2=[]
         number_of_trades=number_of_trades+1
 print('total profit',profit)
 print('number of trades',number_of_trades)
-print('profit per trade',profit/number_of_trades)
+print('profit per trade',(profit+loss)/number_of_trades)
+print('loss',loss)
+print('success ratio',-profit/loss)
 # %%
