@@ -95,7 +95,7 @@ def rosetta_strikes(option_chain):
     return  a,round(b/100)*100,round(c/100)*100
 
 
-def smart_ass(option_chain,c_delta_O,p_delta_O,e_ce,e_pe,i_ce,i_pe):
+def smart_ass(option_chain,c_delta_O,p_delta_O,e_ce,e_pe,i_ce,i_pe,ricker):
     pe_data=option_chain[option_chain['CPType']=='PE']
     ce_data=option_chain[option_chain['CPType']=='CE']
     i=np.array(pe_data['StrikeRate'])[0]
@@ -119,21 +119,32 @@ def smart_ass(option_chain,c_delta_O,p_delta_O,e_ce,e_pe,i_ce,i_pe):
         init_pe=0
         end_pe=0
         end_ce=0
-        for k in range(0,len(ss)):
-            init_pe=init_pe+p_lastrate[k]*p_delta_O[k]
-            init_ce=init_ce+c_lastrate[k]*c_delta_O[k]
-            end_pe=end_pe+p_delta_O[k]*max((ss[k]-i),0)
-            end_ce=end_ce+c_delta_O[k]*max((i-ss[k]),0)
-        c_war=c_war+[init_ce]
-        p_war=p_war+[init_pe]
-        c_truce=c_truce+[end_ce]
-        p_truce=p_truce+[end_pe]
-        if e_ce!=0:
+        if ricker!=0:
+            for k in range(0,len(ss)):
+                init_pe=init_pe+p_lastrate[k]*p_delta_O[k]
+                init_ce=init_ce+c_lastrate[k]*c_delta_O[k]
+                end_pe=end_pe+p_delta_O[k]*max((ss[k]-i),0)
+                end_ce=end_ce+c_delta_O[k]*max((i-ss[k]),0)
+            c_war=c_war+[init_ce]
+            p_war=p_war+[init_pe]
+            c_truce=c_truce+[end_ce]
+            p_truce=p_truce+[end_pe]
             data=data+[init_ce+i_ce[kk]-e_ce[kk]-end_ce-i_pe[kk]-init_pe+e_pe[kk]+end_pe]
             data1=data1+[init_ce+i_ce[kk]-end_ce-e_ce[kk]]
             data2=data2+[-init_pe-i_pe[kk]+end_pe+e_pe[kk]]
             kk=kk+1
         else:
+            p_openinterest=np.array(pe_data['OpenInterest'])
+            c_openinterest=np.array(ce_data['OpenInterest'])
+            for k in range(0,len(ss)):
+                init_pe=init_pe+p_lastrate[k]*p_openinterest[k]
+                init_ce=init_ce+c_lastrate[k]*c_openinterest[k]
+                end_pe=end_pe+p_openinterest[k]*max((ss[k]-i),0)
+                end_ce=end_ce+c_openinterest[k]*max((i-ss[k]),0)
+            c_war=c_war+[init_ce]
+            p_war=p_war+[init_pe]
+            c_truce=c_truce+[end_ce]
+            p_truce=p_truce+[end_pe]
             data=data+[init_ce-end_ce-init_pe+end_pe]
             data1=data1+[init_ce-end_ce]
             data2=data2+[-init_pe+end_pe]
@@ -389,9 +400,9 @@ def decoy4(option_chain,exclusive_strike,tron,taken_trade,del_to_deal):
         taken_trade=0
     return taken_trade,exclusive_strike
 #%%
-ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
-    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+'''ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')'''
+'''while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :'''
+'''    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')'''
 #%%
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
@@ -441,12 +452,11 @@ while True:
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
     try:
-        
         c_data_store=option_chain_store[option_chain_store['CPType']=='CE']
         p_data_store=option_chain_store[option_chain_store['CPType']=='PE']
         c_delta_O=np.array(c_data['OpenInterest']-c_data_store['OpenInterest'])
         p_delta_O=np.array(p_data['OpenInterest']-p_data_store['OpenInterest'])
-        vin,s1,s2, e_ce,e_pe,i_ce,i_pe=smart_ass(option_chain,c_delta_O,p_delta_O,e_ce,e_pe,i_ce,i_pe)
+        vin,s1,s2, e_ce,e_pe,i_ce,i_pe=smart_ass(option_chain,c_delta_O,p_delta_O,e_ce,e_pe,i_ce,i_pe,ricker)
         print('vinays_best_work',vin)
     except Exception:
         pass
