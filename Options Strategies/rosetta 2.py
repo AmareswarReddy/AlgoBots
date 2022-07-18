@@ -457,7 +457,7 @@ while True:
         c_delta_O=np.array(c_data['OpenInterest']-c_data_store['OpenInterest'])
         p_delta_O=np.array(p_data['OpenInterest']-p_data_store['OpenInterest'])
         vin,s1,s2, e_ce,e_pe,i_ce,i_pe=smart_ass(option_chain,c_delta_O,p_delta_O,e_ce,e_pe,i_ce,i_pe,ricker)
-        print('vinays_best_work',vin)
+        print('vinays_best_work',x-vin)
     except Exception:
         pass
     c1=int(c_data[c_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
