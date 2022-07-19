@@ -489,7 +489,6 @@ while True:
         break
     option_chain_store=option_chain
     ricker=1
-    sleep(2)
 
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
