@@ -433,6 +433,7 @@ exclusive_strike=0
 taken_trade=0
 del_to_deal=0
 ricker=0
+e_ce,e_pe,i_ce,i_pe=0,0,0,0
 while True:
     re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     aa=prime_client['login'].fetch_market_feed(re)
@@ -487,9 +488,7 @@ while True:
         decoy3(option_chain,c_striker,p_striker,prime_client,c_lots_track,p_lots_track,taken_trade,exclusive_strike,tron)
         break
     option_chain_store=option_chain
-    if ricker==0:
-        e_ce,e_pe,i_ce,i_pe=0,0,0,0
-        ricker=1
+    ricker=1
     sleep(2)
 
 fig, ax_left = plt.subplots()
