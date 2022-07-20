@@ -167,19 +167,19 @@ def past_picture(indicator,project_k,b_lastrate,x,delta):
         for i in range(1,n):
             a=(b_lastrate[n-1]-b_lastrate[i])
             b=(indicator[n-1]-indicator[i])
-            div_factor=div_factor+b+a*delta/4
+            div_factor=div_factor+b #+a*delta/4
         div_factor=div_factor/n
     if n>121:
         for i in range(n-120,n):
             a=(b_lastrate[n-1]-b_lastrate[i])
             b=(indicator[n-1]-indicator[i])
-            local_div_factor=local_div_factor+b+a*delta/4
+            local_div_factor=local_div_factor+b#+a*delta/4
         local_div_factor=local_div_factor/120
     if n>21:
         for i in range(n-20,n):
             a=(b_lastrate[n-1]-b_lastrate[i])
             b=(indicator[n-1]-indicator[i])
-            instant_div_factor=instant_div_factor+b+a*delta/4
+            instant_div_factor=instant_div_factor+b#+a*delta/4
         instant_div_factor=instant_div_factor/20
     return indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor
 
@@ -434,6 +434,7 @@ taken_trade=0
 del_to_deal=0
 ricker=0
 e_ce,e_pe,i_ce,i_pe=0,0,0,0
+new_version=[]
 while True:
     re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
     aa=prime_client['login'].fetch_market_feed(re)
@@ -459,6 +460,7 @@ while True:
         p_delta_O=np.array(p_data['OpenInterest']-p_data_store['OpenInterest'])
         vin,s1,s2, e_ce,e_pe,i_ce,i_pe=smart_ass(option_chain,c_delta_O,p_delta_O,e_ce,e_pe,i_ce,i_pe,ricker)
         print('vinays_best_work',x-vin)
+        new_version=new_version+[x-vin]
     except Exception:
         pass
     c1=int(c_data[c_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
@@ -543,4 +545,10 @@ print('number of trades',number_of_trades)
 print('profit per trade',(profit+loss)/number_of_trades)
 print('loss',loss)
 print('success ratio',-profit/loss)
+fig, ax_left = plt.subplots()
+ax_right = ax_left.twinx()
+ax_left.plot(b_lastrate, color='blue')
+ax_right.plot(k, color='red')
+ax_right.plot(new_version, color='orange')
+
 # %%
