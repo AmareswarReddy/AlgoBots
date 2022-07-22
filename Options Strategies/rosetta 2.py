@@ -167,20 +167,20 @@ def past_picture(indicator,project_k,b_lastrate,x,delta):
         for i in range(1,n):
             a=(b_lastrate[n-1]-b_lastrate[i])
             b=(indicator[n-1]-indicator[i])
-            div_factor=div_factor+b #+a*delta/4
+            div_factor=div_factor+b 
         div_factor=div_factor/n
     if n>121:
         for i in range(n-120,n):
             a=(b_lastrate[n-1]-b_lastrate[i])
             b=(indicator[n-1]-indicator[i])
-            local_div_factor=local_div_factor+b#+a*delta/4
+            local_div_factor=local_div_factor+b
         local_div_factor=local_div_factor/120
-    if n>21:
-        for i in range(n-20,n):
+    if n>11:
+        for i in range(n-10,n):
             a=(b_lastrate[n-1]-b_lastrate[i])
             b=(indicator[n-1]-indicator[i])
-            instant_div_factor=instant_div_factor+b#+a*delta/4
-        instant_div_factor=instant_div_factor/20
+            instant_div_factor=instant_div_factor+b
+        instant_div_factor=instant_div_factor/10
     return indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor
 
 def strike_list(strike1,strike2):
@@ -502,9 +502,9 @@ ax_right.plot(inst_diverge, color='orange')
 #%%
 k=-np.array(l_diverge)+np.array(inst_diverge)
 iso=[]
-for i in range(1,len(k)):
-    iso=iso+[k[i]-k[i-1]]
-iso=[0]+iso
+for i in range(4,len(k)):
+    iso=iso+[k[i]-k[i-4]]
+iso=[0,0,0,0]+iso
 profit=0
 loss=0
 c1=0
@@ -512,17 +512,17 @@ c2=0
 pair1=[]
 pair2=[]
 number_of_trades=0
-for iter in range(200,len(iso)):
-    if iso[iter]>0.4 and c1==0 :
+for iter in range(122,len(iso)):
+    if iso[iter]>1 and c1==0 :
         pair1=pair1+[b_lastrate[iter]]
         c1=1
-    if iso[iter]<-0.4 and c2==0 :
+    if iso[iter]<-1 and c2==0 :
         pair2=pair2+[b_lastrate[iter]]
         c2=1
-    if c1==1 and iso[iter]<-0.4  :
+    if c1==1 and iso[iter]<-0.1  :
         pair1=pair1+[b_lastrate[iter]]
         c1=0
-    if c2==1 and iso[iter]>0.4  :
+    if c2==1 and iso[iter]>0.1  :
         pair2=pair2+[b_lastrate[iter]]
         c2=0
     if len(pair1)==2:
@@ -544,11 +544,10 @@ print('total profit',profit)
 print('number of trades',number_of_trades)
 print('profit per trade',(profit+loss)/number_of_trades)
 print('loss',loss)
-print('success ratio',-profit/loss)
+print('success ratio',-profit/(loss+0.1))
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
-ax_left.plot(b_lastrate, color='blue')
-ax_right.plot(k, color='red')
-ax_right.plot(new_version, color='orange')
+ax_left.plot(b_lastrate[120:], color='blue')
+ax_right.plot(k[122:], color='red')
 
 # %%
