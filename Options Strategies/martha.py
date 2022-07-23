@@ -235,7 +235,7 @@ while True:
         print('')
     if tron>0:
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron)
-    if int(ind_time[11:13])*60+int(ind_time[14:16])>913 :
+    if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         break
 
