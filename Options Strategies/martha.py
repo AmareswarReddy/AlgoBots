@@ -238,7 +238,10 @@ while True:
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         break
-
+    json_data = {'lastrate': list(b_lastrate), 'k':list(to_deal)}
+    with open('variables_data.json', 'w') as  json_file:
+        json.dump(json_data, json_file)
+        
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
 ax_left.plot(b_lastrate, color='blue')
@@ -294,3 +297,11 @@ fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
 ax_left.plot(b_lastrate[120:], color='blue')
 ax_right.plot(k[122:], color='red')
+
+
+#%%
+from scipy.stats.stats import pearsonr   
+a = [4,6,7,1,4,5]
+b = [4,6,7,1,4,-5]   
+print(pearsonr(a,b))
+# %%
