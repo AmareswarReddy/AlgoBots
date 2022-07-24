@@ -230,7 +230,7 @@ while True:
     to_deal=to_deal+[instant_div_factor-local_div_factor]
     print('sample no.:',len(to_deal))
     print('base_indicator :',to_deal[-1])
-    corr=corr+[pearsonr(to_deal[-10:],b_lastrate[-10:])]
+    corr=corr+[pearsonr(to_deal[-10:],b_lastrate[-10:])[0]]
     if len(to_deal)>2:
         del_to_deal=to_deal[-1]-to_deal[-2]
         print('new_indicator',del_to_deal)
@@ -305,5 +305,5 @@ ax_right.plot(k[122:], color='red')
 from scipy.stats import pearsonr   
 a = [0,4,6,7,1,10,4,10]
 b = [0,-4,-6,-7,-1,-4,-4,-10]   
-print()
+print(pearsonr(a,b)[0])
 # %%
