@@ -240,7 +240,7 @@ while True:
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         break
-    json_data = {'lastrate': list(b_lastrate[-120:]), 'k':list(to_deal[-120:]),'corr':list(corr[-120:])}
+    json_data = {'lastrate': list(b_lastrate[-120:]), 'k':list(to_deal[-120:]),'corr':list(np.array(corr[-120:])*10)}
     with open('variables_data.json', 'w') as  json_file:
         json.dump(json_data, json_file)
         
