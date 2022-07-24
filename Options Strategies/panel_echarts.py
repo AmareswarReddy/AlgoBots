@@ -31,6 +31,7 @@ def refresh_chart():
         
     echart['series'] = [dict(echart['series'][0], data= lastrate), dict(echart['series'][1], data= k)]
     echart['xAxis'] = dict(echart['xAxis'], data = x_axis_array)
+    echart['yAxis'] = [dict(echart['yAxis'][0], min = min(lastrate),max = max(lastrate))]
     echart_pane.param.trigger('object')
 
     # min_banknifty = min(lastrate)
@@ -90,7 +91,7 @@ def cb_button(event):
     print("Hello")
     #refresh_chart()
 button.on_click(cb_button)
-cb = pn.state.add_periodic_callback(refresh_chart, 5000)
+cb = pn.state.add_periodic_callback(refresh_chart, 2000)
 
 pn.template.FastListTemplate(
     site="Echarts", 
