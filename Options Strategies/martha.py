@@ -13,6 +13,7 @@ import requests
 from pytz import timezone 
 from cred import *
 from py5paisa.order import Basket_order
+from scipy.stats import pearsonr   
 
 def client_login(client):
     import json
@@ -125,7 +126,7 @@ def packup(option_chain,prime_client,taken_trade,exclusive_strike,tron):
         prime_client['login'].place_order(test_order)
     return 0
 
-def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,lots_tuner,tron):
+def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,lots_tuner,tron,corr):
     if local_div_factor!=0 :
         if del_to_deal>0.4 and to_deal<-tempo and taken_trade==0 :
             exclusive_strike=int(np.round(x/100)*100)
@@ -229,16 +230,17 @@ while True:
     to_deal=to_deal+[instant_div_factor-local_div_factor]
     print('sample no.:',len(to_deal))
     print('base_indicator :',to_deal[-1])
+    corr=corr+[pearsonr(to_deal[-10:],b_lastrate[-10:])]
     if len(to_deal)>2:
         del_to_deal=to_deal[-1]-to_deal[-2]
         print('new_indicator',del_to_deal)
         print('')
     if tron>0:
-        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron)
+        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         break
-    json_data = {'lastrate': list(b_lastrate[len(b_lastrate)-120:]), 'k':list(to_deal[len(to_deal)-120:len(to_deal)])}
+    json_data = {'lastrate': list(b_lastrate[-120:]), 'k':list(to_deal[-120:]),'corr':list(corr[-120:])}
     with open('variables_data.json', 'w') as  json_file:
         json.dump(json_data, json_file)
         
@@ -300,8 +302,8 @@ ax_right.plot(k[122:], color='red')
 
 
 #%%
-from scipy.stats.stats import pearsonr   
+from scipy.stats import pearsonr   
 a = [0,4,6,7,1,10,4,10]
 b = [0,-4,-6,-7,-1,-4,-4,-10]   
-print(pearsonr(a,b))
+print()
 # %%
