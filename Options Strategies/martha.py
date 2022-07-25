@@ -176,10 +176,10 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             lots_tuner=lots_tuner*2
     return taken_trade,exclusive_strike,tempo,lots_tuner
 #%%
-'''ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')'''
-'''while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :'''
-'''    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')'''
-#%%
+ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -195,6 +195,7 @@ diverge=[]
 l_diverge=[]
 inst_diverge=[]
 to_deal=[]
+corr=[]
 exclusive_strike=0
 taken_trade=0
 tempo=10
@@ -230,12 +231,13 @@ while True:
     to_deal=to_deal+[instant_div_factor-local_div_factor]
     print('sample no.:',len(to_deal))
     print('base_indicator :',to_deal[-1])
-    corr=corr+[pearsonr(to_deal[-10:],b_lastrate[-10:])[0]]
-    if len(to_deal)>2:
+    if len(to_deal)>11:
+        corr=corr+[pearsonr(to_deal[-10:],b_lastrate[-10:])[0]]
+    if len(to_deal)>11:
         del_to_deal=to_deal[-1]-to_deal[-2]
         print('new_indicator',del_to_deal)
         print('')
-    if tron>0:
+    if tron>0 and len(to_deal)>11:
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
@@ -243,7 +245,7 @@ while True:
     json_data = {'lastrate': list(b_lastrate[-120:]), 'k':list(to_deal[-120:]),'corr':list(np.array(corr[-120:])*10)}
     with open('variables_data.json', 'w') as  json_file:
         json.dump(json_data, json_file)
-        
+    sleep(2)
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
 ax_left.plot(b_lastrate, color='blue')

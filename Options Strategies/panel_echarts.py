@@ -87,7 +87,7 @@ echart = {
         'data': k,
         'smooth': True
     }, {
-        'name': 'L',
+        'name': 'corr',
         'type': 'line',
         'yAxisIndex': 1,
         'data': corr,
