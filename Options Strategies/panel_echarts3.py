@@ -79,6 +79,7 @@ echart = {
         'yAxisIndex': 1,
         'data': k,
         'smooth': True
+    }
     
     ],
 }
