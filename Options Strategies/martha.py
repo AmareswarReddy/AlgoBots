@@ -196,6 +196,7 @@ l_diverge=[]
 inst_diverge=[]
 to_deal=[]
 corr=[]
+corr_window=10
 exclusive_strike=0
 taken_trade=0
 tempo=10
@@ -231,18 +232,18 @@ while True:
     to_deal=to_deal+[instant_div_factor-local_div_factor]
     print('sample no.:',len(to_deal))
     print('base_indicator :',to_deal[-1])
-    if len(to_deal)>11:
-        corr=corr+[pearsonr(to_deal[-10:],b_lastrate[-10:])[0]]
-    if len(to_deal)>11:
+    if len(to_deal)>corr_window+1:
+        corr=corr+[pearsonr(to_deal[-corr_window:],b_lastrate[-corr_window:])[0]]
+    if len(to_deal)>corr_window+1:
         del_to_deal=to_deal[-1]-to_deal[-2]
         print('new_indicator',del_to_deal)
         print('')
-    if tron>0 and len(to_deal)>11:
+    if tron>0 and len(to_deal)>corr_window+1:
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         break
-    json_data = {'lastrate': list(b_lastrate[-120:]), 'k':list(to_deal[-120:]),'corr':list(np.array(corr[-120:])*10)}
+    json_data = {'lastrate': list(b_lastrate[corr_window+1:][-120:]), 'k':list(to_deal[corr_window+1:][-120:]),'corr':list(np.array(corr[-120:])*10)}
     with open('variables_data.json', 'w') as  json_file:
         json.dump(json_data, json_file)
     sleep(2)
