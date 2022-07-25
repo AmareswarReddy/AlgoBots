@@ -1,4 +1,5 @@
 import panel as pn
+import numpy as np
 import json 
 pn.extension('echarts')
 
@@ -7,8 +8,9 @@ lastrate = []
 x_axis_array = []
 with open('variables_data.json', 'r') as  json_file:
     j_data = json.load(json_file)
-    lastrate = j_data['lastrate'][120:]
-    k = j_data['k'][120:]
+    lastrate = j_data['lastrate']
+    k = j_data['k']
+    corr = j_data['corr']
 for i in range(0,len(k)):
     x_axis_array.append(i)
 
@@ -21,15 +23,16 @@ def refresh_chart():
     with open('variables_data.json', 'r') as  json_file:
         print("Hello from inside json read")
         j_data = json.load(json_file)
-        lastrate = j_data['lastrate'][120:]
-        k = j_data['k'][120:]
+        lastrate = j_data['lastrate']
+        k = j_data['k']
+        corr = j_data['corr']
         print(len(lastrate))
         print(len(k))
         x_axis_array = []
         for i in range(0,len(k)):
             x_axis_array.append(i)
         
-    echart['series'] = [dict(echart['series'][0], data= lastrate), dict(echart['series'][1], data= k)]
+    echart['series'] = [dict(echart['series'][0], data= lastrate), dict(echart['series'][1], data= k), dict(echart['series'][2], data= corr)]
     echart['xAxis'] = dict(echart['xAxis'], data = x_axis_array)
     echart['yAxis'] = [dict(echart['yAxis'][0], min = min(lastrate),max = max(lastrate))]
     echart_pane.param.trigger('object')
@@ -43,7 +46,7 @@ echart = {
     },
     'tooltip': {},
     'legend': {
-        'data':['BANKNIFTY', 'K']
+        'data':['BANKNIFTY', 'K', 'L']
     },
     'xAxis': {
         'data': x_axis_array
@@ -61,6 +64,11 @@ echart = {
       'type': 'value',
       'name': 'K',
       'position': 'right',
+    },
+    {
+      'type': 'value',
+      'name': 'corr',
+      'position': 'right',
     }
   ],
 
@@ -77,6 +85,12 @@ echart = {
         'type': 'line',
         'yAxisIndex': 1,
         'data': k,
+        'smooth': True
+    }, {
+        'name': 'L',
+        'type': 'line',
+        'yAxisIndex': 1,
+        'data': corr,
         'smooth': True
     }
     ],
