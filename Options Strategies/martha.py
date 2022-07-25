@@ -253,10 +253,15 @@ ax_left.plot(b_lastrate, color='blue')
 ax_right.plot(to_deal, color='red')
 
 #%%
-k=-np.array(l_diverge)+np.array(inst_diverge)
+k=j_data['k']
+b_lastrate=j_data['lastrate']
+corr=[]
+corr_window=50
+for i in range(122,len(k)):
+    corr=corr+[pearsonr(k[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
 iso=[]
 for i in range(4,len(k)):
-    iso=iso+[k[i]-k[i-4]]
+    iso=iso+[k[i]-k[i-1]]
 iso=[0,0,0,0]+iso
 profit=0
 loss=0
@@ -265,48 +270,59 @@ c2=0
 pair1=[]
 pair2=[]
 number_of_trades=0
+temp=10
 for iter in range(122,len(iso)):
-    if iso[iter]>1 and c1==0 :
+    if iso[iter]>0.4 and k[iter]<-temp and c1==0:
         pair1=pair1+[b_lastrate[iter]]
         c1=1
-    if iso[iter]<-1 and c2==0 :
+        temp=temp+10
+    if iso[iter]<-0.4 and k[iter]>temp and c2==0 :
         pair2=pair2+[b_lastrate[iter]]
         c2=1
-    if c1==1 and iso[iter]<-0.1  :
+        temp=temp+10 
+    if c1==1 and iso[iter]<0  and k[iter]>0:
         pair1=pair1+[b_lastrate[iter]]
         c1=0
-    if c2==1 and iso[iter]>0.1  :
+        c1_m=(temp-10)/10
+        temp=10
+    if c2==1 and iso[iter]>0  and k[iter]<0 :
         pair2=pair2+[b_lastrate[iter]]
         c2=0
+        c2_m=(temp-10)/10
+        temp=10
+    if iso[iter]>0.4 and k[iter]<-temp  :
+        temp=temp+10
+        pair1=[(pair1[0]+b_lastrate[iter])/2]
+    if iso[iter]<-0.4 and k[iter]>temp  :
+        temp=temp+10
+        pair2=[(pair2[0]+b_lastrate[iter])/2]
     if len(pair1)==2:
         if pair1[1]-pair1[0]>0:
-            profit=profit+pair1[1]-pair1[0]
+            profit=profit+(pair1[1]-pair1[0])*c1_m
         else:
-            loss=loss+pair1[1]-pair1[0]
+            loss=loss+(pair1[1]-pair1[0])*c1_m
+        print(pair1)
         pair1=[]
         number_of_trades=number_of_trades+1
     if len(pair2)==2:
         if pair2[1]-pair2[0]<0:
-            profit=profit+pair2[0]-pair2[1]
+            profit=profit+c2_m*(pair2[0]-pair2[1])
         else:
-            loss=loss-(pair2[1]-pair2[0])
-            print(pair2)
+            loss=loss-c2_m*(pair2[1]-pair2[0])
+            
         pair2=[]
         number_of_trades=number_of_trades+1
 print('total profit',profit)
 print('number of trades',number_of_trades)
 print('profit per trade',(profit+loss)/number_of_trades)
 print('loss',loss)
-print('success ratio',-profit/(loss+0.1))
+print('success ratio',-profit/(loss))
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
 ax_left.plot(b_lastrate[120:], color='blue')
 ax_right.plot(k[122:], color='red')
+for i in range(0,len(corr)):
+    if corr[i]>0:
+        corr[i]=0
+ax_right.plot(np.array(corr)*30, color='yellow',linewidth=0.1)
 
-
-#%%
-from scipy.stats import pearsonr   
-a = [0,4,6,7,1,10,4,10]
-b = [0,-4,-6,-7,-1,-4,-4,-10]   
-print(pearsonr(a,b)[0])
-# %%
