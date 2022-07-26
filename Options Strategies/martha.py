@@ -149,7 +149,7 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*(lots_tuner), price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order)
-            tempo=10
+            tempo=20
             lots_tuner=tron
             taken_trade=0
         if del_to_deal>0 and to_deal<0 and taken_trade==-1:
@@ -159,7 +159,7 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             prime_client['login'].place_order(test_order)
             taken_trade=0
             lots_tuner=tron
-            tempo=10
+            tempo=20
         if del_to_deal>0.4 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24:
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
@@ -199,7 +199,7 @@ corr=[]
 corr_window=10
 exclusive_strike=0
 taken_trade=0
-tempo=10
+tempo=20
 new_version=[]
 lots_tuner=tron
 while True:
