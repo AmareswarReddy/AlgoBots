@@ -260,13 +260,14 @@ while True:
     json_data = {'lastrate': list(b_lastrate[corr_window+1:][-120:]), 'k':list(to_deal[corr_window+1:][-120:]),'corr':list(np.array(corr[-120:])*10)}
     with open('variables_data.json', 'w') as  json_file:
         json.dump(json_data, json_file)
-    sleep(2)
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
 ax_left.plot(b_lastrate, color='blue')
 ax_right.plot(to_deal, color='red')
 
 #%%
+with open('variables_data_all.json', 'r') as  json_file:
+    j_data = json.load(json_file)
 k=j_data['k']
 b_lastrate=j_data['lastrate']
 corr=[]
@@ -339,4 +340,27 @@ for i in range(0,len(corr)):
     if corr[i]>0:
         corr[i]=0
 ax_right.plot(np.array(corr)*30, color='yellow',linewidth=0.1)
+#%%
+a=k[122:]
+b=b_lastrate[122:]
+pair1=[]
+pair2=[]
+profit=0
+for iter in range(2,len(b)):
+    if corr[iter]<0 and (a[iter]-a[iter-1])>0 and len(pair1)==0:
+        pair1=[b_lastrate[iter]]
+    if len(pair1)>0 and (a[iter]-a[iter-1])<0 and corr[iter]>0 :
+        pair1=pair1+[b_lastrate[iter]]
+    if len(pair1)==2:
+        profit=profit+pair1[1]-pair1[0]
+        pair1=[]
+    if corr[iter]<0 and (a[iter]-a[iter-1])<0 and len(pair2)==0:
+        pair2=[b_lastrate[iter]]
+    if len(pair2)>0 and (a[iter]-a[iter-1])>0 and corr[iter]>0 :
+        pair2=pair2+[b_lastrate[iter]]
+    if len(pair2)==2:
+        profit=profit+pair2[0]-pair2[1]
+        pair2=[]
 
+
+# %%
