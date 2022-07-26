@@ -13,7 +13,23 @@ import requests
 from pytz import timezone 
 from cred import *
 from py5paisa.order import Basket_order
-from scipy.stats import pearsonr   
+
+def pearsonr(x, y):
+    n = len(x)
+    x = np.asarray(x)
+    y = np.asarray(y)
+    dtype = type(1.0 + x[0] + y[0])
+    if n == 2:
+        return dtype(np.sign(x[1] - x[0])*np.sign(y[1] - y[0])), 1.0
+    xmean = x.mean(dtype=dtype)
+    ymean = y.mean(dtype=dtype)
+    xm = x.astype(dtype) - xmean
+    ym = y.astype(dtype) - ymean
+    normxm = np.linalg.norm(xm)
+    normym = np.linalg.norm(ym)
+    r = np.dot(xm/normxm, ym/normym)
+    r = max(min(r, 1.0), -1.0)
+    return r,0
 
 def client_login(client):
     import json
@@ -79,21 +95,19 @@ def past_picture(indicator,project_k,b_lastrate,x):
     div_factor=0
     local_div_factor=0
     instant_div_factor=0
-    if n>2:
-        for i in range(1,n):
-            a=(b_lastrate[n-1]-b_lastrate[i])
-            b=(indicator[n-1]-indicator[i])
-            div_factor=div_factor+b 
-        div_factor=div_factor/n
+    '''if n>2:'''
+    '''    for i in range(1,n):'''
+    '''        a=(b_lastrate[n-1]-b_lastrate[i])'''
+    '''        b=(indicator[n-1]-indicator[i])'''
+    '''        div_factor=div_factor+b '''
+    '''    div_factor=div_factor/n'''
     if n>121:
         for i in range(n-120,n):
-            a=(b_lastrate[n-1]-b_lastrate[i])
             b=(indicator[n-1]-indicator[i])
             local_div_factor=local_div_factor+b
         local_div_factor=local_div_factor/120
     if n>11:
         for i in range(n-10,n):
-            a=(b_lastrate[n-1]-b_lastrate[i])
             b=(indicator[n-1]-indicator[i])
             instant_div_factor=instant_div_factor+b
         instant_div_factor=instant_div_factor/10
