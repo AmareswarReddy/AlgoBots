@@ -236,7 +236,6 @@ while True:
     proj,Cyi,Phf=rosetta_strikes(option_chain)
     project_k=(x-proj)
     print('Niftybank:  ',project_k)
-    nifty_bank=nifty_bank+[project_k]
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
@@ -247,8 +246,6 @@ while True:
     dynamic_crossover=(c1+c2+p1+p2)/4
     indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x)
     diverge=diverge+[div_factor]
-    l_diverge=l_diverge+[local_div_factor]
-    inst_diverge=inst_diverge+[instant_div_factor]
     to_deal=to_deal+[instant_div_factor-local_div_factor]
     print('sample no.:',len(to_deal))
     print('base_indicator :',to_deal[-1])
@@ -259,11 +256,11 @@ while True:
         print('new_indicator',del_to_deal)
         print('')
     if tron>0 and len(to_deal)>corr_window+1:
-        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x)
+        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,project_k)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         break
-    json_data = {'lastrate': list(b_lastrate[corr_window+1:][-120:]), 'k':list(to_deal[corr_window+1:][-120:]),'corr':list(np.array(corr[-120:])*10),'nifty_bank':list(np.array(nifty_bank[-120:]))}
+    json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator))}
     with open('variables_data.json', 'w') as  json_file:
         json.dump(json_data, json_file)
 fig, ax_left = plt.subplots()

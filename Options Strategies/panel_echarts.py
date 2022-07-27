@@ -84,18 +84,19 @@ echart = {
     }
     ,
     {
+    'name': 'corr',
+    'type': 'line',
+    'data': corr,
+    'yAxisIndex': 1,
+    'smooth': True
+    },
+    {
         'name': 'K',
         'type': 'line',
         'yAxisIndex': 1,
         'data': k,
         'smooth': True
-    }, {
-        'name': 'corr',
-        'type': 'line',
-        'data': corr,
-        'yAxisIndex': 2,
-        'smooth': True
-    }
+    }, 
     ],
 }
 
