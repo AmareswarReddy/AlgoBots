@@ -11,6 +11,7 @@ with open('variables_data.json', 'r') as  json_file:
     lastrate = j_data['lastrate']
     k = j_data['k']
     corr = j_data['corr']
+    #corr=list[np.array(corr)*-1]
 for i in range(0,len(k)):
     x_axis_array.append(i)
 
@@ -68,6 +69,8 @@ echart = {
     {
       'type': 'value',
       'name': 'corr',
+      'min': -10,
+      'max': 10,
       'position': 'right',
     }
   ],
@@ -89,15 +92,15 @@ echart = {
     }, {
         'name': 'corr',
         'type': 'line',
-        'yAxisIndex': 1,
         'data': corr,
+        'yAxisIndex': 2,
         'smooth': True
     }
     ],
 }
 
 
-echart_pane = pn.pane.ECharts(echart, height=480, width=720)
+echart_pane = pn.pane.ECharts(echart, height=480, width=1400)
 echart_pane
 
 button = pn.widgets.Button(name='Click me', button_type='primary')
