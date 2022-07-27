@@ -217,9 +217,14 @@ tempo=20
 new_version=[]
 lots_tuner=tron
 while True:
-    re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-    aa=prime_client['login'].fetch_market_feed(re)
-    x=aa['Data'][0]['LastRate']
+    while True:
+        try:
+            re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
+            aa=prime_client['login'].fetch_market_feed(re)
+            x=aa['Data'][0]['LastRate']
+            break
+        except Exception:
+            pass
     while True:
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
