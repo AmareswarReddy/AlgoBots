@@ -145,8 +145,8 @@ button.on_click(cb_button)
 cb = pn.state.add_periodic_callback(refresh_chart, 2000)
 
 pn.template.FastListTemplate(
-    site="Echarts", 
-    title="Assy", 
+    site="Welcome", 
+    title="Ammu", 
     theme="dark",
     sidebar=[button], 
     main=[
