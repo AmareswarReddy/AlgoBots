@@ -11,6 +11,7 @@ with open('variables_data.json', 'r') as  json_file:
     lastrate = j_data['lastrate']
     k = j_data['k']
     corr = j_data['corr']
+    niftybank=j_data['nifty_bank']
     #corr=list[np.array(corr)*-1]
 for i in range(0,len(k)):
     x_axis_array.append(i)
@@ -27,6 +28,7 @@ def refresh_chart():
         lastrate = j_data['lastrate']
         k = j_data['k']
         corr = j_data['corr']
+        niftybank=j_data['nifty_bank']
         print(len(lastrate))
         print(len(k))
         x_axis_array = []
@@ -38,6 +40,10 @@ def refresh_chart():
     echart['yAxis'] = [dict(echart['yAxis'][0], min = min(lastrate),max = max(lastrate))]
     echart_pane.param.trigger('object')
 
+    echart2['series'] = [dict(echart2['series'][0], data= niftybank)]
+    echart2['xAxis'] = dict(echart2['xAxis'], data = x_axis_array)
+    echart_pane2.param.trigger('object')
+
     # min_banknifty = min(lastrate)
     # max_banknifty = max(lastrate)
     
@@ -47,7 +53,7 @@ echart = {
     },
     'tooltip': {},
     'legend': {
-        'data':['BANKNIFTY', 'K', 'L']
+        'data':['BANKNIFTY', 'L', 'K']
     },
     'xAxis': {
         'data': x_axis_array
@@ -59,11 +65,6 @@ echart = {
       'name': 'BANKNIFTY',
       'min': min_banknifty,
       'max': max_banknifty,
-      'position': 'left',
-    },
-    {
-      'type': 'value',
-      'name': 'K',
       'position': 'right',
     },
     {
@@ -72,6 +73,11 @@ echart = {
       'min': -10,
       'max': 10,
       'position': 'right',
+    },
+    {
+   'type': 'value',
+   'name': 'K',
+   'position': 'left',
     }
   ],
 
@@ -100,9 +106,36 @@ echart = {
     ],
 }
 
-
+echart2= {
+    'title': {
+        #'text': 'ECharts entry example'
+    },
+    'tooltip': {},
+    'legend': {
+        'data':['nifty_bank',]
+    },
+    'xAxis': {
+        'data': x_axis_array
+    },
+    'yAxis': [
+    {
+      'type': 'value',
+      'name': 'nifty_bank',
+      'position': 'left',
+    }
+  ],
+    'series': [{
+        'name': 'nifty_bank',
+        'type': 'line',
+        'yAxisIndex': 0,
+        'data': niftybank,
+        'smooth': True
+    }
+    ]
+}
 echart_pane = pn.pane.ECharts(echart, height=480, width=1400)
 echart_pane
+echart_pane2 = pn.pane.ECharts(echart2, height=480, width=1400)
 
 button = pn.widgets.Button(name='Click me', button_type='primary')
 def cb_button(event):
@@ -117,7 +150,8 @@ pn.template.FastListTemplate(
     theme="dark",
     sidebar=[button], 
     main=[
-       echart_pane
+       echart_pane,
+       echart_pane2
     ]
 ).servable()
 

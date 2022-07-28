@@ -106,11 +106,11 @@ def past_picture(indicator,project_k,b_lastrate,x):
             b=(indicator[n-1]-indicator[i])
             local_div_factor=local_div_factor+b
         local_div_factor=local_div_factor/120
-    if n>11:
-        for i in range(n-10,n):
+    if n>21:
+        for i in range(n-20,n):
             b=(indicator[n-1]-indicator[i])
             instant_div_factor=instant_div_factor+b
-        instant_div_factor=instant_div_factor/10
+        instant_div_factor=instant_div_factor/20
     return indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor
 
 def strike_list(strike1,strike2):
@@ -193,7 +193,7 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-
+#%%
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -260,7 +260,7 @@ while True:
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         break
-    json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator))}
+    json_data = {'lastrate': list(b_lastrate[corr_window+1:][-240:]), 'k':list(to_deal[corr_window+1:][-240:]),'corr':list(np.array(corr[-240:])*10),'nifty_bank':list(np.array(indicator[-240:]))}
     with open('variables_data.json', 'w') as  json_file:
         json.dump(json_data, json_file)
 fig, ax_left = plt.subplots()
