@@ -55,7 +55,10 @@ echart = {
         'data':['BANKNIFTY', 'K', 'corr']
     },
     'xAxis': {
-        'data': x_axis_array
+        'data': x_axis_array,
+         'splitLine': {
+         'show': False
+      }
     },
 
     'yAxis': [
@@ -65,16 +68,25 @@ echart = {
       'min': min_banknifty,
       'max': max_banknifty,
       'position': 'right',
+       'splitLine': {
+         'show': False
+      }
     },
     {
       'type': 'value',
       'name': 'K',
       'position': 'right',
+       'splitLine': {
+         'show': False
+      }
     },
     {
       'type': 'value',
       'name': 'corr',
       'position': 'left',
+       'splitLine': {
+         'show': False
+      }
     }
   ],
 
@@ -114,13 +126,19 @@ echart2= {
         'data':['nifty_bank',]
     },
     'xAxis': {
-        'data': x_axis_array
+        'data': x_axis_array,
+         'splitLine': {
+         'show': False
+      }
     },
     'yAxis': [
     {
       'type': 'value',
       'name': 'nifty_bank',
       'position': 'left',
+       'splitLine': {
+         'show': False
+      }
     }
   ],
     'series': [{
