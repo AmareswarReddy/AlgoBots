@@ -259,6 +259,9 @@ while True:
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,project_k)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
+        json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator))}
+        with open('variables_data_'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
+            json.dump(json_data, json_file)
         break
     json_data = {'lastrate': list(b_lastrate[corr_window+1:][-240:]), 'k':list(to_deal[corr_window+1:][-240:]),'corr':list(np.array(corr[-240:])*10),'nifty_bank':list(np.array(indicator[-240:]))}
     with open('variables_data.json', 'w') as  json_file:
