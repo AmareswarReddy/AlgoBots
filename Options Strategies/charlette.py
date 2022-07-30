@@ -169,6 +169,14 @@ def charlette_special(option_chain,exclusive_strike,taken_trade,x,b_delta,direct
         taken_trade=0
     return taken_trade,exclusive_strike
 #%%
+def charlette_exclusive_straddle(x,b_delta,b_ind,current_indicator):
+    if b_ind!=0:
+        straddle_strike=x-current_indicator*(b_delta/b_ind)
+    else:
+        straddle_strike=0
+    return straddle_strike
+
+#%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>900 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -185,11 +193,11 @@ p_scrip=int(p_data[p_data['StrikeRate']==p_striker]['ScripCode'])
 indicator=[]
 b_lastrate=[]
 to_deal=[]
-corr=[]
 direct_corr=[]
 corr_window=10
 exclusive_strike=0
 taken_trade=0
+charlette_straddle_strike=[]
 while True:
     while True:
         try:
@@ -213,13 +221,15 @@ while True:
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     indicator=indicator+[project_k]
     b_delta=indicator[-1]-indicator[-10]
+    b_ind=indicator[-1]-indicator[-10]
     if len(b_lastrate)>corr_window+1:
         direct_corr=direct_corr+[pearsonr(b_lastrate[-corr_window:],indicator[-corr_window:])]
+        charlette_straddle_strike=charlette_straddle_strike+[charlette_exclusive_straddle(x,b_delta,b_ind,indicator[-1])]
     if tron>0 and len(b_lastrate)>corr_window+1:
         taken_trade,exclusive_strike=charlette_special(option_chain,exclusive_strike,taken_trade,x,b_delta,direct_corr)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike)
-        json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator))}
+        json_data = {'lastrate': list(b_lastrate[corr_window+1:]),'nifty_bank':list(np.array(indicator)),'charrlette_straddle_strike': list(charlette_straddle_strike[corr_window+1:])}
         with open('variables_data_'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
             json.dump(json_data, json_file)
         break
