@@ -229,16 +229,16 @@ while True:
         taken_trade,exclusive_strike=charlette_special(option_chain,exclusive_strike,taken_trade,x,b_delta,direct_corr)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike)
-        json_data = {'lastrate': list(b_lastrate[corr_window+1:]),'nifty_bank':list(np.array(indicator)),'charrlette_straddle_strike': list(charlette_straddle_strike[corr_window+1:])}
+        json_data = {'lastrate': list(b_lastrate[corr_window+1:]),'nifty_bank':list(np.array(indicator[corr_window+1:])),'charrlette_straddle_strike': list(charlette_straddle_strike[corr_window+1:])}
         with open('variables_data_'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
             json.dump(json_data, json_file)
         break
-    json_data = {'lastrate': list(b_lastrate[corr_window+1:][-240:]), 'k':list(to_deal[corr_window+1:][-240:]),'corr':list(np.array(corr[-240:])*10),'nifty_bank':list(np.array(indicator[-240:]))}
+    json_data = {'lastrate': list(b_lastrate[corr_window+1:][-240:]),'nifty_bank':list(np.array(indicator[corr_window+1:][-240:])),'charrlette_straddle_strike': list(charlette_straddle_strike[corr_window+1:][-240:])}
     with open('variables_data.json', 'w') as  json_file:
         json.dump(json_data, json_file)
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
 ax_left.plot(b_lastrate, color='blue')
-ax_right.plot(to_deal, color='red')
+ax_right.plot(charlette_straddle_strike, color='red')
 
 # %%
