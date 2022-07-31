@@ -50,7 +50,7 @@ def client_login(client):
 import sys
 client_name   = 'bhaskar'
 #lots=int(input('lots (Eg:3):'))
-tron=int(input('enter the number of lots for buying :'))
+tron=int(input('enter the number of lots for buying :'))*25
 def rosetta_strikes(option_chain):
     pe_data=option_chain[option_chain['CPType']=='PE']
     ce_data=option_chain[option_chain['CPType']=='CE']
@@ -131,12 +131,12 @@ def packup(option_chain,prime_client,taken_trade,exclusive_strike):
     if taken_trade==-1:
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=1000, price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
     elif taken_trade==1:
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=1000, price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
     return 0
 
@@ -145,26 +145,26 @@ def charlette_special(option_chain,exclusive_strike,taken_trade,x,b_delta,direct
         exclusive_strike=int(np.round(x/100)*100)
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=1000, price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=1
     if direct_corr>0 and taken_trade==0 and b_delta<0 :
         exclusive_strike=int(np.round(x/100)*100)
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=1000, price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=-1
     if direct_corr<0 and taken_trade==1 :
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=1000, price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
         taken_trade=0
     if direct_corr<0 and taken_trade==-1:
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=1000, price=0 ,is_intraday=False,remote_order_id="tag")
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order)
         taken_trade=0
     return taken_trade,exclusive_strike
