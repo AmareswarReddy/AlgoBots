@@ -220,11 +220,12 @@ while True:
     print('Niftybank:  ',project_k)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     indicator=indicator+[project_k]
-    b_delta=indicator[-1]-indicator[-10]
-    b_ind=indicator[-1]-indicator[-10]
     if len(b_lastrate)>corr_window+1:
+        b_delta=indicator[-1]-indicator[-10]
+        b_ind=indicator[-1]-indicator[-10]
         direct_corr=direct_corr+[pearsonr(b_lastrate[-corr_window:],indicator[-corr_window:])]
         charlette_straddle_strike=charlette_straddle_strike+[charlette_exclusive_straddle(x,b_delta,b_ind,indicator[-1])]
+        print(charlette_straddle_strike[-1])
     if tron>0 and len(b_lastrate)>corr_window+1:
         taken_trade,exclusive_strike=charlette_special(option_chain,exclusive_strike,taken_trade,x,b_delta,direct_corr)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
