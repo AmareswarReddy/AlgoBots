@@ -204,6 +204,7 @@ while True:
             re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
             aa=prime_client['login'].fetch_market_feed(re)
             x=aa['Data'][0]['LastRate']
+            b_lastrate=b_lastrate+[x]
             break
         except Exception:
             pass
