@@ -272,12 +272,13 @@ ax_left.plot(b_lastrate, color='blue')
 ax_right.plot(to_deal, color='red')
 
 #%%
-with open('variables_data_all.json', 'r') as  json_file:
+import json
+with open('variables_data_0.json', 'r') as  json_file:
     j_data = json.load(json_file)
 k=j_data['k']
 b_lastrate=j_data['lastrate']
 corr=[]
-corr_window=50
+corr_window=10
 for i in range(122,len(k)):
     corr=corr+[pearsonr(k[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
 iso=[]
@@ -367,6 +368,31 @@ for iter in range(2,len(b)):
     if len(pair2)==2:
         profit=profit+pair2[0]-pair2[1]
         pair2=[]
-
+print(profit)
 
 # %%
+import json
+with open('variables_data_0.json', 'r') as  json_file:
+    j_data = json.load(json_file)
+k=j_data['k']
+b_lastrate=j_data['lastrate']
+indicator=j_data['nifty_bank']
+corr=[]
+corr_window=50
+for i in range(122,len(k)):
+    #corr=corr+[pearsonr(indicator[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
+    corr=corr+[pearsonr(indicator[:i],b_lastrate[:i])[0]]
+
+fig, ax_left = plt.subplots()
+ax_right = ax_left.twinx()
+
+#%%
+i=0
+while True:
+    i=i+100
+    fig, ax_left = plt.subplots()
+    ax_right = ax_left.twinx()
+    ax_left.plot(b_lastrate[i:i+500], color='blue')
+    ax_right.plot(corr[i:i+500], color='red')
+    plt.show()
+    input('fg')

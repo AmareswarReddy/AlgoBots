@@ -141,14 +141,14 @@ def packup(option_chain,prime_client,taken_trade,exclusive_strike):
     return 0
 
 def charlette_special(option_chain,exclusive_strike,taken_trade,x,b_delta,direct_corr):
-    if direct_corr>0 and  taken_trade==0 and b_delta>0 :
+    if direct_corr>0.6 and  taken_trade==0 and b_delta>0 :
         exclusive_strike=int(np.round(x/100)*100)
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
         test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=tron, price=0 ,is_intraday=False,remote_order_id="tag")
         prime_client['login'].place_order(test_order) 
         taken_trade=1
-    if direct_corr>0 and taken_trade==0 and b_delta<0 :
+    if direct_corr>0.6 and taken_trade==0 and b_delta<0 :
         exclusive_strike=int(np.round(x/100)*100)
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
@@ -194,7 +194,7 @@ indicator=[]
 b_lastrate=[]
 to_deal=[]
 direct_corr=[]
-corr_window=10
+corr_window=500
 exclusive_strike=0
 taken_trade=0
 charlette_straddle_strike=[]
