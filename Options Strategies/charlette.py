@@ -194,7 +194,7 @@ indicator=[]
 b_lastrate=[]
 to_deal=[]
 direct_corr=[]
-corr_window=500
+corr_window=1000
 exclusive_strike=0
 taken_trade=0
 charlette_straddle_strike=[]
@@ -222,8 +222,8 @@ while True:
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     indicator=indicator+[project_k]
     if len(b_lastrate)>corr_window+1:
-        b_delta=indicator[-1]-indicator[-10]
-        b_ind=indicator[-1]-indicator[-10]
+        b_delta=indicator[-1]-indicator[-corr_window]
+        b_ind=indicator[-1]-indicator[-corr_window]
         direct_corr=direct_corr+[pearsonr(b_lastrate[-corr_window:],indicator[-corr_window:])[0]]
         charlette_straddle_strike=charlette_straddle_strike+[charlette_exclusive_straddle(x,b_delta,b_ind,indicator[-1])]
         print(charlette_straddle_strike[-1])
