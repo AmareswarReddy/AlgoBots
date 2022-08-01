@@ -228,7 +228,7 @@ while True:
         charlette_straddle_strike=charlette_straddle_strike+[charlette_exclusive_straddle(x,b_delta,b_ind,indicator[-1])]
         print(charlette_straddle_strike[-1])
     if tron>0 and len(b_lastrate)>corr_window+1:
-        taken_trade,exclusive_strike=charlette_special(option_chain,exclusive_strike,taken_trade,x,b_delta,direct_corr)
+        taken_trade,exclusive_strike=charlette_special(option_chain,exclusive_strike,taken_trade,x,b_delta,direct_corr[-1])
     if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike)
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]),'nifty_bank':list(np.array(indicator[corr_window+1:])),'charrlette_straddle_strike': list(charlette_straddle_strike[corr_window+1:])}
