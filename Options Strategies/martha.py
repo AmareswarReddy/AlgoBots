@@ -140,9 +140,9 @@ def packup(option_chain,prime_client,taken_trade,exclusive_strike,tron):
         prime_client['login'].place_order(test_order)
     return 0
 
-def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,lots_tuner,tron,corr,x,project_k):
+def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,lots_tuner,tron,corr,x,limit_breaker):
     if local_div_factor!=0 :
-        if del_to_deal>0.4 and to_deal<-tempo and taken_trade==0 and project_k>0:
+        if del_to_deal>0.4 and to_deal<-tempo and taken_trade==0 and limit_breaker>-0.25:
             exclusive_strike=int(np.round(x/100)*100)
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
@@ -150,7 +150,7 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             taken_trade=1
-        if del_to_deal<-0.4 and to_deal>tempo and taken_trade==0 and project_k<0 :
+        if del_to_deal<-0.4 and to_deal>tempo and taken_trade==0 and limit_breaker<0.25 :
             exclusive_strike=int(np.round(x/100)*100)
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
@@ -174,14 +174,14 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             taken_trade=0
             lots_tuner=tron
             tempo=20
-        if del_to_deal>0.4 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 and project_k>0:
+        if del_to_deal>0.4 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 and limit_breaker>-0.25:
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             lots_tuner=lots_tuner*2
-        if del_to_deal<-0.4 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 and project_k<0:
+        if del_to_deal<-0.4 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 and limit_breaker<0.25:
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
@@ -256,7 +256,8 @@ while True:
         print('new_indicator',del_to_deal)
         print('')
     if tron>0 and len(to_deal)>corr_window+1:
-        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,project_k)
+        limit_breaker=project_k/dynamic_crossover
+        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,limit_breaker)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>929 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator))}
