@@ -257,7 +257,7 @@ while True:
         print('')
     if tron>0 and len(to_deal)>corr_window+1:
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,project_k)
-    if int(ind_time[11:13])*60+int(ind_time[14:16])>921 :
+    if int(ind_time[11:13])*60+int(ind_time[14:16])>929 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator))}
         with open('variables_data_'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
@@ -378,10 +378,10 @@ k=j_data['k']
 b_lastrate=j_data['lastrate']
 indicator=j_data['nifty_bank']
 corr=[]
-corr_window=50
-for i in range(122,len(k)):
-    #corr=corr+[pearsonr(indicator[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
-    corr=corr+[pearsonr(indicator[:i],b_lastrate[:i])[0]]
+corr_window=200
+for i in range(corr_window+1,len(k)):
+    corr=corr+[pearsonr(indicator[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
+    #corr=corr+[pearsonr(indicator[:i],b_lastrate[:i])[0]]
 
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
@@ -392,7 +392,8 @@ while True:
     i=i+100
     fig, ax_left = plt.subplots()
     ax_right = ax_left.twinx()
-    ax_left.plot(b_lastrate[i:i+500], color='blue')
-    ax_right.plot(corr[i:i+500], color='red')
+    ax_left.plot(b_lastrate[i+corr_window:i+corr_window+500], color='blue')
+    ax_right.plot(np.array(corr[i:i+500])*100, color='red')
+    ax_right.plot(indicator[i+corr_window:i+corr_window+500], color='green')
     plt.show()
-    input('fg')
+# %%
