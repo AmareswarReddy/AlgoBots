@@ -373,7 +373,7 @@ print(profit)
 
 # %%
 import json
-with open('variables_data_1.json', 'r') as  json_file:
+with open('variables_data_2.json', 'r') as  json_file:
     j_data = json.load(json_file)
 k=j_data['k']
 b_lastrate=j_data['lastrate']
