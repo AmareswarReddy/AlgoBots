@@ -217,6 +217,11 @@ oi_chain=0
 tempo=20
 nifty_bank=[]
 lots_tuner=tron
+if datetime.today().weekday()==3:
+    time=916
+else:
+    time=928
+
 while True:
     while True:
         try:
@@ -259,7 +264,7 @@ while True:
     if tron>0 and len(to_deal)>corr_window+1:
         limit_breaker=project_k/dynamic_crossover
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,limit_breaker)
-    if int(ind_time[11:13])*60+int(ind_time[14:16])>918 :
+    if int(ind_time[11:13])*60+int(ind_time[14:16])>time :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator[corr_window+1:]))}
         with open('variables_data_'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
