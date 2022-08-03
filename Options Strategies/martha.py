@@ -213,6 +213,7 @@ corr=[]
 corr_window=10
 exclusive_strike=0
 taken_trade=0
+oi_chain=0
 tempo=20
 nifty_bank=[]
 lots_tuner=tron
@@ -228,7 +229,7 @@ while True:
     while True:
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
-            current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
+            current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
             break
         except Exception :
@@ -258,12 +259,15 @@ while True:
     if tron>0 and len(to_deal)>corr_window+1:
         limit_breaker=project_k/dynamic_crossover
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,limit_breaker)
-    if int(ind_time[11:13])*60+int(ind_time[14:16])>929 :
+    if int(ind_time[11:13])*60+int(ind_time[14:16])>918 :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
-        json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator))}
+        json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator[corr_window+1:]))}
         with open('variables_data_'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
             json.dump(json_data, json_file)
-        break
+        if datetime.today().weekday()==3:
+            oi_chain=1
+        else:
+            break
     json_data = {'lastrate': list(b_lastrate[corr_window+1:][-240:]), 'k':list(to_deal[corr_window+1:][-240:]),'corr':list(np.array(corr[-240:])*10),'nifty_bank':list(np.array(indicator[-240:]))}
     with open('variables_data.json', 'w') as  json_file:
         json.dump(json_data, json_file)
@@ -348,28 +352,6 @@ for i in range(0,len(corr)):
     if corr[i]>0:
         corr[i]=0
 ax_right.plot(np.array(corr)*30, color='yellow',linewidth=0.1)
-#%%
-a=k[122:]
-b=b_lastrate[122:]
-pair1=[]
-pair2=[]
-profit=0
-for iter in range(2,len(b)):
-    if corr[iter]<0 and (a[iter]-a[iter-1])>0 and len(pair1)==0:
-        pair1=[b_lastrate[iter]]
-    if len(pair1)>0 and (a[iter]-a[iter-1])<0 and corr[iter]>0 :
-        pair1=pair1+[b_lastrate[iter]]
-    if len(pair1)==2:
-        profit=profit+pair1[1]-pair1[0]
-        pair1=[]
-    if corr[iter]<0 and (a[iter]-a[iter-1])<0 and len(pair2)==0:
-        pair2=[b_lastrate[iter]]
-    if len(pair2)>0 and (a[iter]-a[iter-1])>0 and corr[iter]>0 :
-        pair2=pair2+[b_lastrate[iter]]
-    if len(pair2)==2:
-        profit=profit+pair2[0]-pair2[1]
-        pair2=[]
-print(profit)
 
 # %%
 import json
@@ -377,15 +359,31 @@ with open('variables_data_2.json', 'r') as  json_file:
     j_data = json.load(json_file)
 k=j_data['k']
 b_lastrate=j_data['lastrate']
-indicator=j_data['nifty_bank']
+indicator=j_data['nifty_bank'][11:]
 corr=[]
-corr_window=200
+indicator_special=[]
+corr_window=100
 for i in range(corr_window+1,len(k)):
-    #corr=corr+[pearsonr(indicator[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
-    corr=corr+[pearsonr(indicator[:i],b_lastrate[:i])[0]]
+    corr=corr+[pearsonr(indicator[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
+    indicator_special=indicator_special+[sum(indicator[i-corr_window:i])/corr_window]
+fig, ax_left = plt.subplots()
+ax_right = ax_left.twinx()
+ax_left.plot(b_lastrate[corr_window+1:], color='blue') 
+ax_right.plot(np.array(corr)*100, color='red')
+ax_right.plot(indicator_special, color='green')
+plt.show()
+
+#%%
+#for i in range(2,len(k)):
+#    corr=corr+[pearsonr(indicator[:i],b_lastrate[:i])[0]]
 
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
+ax_left.plot(b_lastrate[2:], color='blue') 
+ax_right.plot(np.array(corr)*100, color='red')
+ax_right.plot(indicator[2:], color='green')
+plt.show()
+
 
 #%%
 i=0
@@ -397,4 +395,4 @@ while True:
     ax_right.plot(np.array(corr[i:i+500])*100, color='red')
     ax_right.plot(indicator[i+corr_window:i+corr_window+500], color='green')
     plt.show()
-# %%
+
