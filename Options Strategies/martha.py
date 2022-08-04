@@ -360,14 +360,14 @@ ax_right.plot(np.array(corr)*30, color='yellow',linewidth=0.1)
 
 # %%
 import json
-with open('variables_data_2.json', 'r') as  json_file:
+with open('variables_data_3.json', 'r') as  json_file:
     j_data = json.load(json_file)
 k=j_data['k']
 b_lastrate=j_data['lastrate']
-indicator=j_data['nifty_bank'][11:]
+indicator=j_data['nifty_bank']
 corr=[]
 indicator_special=[]
-corr_window=100
+corr_window=200
 for i in range(corr_window+1,len(k)):
     corr=corr+[pearsonr(indicator[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
     indicator_special=indicator_special+[sum(indicator[i-corr_window:i])/corr_window]
@@ -379,8 +379,9 @@ ax_right.plot(indicator_special, color='green')
 plt.show()
 
 #%%
-#for i in range(2,len(k)):
-#    corr=corr+[pearsonr(indicator[:i],b_lastrate[:i])[0]]
+corr=[]
+for i in range(2,len(k)):
+    corr=corr+[pearsonr(indicator[:i],b_lastrate[:i])[0]]
 
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
