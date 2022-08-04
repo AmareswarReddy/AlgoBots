@@ -261,7 +261,7 @@ while True:
         del_to_deal=to_deal[-1]-to_deal[-2]
         print('new_indicator',del_to_deal)
         print('')
-    if tron>0 and len(to_deal)>corr_window+1:
+    if tron>0 and len(to_deal)>corr_window+1 and oi_chain==0:
         limit_breaker=project_k/dynamic_crossover
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,limit_breaker)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>time :
