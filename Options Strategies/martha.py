@@ -177,14 +177,14 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             taken_trade=0
             lots_tuner=tron
             tempo=20
-        elif del_to_deal>0.4 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 and limit_breaker>-0.25:
+        elif del_to_deal>0 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 and limit_breaker>-0.25:
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             lots_tuner=lots_tuner*2
-        elif del_to_deal<-0.4 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 and limit_breaker<0.25:
+        elif del_to_deal<0 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 and limit_breaker<0.25:
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")

@@ -2,15 +2,13 @@
 import json
 import matplotlib.pyplot as plt
 from time import sleep
-with open('variables_data_0.json', 'r') as  json_file:
+with open('variables_data_4.json', 'r') as  json_file:
     j_data = json.load(json_file)
     lastrate = j_data['lastrate']
     corr = j_data['corr']
     k = j_data['k']
     niftybank=j_data['nifty_bank']
 
-
-# %%
 import numpy as np
 def pearsonr(x, y):
     n = len(x)
@@ -29,45 +27,52 @@ def pearsonr(x, y):
     r = max(min(r, 1.0), -1.0)
     return r,0
 corr2=[]
-
 for i in range(2,len(k)):
     corr2=corr2+[pearsonr(niftybank[:i],lastrate[:i])[0]]
+
+profit=0
+p1=[]
+p2=[]
 martha=np.zeros(len(k))
 tempo=10
 taken_trade=0
 for i in range(2,len(k)):
     if k[i]-k[i-1]>0.4 and k[i]<-tempo and taken_trade==0 and niftybank[i]>-10:
+        p1=p1+[lastrate[i]]
         martha[i]=tempo
         tempo=tempo+10
         taken_trade=1
+        
     elif k[i]-k[i-1]<-0.4 and k[i]>tempo and taken_trade==0 and niftybank[i]<10 :
+        p1=p1+[lastrate[i]]
         martha[i]=-tempo
         tempo=tempo+10
         taken_trade=-1
+        
     elif k[i]-k[i-1]<0 and k[i]>0 and taken_trade==1 :
+        profit=(lastrate[i]*len(p1)-np.sum(p1))
+        p1=[]
         martha[i]=0
         tempo=10
         taken_trade=0
+        
     elif k[i]-k[i-1]>0 and k[i]<0 and taken_trade==-1:
+        profit=-(lastrate[i]*len(p1)-np.sum(p1))
+        p1=[]
         martha[i]=0
         taken_trade=0
         tempo=10
-    elif k[i]-k[i-1]>0.4 and k[i]<-tempo and taken_trade==1 and niftybank[i]>-10:
+    elif k[i]-k[i-1]>0 and k[i]<-tempo and taken_trade==1 and niftybank[i]>-10:
+        p1=p1+[lastrate[i]]
         martha[i]=tempo
         tempo=tempo+10
-    elif k[i]-k[i-1]<-0.4 and k[i]>tempo and taken_trade==-1 and niftybank[i]<10:
+    elif k[i]-k[i-1]<-0 and k[i]>tempo and taken_trade==-1 and niftybank[i]<10:
+        p1=p1+[lastrate[i]]
         martha[i]=-tempo
         tempo=tempo+10
     else:
         martha[i]=martha[i-1]
-
-
-
-
-
-
-
-
+print('profit: ',profit)
 #%%
 fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
