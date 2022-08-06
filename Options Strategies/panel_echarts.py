@@ -44,7 +44,7 @@ prime_client=client_login('vinathi')
 
 def order_button(exclusive_strike,type,lots):
     if lots>=48:
-          lots=48
+        lots=48
     while True:
         try:
             re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
