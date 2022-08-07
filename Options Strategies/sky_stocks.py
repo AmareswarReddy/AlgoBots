@@ -163,18 +163,11 @@ company_scrip=details(company)
 arr=np.array(option_chain['StrikeRate'])
 while True:
     while True:
-        try:
-            re=[{"Exch":"N","ExchType":"C","Symbol":company,"Scripcode":company_scrip,"OptionType":"EQ"}]          
-            aa=prime_client['login'].fetch_market_feed(re)
-            x=aa['Data'][0]['LastRate']
-            break
-        except Exception:
-            pass
-    while True:
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N",company).copy()
             current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N",company,current_expiry_time_stamp_weekly)['Options'])
+            x=expiry_timestamps['lastrate'][0]['LTP']
             break
         except Exception :
             pass

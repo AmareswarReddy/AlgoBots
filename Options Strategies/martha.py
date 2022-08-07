@@ -13,7 +13,6 @@ import requests
 from pytz import timezone 
 from cred import *
 from py5paisa.order import Basket_order
-from playsound import playsound
 import pygame
 pygame.init()
 s = pygame.mixer.Sound("alarm.wav")
@@ -51,7 +50,7 @@ def client_login(client):
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
-client_name   = 'vinathi'
+client_name   = 'bhaskar'
 #lots=int(input('lots (Eg:3):'))
 tron=int(input('enter the number of lots for buying :'))
 def rosetta_strikes(option_chain):
@@ -198,6 +197,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*6
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 prime_client=client_login(client=client_name)
+#%%
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
@@ -227,18 +227,11 @@ else:
 
 while True:
     while True:
-        try:
-            re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-            aa=prime_client['login'].fetch_market_feed(re)
-            x=aa['Data'][0]['LastRate']
-            break
-        except Exception:
-            pass
-    while True:
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
             current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
+            x=expiry_timestamps['lastrate'][0]['LTP']
             break
         except Exception :
             pass
