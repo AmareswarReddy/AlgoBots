@@ -50,7 +50,7 @@ def client_login(client):
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
-client_name   = 'vinathi'
+client_name   = 'bhaskar'
 #%%
 #lots=int(input('lots (Eg:3):'))
 tron=int(input('enter the number of lots for buying :'))
@@ -224,12 +224,11 @@ if datetime.today().weekday()==3:
     time=916
 else:
     time=928
-
+expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
+current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['ExpiryDate'][6:19])
 while True:
     while True:
         try :
-            expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
-            current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
             x=expiry_timestamps['lastrate'][0]['LTP']
             break
@@ -279,3 +278,5 @@ ax_right = ax_left.twinx()
 ax_left.plot(b_lastrate, color='blue')
 ax_right.plot(to_deal, color='red')
 
+
+# %%

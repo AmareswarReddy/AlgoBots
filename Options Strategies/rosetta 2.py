@@ -400,9 +400,9 @@ def decoy4(option_chain,exclusive_strike,tron,taken_trade,del_to_deal):
         taken_trade=0
     return taken_trade,exclusive_strike
 #%%
-'''ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')'''
-'''while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :'''
-'''    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')'''
+ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
@@ -435,15 +435,13 @@ del_to_deal=0
 ricker=0
 e_ce,e_pe,i_ce,i_pe=0,0,0,0
 new_version=[]
+expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
+current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 while True:
-    re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-    aa=prime_client['login'].fetch_market_feed(re)
-    x=aa['Data'][0]['LastRate']
     while True:
         try :
-            expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
-            current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
+            x=expiry_timestamps['lastrate'][0]['LTP']
             break
         except Exception :
             pass

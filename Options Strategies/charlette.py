@@ -198,21 +198,14 @@ corr_window=1000
 exclusive_strike=0
 taken_trade=0
 charlette_straddle_strike=[]
+expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
+current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 while True:
     while True:
-        try:
-            re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-            aa=prime_client['login'].fetch_market_feed(re)
-            x=aa['Data'][0]['LastRate']
-            b_lastrate=b_lastrate+[x]
-            break
-        except Exception:
-            pass
-    while True:
         try :
-            expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
-            current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
+            x=expiry_timestamps['lastrate'][0]['LTP']
+            b_lastrate=b_lastrate+[x]
             break
         except Exception :
             pass
