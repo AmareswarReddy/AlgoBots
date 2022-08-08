@@ -52,10 +52,10 @@ def client_login(client):
 import sys
 client_name   = 'bhaskar'
 #%%
-stocks_to_go=['HDFC','ONGC','INFY','HDFCBANK','RELIANCE']
+stocks_to_go=['HDFC','ONGC','INFY','HDFCBANK','RELIANCE','TATAPOWER','IRCTC','AXISBANK']
 raw_df=pd.read_csv('scripmaster-csv-format-4.csv')
 df=raw_df[raw_df['Exch']=='N']
-company=stocks_to_go[4]
+company=stocks_to_go[-1]
 def details(company):
     eq_scrip=str(int(df[df['Name']==company]['Scripcode']))
     return eq_scrip
@@ -161,11 +161,11 @@ else:
     time=928
 company_scrip=details(company)
 arr=np.array(option_chain['StrikeRate'])
+expiry_timestamps=prime_client['login'].get_expiry("N",company).copy()
+current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['ExpiryDate'][6:19])
 while True:
     while True:
         try :
-            expiry_timestamps=prime_client['login'].get_expiry("N",company).copy()
-            current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N",company,current_expiry_time_stamp_weekly)['Options'])
             x=expiry_timestamps['lastrate'][0]['LTP']
             break
