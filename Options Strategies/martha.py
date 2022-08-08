@@ -13,7 +13,6 @@ import requests
 from pytz import timezone 
 from cred import *
 from py5paisa.order import Basket_order
-from playsound import playsound
 import pygame
 pygame.init()
 s = pygame.mixer.Sound("alarm.wav")
@@ -51,7 +50,7 @@ def client_login(client):
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
-client_name   = 'vinathi'
+client_name   = 'bhaskar'
 #lots=int(input('lots (Eg:3):'))
 tron=int(input('enter the number of lots for buying :'))
 def rosetta_strikes(option_chain):
@@ -177,14 +176,14 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             taken_trade=0
             lots_tuner=tron
             tempo=20
-        elif del_to_deal>0.4 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 and limit_breaker>-0.25:
+        elif del_to_deal>0 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 and limit_breaker>-0.25:
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             lots_tuner=lots_tuner*2
-        elif del_to_deal<-0.4 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 and limit_breaker<0.25:
+        elif del_to_deal<0 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 and limit_breaker<0.25:
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
@@ -198,6 +197,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*6
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 prime_client=client_login(client=client_name)
+#%%
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
@@ -227,18 +227,11 @@ else:
 
 while True:
     while True:
-        try:
-            re=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
-            aa=prime_client['login'].fetch_market_feed(re)
-            x=aa['Data'][0]['LastRate']
-            break
-        except Exception:
-            pass
-    while True:
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
             current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
+            x=expiry_timestamps['lastrate'][0]['LTP']
             break
         except Exception :
             pass
