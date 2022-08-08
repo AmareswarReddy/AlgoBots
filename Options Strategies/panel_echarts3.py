@@ -21,12 +21,12 @@ with open('variables_data.json', 'r') as  json_file:
 for i in range(0,len(k)):
     x_axis_array.append(i)
 
-with open('variables_data_nifty.json', 'r') as  json_file:
+with open('nifty.json', 'r') as  json_file:
     j_data_nifty = json.load(json_file)
     lastrate_nifty = j_data_nifty['lastrate']
     corr_nifty = j_data_nifty['corr']
     k_nifty = j_data_nifty['k']
-    ind_nifty=j_data_nifty['nifty_bank']
+    ind_nifty=j_data_nifty['nifty']
 for i in range(0,len(k_nifty)):
     x_axis_array_nifty.append(i)
 
@@ -51,12 +51,12 @@ def refresh_chart():
         x_axis_array = []
         for i in range(0,len(k)):
             x_axis_array.append(i)
-    with open('variables_data_nifty.json', 'r') as  json_file:
+    with open('nifty.json', 'r') as  json_file:
         j_data_nifty = json.load(json_file)
-        lastrate_nifty = j_data_nifty['lastrate']
-        corr_nifty = j_data_nifty['corr']
-        k_nifty = j_data_nifty['k']
-        ind_nifty=j_data_nifty['nifty_bank']
+        lastrate_nifty = j_data_nifty['lastrate'][-150:]
+        corr_nifty = j_data_nifty['corr'][-150:]
+        k_nifty = j_data_nifty['k'][-150:]
+        ind_nifty=j_data_nifty['nifty'][-150:]
         x_axis_array_nifty = []
         for i in range(0,len(k_nifty)):
             x_axis_array_nifty.append(i)
