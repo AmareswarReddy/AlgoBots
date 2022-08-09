@@ -68,16 +68,35 @@ def loopin(company):
     index=np.argmin(np.abs(data))
     a=np.array(option_chain['StrikeRate'])[0]+index*increment
     arr=np.array(option_chain['StrikeRate'])
-    t1=np.argmin(np.abs(arr-a))
+    t1=np.argmin(np.abs(arr-x))
     at_strike=arr[t1]
     project_k=(2*(x-a))/np.sum(option_chain[option_chain['StrikeRate']==at_strike]['LastRate'])
     return  project_k
 
 
 
-client_name   = 'bhaskar'
+client_name   = 'vinathi'
 prime_client=client_login(client=client_name)
-stocks_to_go=['HDFC','ONGC','INFY','HDFCBANK','RELIANCE','TATAPOWER','IRCTC','AXISBANK']
+stocks_to_go=['SBIN',
+'HDFCBANK',
+'RELIANCE',
+'ADANIPORTS',
+'ICICIBANK',
+'INFY',
+'BHARTIARTL',
+'AXISBANK',
+'TATAMOTORS',
+'ADANIENT',
+'M&M',
+'HDFC',
+'LT',
+'NMDC',
+'HAL',
+'PEL',
+'BAJFINANCE',
+'TCS',
+'BAJAJFINSV',
+'TATASTEEL']
 company=stocks_to_go[-1]
 
 #%%
@@ -91,4 +110,5 @@ while True:
         stocks_manual_json[company]=loopin(company)
     with open('stocks_manual.json', 'w') as  json_file:
         json.dump(stocks_manual_json, json_file)
-
+        break
+# %%
