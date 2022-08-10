@@ -212,12 +212,12 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             temp2=lots_tuner
             temp=int(temp2/48)
             end=temp2-temp*48
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=48, price=0 ,is_intraday=False,remote_order_id="tag")
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=48*25, price=0 ,is_intraday=False,remote_order_id="tag")
             while temp>0:
                 prime_client['login'].place_order(test_order) 
                 temp=temp-1
             if temp==0 and end!=0:
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=end, price=0 ,is_intraday=False,remote_order_id="tag")
+                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=end*25, price=0 ,is_intraday=False,remote_order_id="tag")
                 prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             lots_tuner=lots_tuner*2
