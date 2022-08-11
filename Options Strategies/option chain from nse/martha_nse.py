@@ -13,7 +13,9 @@ import requests
 from pytz import timezone 
 from cred import *
 from py5paisa.order import Basket_order
-
+import pygame
+pygame.init()
+s = pygame.mixer.Sound("alarm.wav")
 def pearsonr(x, y):
     n = len(x)
     x = np.asarray(x)
@@ -48,7 +50,7 @@ def client_login(client):
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
-client_name   = 'vinathi'
+client_name   = 'bhaskar'
 #lots=int(input('lots (Eg:3):'))
 tron=int(input('enter the number of lots for buying :'))
 def rosetta_strikes(option_chain):
@@ -65,7 +67,7 @@ def rosetta_strikes(option_chain):
     data=[]
     data1=[]
     data2=[]
-    increment=(n-i)/15
+    increment=(n-i)/100
     while i<end:
         i=i+increment
         init_ce=0
@@ -146,94 +148,46 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             exclusive_strike=int(np.round(x/100)*100)
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-            temp2=lots_tuner
-            temp=int(temp2/48)
-            end=temp2-temp*48
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*48, price=0 ,is_intraday=False,remote_order_id="tag")
-            while temp>0:
-                prime_client['login'].place_order(test_order) 
-                temp=temp-1
-            if temp==0 and end!=0:
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*end, price=0 ,is_intraday=False,remote_order_id="tag")
-                prime_client['login'].place_order(test_order) 
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
+            prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             taken_trade=1
-        if del_to_deal<-0.4 and to_deal>tempo and taken_trade==0 and limit_breaker<0.25 :
+        elif del_to_deal<-0.4 and to_deal>tempo and taken_trade==0 and limit_breaker<0.25 :
             exclusive_strike=int(np.round(x/100)*100)
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-            temp2=lots_tuner
-            temp=int(temp2/48)
-            end=temp2-temp*48
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*48, price=0 ,is_intraday=False,remote_order_id="tag")
-            while temp>0:
-                prime_client['login'].place_order(test_order) 
-                temp=temp-1
-            if temp==0 and end!=0:
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*end, price=0 ,is_intraday=False,remote_order_id="tag")
-                prime_client['login'].place_order(test_order) 
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
+            prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             taken_trade=-1
-        if del_to_deal<0 and to_deal>0 and taken_trade==1 :
+        elif del_to_deal<0 and to_deal>0 and taken_trade==1 :
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-            temp2=lots_tuner
-            temp=int(temp2/48)
-            end=temp2-temp*48
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*(48), price=0 ,is_intraday=False,remote_order_id="tag")
-            while temp>0:
-                prime_client['login'].place_order(test_order) 
-                temp=temp-1
-            if temp==0 and end!=0:
-                test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*(end), price=0 ,is_intraday=False,remote_order_id="tag")
-                prime_client['login'].place_order(test_order) 
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*(lots_tuner), price=0 ,is_intraday=False,remote_order_id="tag")
+            prime_client['login'].place_order(test_order)
             tempo=20
             lots_tuner=tron
             taken_trade=0
-        if del_to_deal>0 and to_deal<0 and taken_trade==-1:
+        elif del_to_deal>0 and to_deal<0 and taken_trade==-1:
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-            temp2=lots_tuner
-            temp=int(temp2/48)
-            end=temp2-temp*48
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*(48), price=0 ,is_intraday=False,remote_order_id="tag")
-            while temp>0:
-                prime_client['login'].place_order(test_order) 
-                temp=temp-1
-            if temp==0 and end!=0:
-                test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*(end), price=0 ,is_intraday=False,remote_order_id="tag")
-                prime_client['login'].place_order(test_order) 
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*(lots_tuner), price=0 ,is_intraday=False,remote_order_id="tag")
+            prime_client['login'].place_order(test_order)
             taken_trade=0
             lots_tuner=tron
             tempo=20
-        if del_to_deal>0.4 and to_deal<-tempo and taken_trade==1  and limit_breaker>-0.25:
+        elif del_to_deal>0 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 and limit_breaker>-0.25:
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-            temp2=lots_tuner
-            temp=int(temp2/48)
-            end=temp2-temp*48
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=48*25, price=0 ,is_intraday=False,remote_order_id="tag")
-            while temp>0:
-                prime_client['login'].place_order(test_order) 
-                temp=temp-1
-            if temp==0 and end!=0:
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=end*25, price=0 ,is_intraday=False,remote_order_id="tag")
-                prime_client['login'].place_order(test_order) 
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
+            prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             lots_tuner=lots_tuner*2
-        if del_to_deal<-0.4 and to_deal>tempo and taken_trade==-1  and limit_breaker<0.25:
+        elif del_to_deal<0 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 and limit_breaker<0.25:
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-            temp2=lots_tuner
-            temp=int(temp2/48)
-            end=temp2-temp*48
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=48*25, price=0 ,is_intraday=False,remote_order_id="tag")
-            while temp>0:
-                prime_client['login'].place_order(test_order) 
-                temp=temp-1
-            if temp==0 and end!=0:
-                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=end*25, price=0 ,is_intraday=False,remote_order_id="tag")
-                prime_client['login'].place_order(test_order) 
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
+            prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             lots_tuner=lots_tuner*2
     return taken_trade,exclusive_strike,tempo,lots_tuner
@@ -243,6 +197,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*6
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 prime_client=client_login(client=client_name)
+#%%
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
@@ -269,26 +224,87 @@ if datetime.today().weekday()==3:
     time=916
 else:
     time=928
+
+
+def pe_oi(strikeprice):
+    return df[df['strikePrice']==strikeprice]['PE'].iloc[0]['openInterest']
+def ce_oi(strikeprice):
+    return df[df['strikePrice']==strikeprice]['CE'].iloc[0]['openInterest']
+def pe_oi_change(strikeprice):
+    return df[df['strikePrice']==strikeprice]['PE'].iloc[0]['changeinOpenInterest']
+def ce_oi_change(strikeprice):
+    return df[df['strikePrice']==strikeprice]['CE'].iloc[0]['changeinOpenInterest']
+def pe_lastrate(strikeprice):
+    return list(df[df['strikePrice']==strikeprice]['PE'])[0]['lastPrice']
+def ce_lastrate(strikeprice):
+    return list(df[df['strikePrice']==strikeprice]['CE'])[0]['lastPrice']
+
+
+def projected(df):
+    i=np.array(df['strikePrice'])[0]
+    end=np.array(df['strikePrice'])[-1]
+    ss=np.array(df['strikePrice'])
+    data=[]
+    while i<end:
+        i=i+3
+        init_ce=0
+        init_pe=0
+        end_pe=0
+        end_ce=0
+        for k in range(0,len(np.array(df['strikePrice']))):
+            init_pe=init_pe+df['PE'].iloc[k]['lastPrice']*df['PE'].iloc[k]['openInterest']
+            init_ce=init_ce+df['CE'].iloc[k]['lastPrice']*df['CE'].iloc[k]['openInterest']
+            end_pe=end_pe+df['PE'].iloc[k]['openInterest']*max((ss[k]-i),0)
+            end_ce=end_ce+df['CE'].iloc[k]['openInterest']*max((i-ss[k]),0)
+        data=data+[init_ce-end_ce-init_pe+end_pe]
+    index=np.argmin(np.abs(data))
+    return   np.array(df['strikePrice'])[0]+3*(index+1)
+
+
+
+
+headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; '
+            'x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36'}
+main_url = "https://www.nseindia.com/"
+url = "https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY"
+expiry=input('enter the expiry Eg:"07-Apr-2022"')
+
+response = requests.get(main_url, headers=headers)
+cookies = response.cookies
+bank_nifty_oi_data = requests.get(url, headers=headers, cookies=cookies)
+a=json.loads(bank_nifty_oi_data.text)
+k=pd.DataFrame(a['records']['data'])
+df=k[k.expiryDate==expiry]
+df.drop(['expiryDate'],axis=1)
+
+
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['ExpiryDate'][6:19])
+option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
 while True:
     while True:
         try :
-            option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
-            x=expiry_timestamps['lastrate'][0]['LTP']
+            req_list_=[{"Exch":"N","ExchType":"C","Symbol":"BANKNIFTY","Scripcode":"999920005","OptionType":"EQ"}]          
+            a=prime_client['login'].fetch_market_feed(req_list_)
+            x=a['Data'][0]['LastRate']
+            response = requests.get(main_url, headers=headers)
+            cookies = response.cookies
+            bank_nifty_oi_data = requests.get(url, headers=headers, cookies=cookies)
+            a=json.loads(bank_nifty_oi_data.text)
+            k=pd.DataFrame(a['records']['data'])
+            df=k[k.expiryDate==expiry]
+            df.drop(['expiryDate'],axis=1)
             break
         except Exception :
             pass
-    proj,Cyi,Phf=rosetta_strikes(option_chain)
+    proj=projected(df)
     project_k=(x-proj)
     print('Niftybank:  ',project_k)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    c_data=option_chain[option_chain['CPType']=='CE']
-    p_data=option_chain[option_chain['CPType']=='PE']
-    c1=int(c_data[c_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
-    c2=int(c_data[c_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
-    p1=int(p_data[p_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
-    p2=int(p_data[p_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
+    c1=ce_lastrate(int(np.floor(x/100)*100))
+    c2=ce_lastrate(int(np.ceil(x/100)*100))
+    p1=pe_lastrate(int(np.floor(x/100)*100))
+    p2=pe_lastrate(int(np.ceil(x/100)*100))
     dynamic_crossover=(c1+c2+p1+p2)/4
     indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x)
     diverge=diverge+[div_factor]
@@ -302,16 +318,15 @@ while True:
         print('new_indicator',del_to_deal)
         print('')
     if tron>0 and len(to_deal)>corr_window+1 and oi_chain==0:
+        if to_deal[-1]>30 or to_deal[-1]<-30 :
+            s.play()
         limit_breaker=project_k/dynamic_crossover
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,limit_breaker)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>time :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator[corr_window+1:]))}
-        with open('variables_data_'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
+        with open('variables_data_1'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
             json.dump(json_data, json_file)
-        if datetime.today().weekday()==3:
-            oi_chain=1
-        else:
             break
     json_data = {'lastrate': list(b_lastrate[corr_window+1:][-240:]), 'k':list(to_deal[corr_window+1:][-240:]),'corr':list(np.array(corr[-240:])*10),'nifty_bank':list(np.array(indicator[-240:]))}
     with open('variables_data.json', 'w') as  json_file:
@@ -320,4 +335,125 @@ fig, ax_left = plt.subplots()
 ax_right = ax_left.twinx()
 ax_left.plot(b_lastrate, color='blue')
 ax_right.plot(to_deal, color='red')
+
+#%%
+import json
+with open('variables_data_0.json', 'r') as  json_file:
+    j_data = json.load(json_file)
+k=j_data['k']
+b_lastrate=j_data['lastrate']
+corr=[]
+corr_window=10
+for i in range(122,len(k)):
+    corr=corr+[pearsonr(k[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
+iso=[]
+for i in range(4,len(k)):
+    iso=iso+[k[i]-k[i-1]]
+iso=[0,0,0,0]+iso
+profit=0
+loss=0
+c1=0
+c2=0
+pair1=[]
+pair2=[]
+number_of_trades=0
+temp=10
+for iter in range(122,len(iso)):
+    if iso[iter]>0.4 and k[iter]<-temp and c1==0:
+        pair1=pair1+[b_lastrate[iter]]
+        c1=1
+        temp=temp+10
+    if iso[iter]<-0.4 and k[iter]>temp and c2==0 :
+        pair2=pair2+[b_lastrate[iter]]
+        c2=1
+        temp=temp+10 
+    if c1==1 and iso[iter]<0  and k[iter]>0:
+        pair1=pair1+[b_lastrate[iter]]
+        c1=0
+        c1_m=(temp-10)/10
+        temp=10
+    if c2==1 and iso[iter]>0  and k[iter]<0 :
+        pair2=pair2+[b_lastrate[iter]]
+        c2=0
+        c2_m=(temp-10)/10
+        temp=10
+    if iso[iter]>0.4 and k[iter]<-temp  :
+        temp=temp+10
+        pair1=[(pair1[0]+b_lastrate[iter])/2]
+    if iso[iter]<-0.4 and k[iter]>temp  :
+        temp=temp+10
+        pair2=[(pair2[0]+b_lastrate[iter])/2]
+    if len(pair1)==2:
+        if pair1[1]-pair1[0]>0:
+            profit=profit+(pair1[1]-pair1[0])*c1_m
+        else:
+            loss=loss+(pair1[1]-pair1[0])*c1_m
+        print(pair1)
+        pair1=[]
+        number_of_trades=number_of_trades+1
+    if len(pair2)==2:
+        if pair2[1]-pair2[0]<0:
+            profit=profit+c2_m*(pair2[0]-pair2[1])
+        else:
+            loss=loss-c2_m*(pair2[1]-pair2[0])
+            
+        pair2=[]
+        number_of_trades=number_of_trades+1
+print('total profit',profit)
+print('number of trades',number_of_trades)
+print('profit per trade',(profit+loss)/number_of_trades)
+print('loss',loss)
+print('success ratio',-profit/(loss))
+fig, ax_left = plt.subplots()
+ax_right = ax_left.twinx()
+ax_left.plot(b_lastrate[120:], color='blue')
+ax_right.plot(k[122:], color='red')
+for i in range(0,len(corr)):
+    if corr[i]>0:
+        corr[i]=0
+ax_right.plot(np.array(corr)*30, color='yellow',linewidth=0.1)
+
 # %%
+import json
+with open('variables_data_3.json', 'r') as  json_file:
+    j_data = json.load(json_file)
+k=j_data['k']
+b_lastrate=j_data['lastrate']
+indicator=j_data['nifty_bank']
+corr=[]
+indicator_special=[]
+corr_window=200
+for i in range(corr_window+1,len(k)):
+    corr=corr+[pearsonr(indicator[i-corr_window:i],b_lastrate[i-corr_window:i])[0]]
+    indicator_special=indicator_special+[sum(indicator[i-corr_window:i])/corr_window]
+fig, ax_left = plt.subplots()
+ax_right = ax_left.twinx()
+ax_left.plot(b_lastrate[corr_window+1:], color='blue') 
+ax_right.plot(np.array(corr)*100, color='red')
+ax_right.plot(indicator_special, color='green')
+plt.show()
+
+#%%
+corr=[]
+for i in range(2,len(k)):
+    corr=corr+[pearsonr(indicator[:i],b_lastrate[:i])[0]]
+
+fig, ax_left = plt.subplots()
+ax_right = ax_left.twinx()
+ax_left.plot(b_lastrate[2:], color='blue') 
+ax_right.plot(np.array(corr)*100, color='red')
+ax_right.plot(indicator[2:], color='green')
+plt.show()
+
+
+#%%
+i=0
+while True:
+    i=i+100
+    fig, ax_left = plt.subplots()
+    ax_right = ax_left.twinx()
+    ax_left.plot(b_lastrate[i+corr_window:i+corr_window+500], color='blue')
+    ax_right.plot(np.array(corr[i:i+500])*100, color='red')
+    ax_right.plot(indicator[i+corr_window:i+corr_window+500], color='green')
+    plt.show()
+
