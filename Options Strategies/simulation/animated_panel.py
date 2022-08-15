@@ -146,6 +146,8 @@ echart2= {
       'type': 'value',
       'name': 'corr2',
       'position': 'right',
+      'min': -1,
+      'max': 1,
        'splitLine': {
          'show': False
       }

@@ -115,20 +115,6 @@ def past_picture(indicator,project_k,b_lastrate,x):
         instant_div_factor=instant_div_factor/20
     return indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor
 
-def strike_list(strike1,strike2):
-    k=[]
-    if strike1>strike2:
-        a=strike2
-        while a<=strike1:
-            k=k+[a]
-            a=a+100
-    else:
-        a=strike1
-        while a<=strike2:
-            k=k+[a]
-            a=a+100
-    return k
-
 def packup(option_chain,prime_client,taken_trade,exclusive_strike,tron):
     if taken_trade==-1:
         p_data=option_chain[option_chain['CPType']=='PE']
@@ -142,9 +128,9 @@ def packup(option_chain,prime_client,taken_trade,exclusive_strike,tron):
         prime_client['login'].place_order(test_order)
     return 0
 
-def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,lots_tuner,tron,corr,x,limit_breaker):
+def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,lots_tuner,tron,x):
     if local_div_factor!=0 :
-        if del_to_deal>0.4 and to_deal<-tempo and taken_trade==0 and limit_breaker>-0.25:
+        if del_to_deal>0 and to_deal<-tempo and taken_trade==0 :
             exclusive_strike=int(np.round(x/100)*100)
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
@@ -152,7 +138,7 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             taken_trade=1
-        elif del_to_deal<-0.4 and to_deal>tempo and taken_trade==0 and limit_breaker<0.25 :
+        elif del_to_deal<0 and to_deal>tempo and taken_trade==0 :
             exclusive_strike=int(np.round(x/100)*100)
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
@@ -176,14 +162,14 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             taken_trade=0
             lots_tuner=tron
             tempo=20
-        elif del_to_deal>0 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 and limit_breaker>-0.25:
+        elif del_to_deal>0 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 :
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
             tempo=tempo+10
             lots_tuner=lots_tuner*2
-        elif del_to_deal<0 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 and limit_breaker<0.25:
+        elif del_to_deal<0 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 :
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
@@ -238,17 +224,10 @@ while True:
     project_k=(x-proj)
     print('Niftybank:  ',project_k)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    c_data=option_chain[option_chain['CPType']=='CE']
-    p_data=option_chain[option_chain['CPType']=='PE']
-    c1=int(c_data[c_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
-    c2=int(c_data[c_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
-    p1=int(p_data[p_data['StrikeRate']==int(np.floor(x/100)*100)]['LastRate'])
-    p2=int(p_data[p_data['StrikeRate']==int(np.ceil(x/100)*100)]['LastRate'])
-    dynamic_crossover=(c1+c2+p1+p2)/4
     indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x)
     diverge=diverge+[div_factor]
     to_deal=to_deal+[instant_div_factor-local_div_factor]
-    print('sample no.:',len(to_deal))
+    print('sample no.: ',len(to_deal))
     print('base_indicator :',to_deal[-1])
     if len(to_deal)>corr_window+1:
         corr=corr+[pearsonr(to_deal[-corr_window:],b_lastrate[-corr_window:])[0]]
@@ -259,8 +238,7 @@ while True:
     if tron>0 and len(to_deal)>corr_window+1 and oi_chain==0:
         if to_deal[-1]>30 or to_deal[-1]<-30 :
             s.play()
-        limit_breaker=project_k/dynamic_crossover
-        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,corr,x,limit_breaker)
+        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,x)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>time :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator[corr_window+1:]))}
