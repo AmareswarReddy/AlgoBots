@@ -55,7 +55,6 @@ def rosetta_strikes(option_chain):
     pe_data=option_chain[option_chain['CPType']=='PE']
     ce_data=option_chain[option_chain['CPType']=='CE']
     i=np.array(pe_data['StrikeRate'])[0]
-    n=np.array(pe_data['StrikeRate'])[1]
     end=np.array(pe_data['StrikeRate'])[-1]
     ss=np.array(pe_data['StrikeRate'])
     p_lastrate=np.array(pe_data['LastRate'])
@@ -65,7 +64,7 @@ def rosetta_strikes(option_chain):
     data=[]
     data1=[]
     data2=[]
-    increment=(n-i)/15
+    increment=2
     while i<end:
         i=i+increment
         init_ce=0
@@ -323,7 +322,7 @@ while True:
         print('new_indicator',del_to_deal)
         print('')
     if tron>0 and len(to_deal)>corr_window+1 and oi_chain==0:
-        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,x)
+        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,x,max_lots)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>time :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator[corr_window+1:]))}

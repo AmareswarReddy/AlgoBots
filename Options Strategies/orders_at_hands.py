@@ -28,7 +28,7 @@ def client_login(client):
     client_list[client]['login'].login()
     client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-200000)/180000)
     return client_list[client]
-client_name   = 'bhaskar'
+client_name   = 'vinathi'
 prime_client=client_login(client=client_name)
 def order_button(exclusive_strike,type,lots):
     if exclusive_strike==0:

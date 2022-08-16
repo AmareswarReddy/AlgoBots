@@ -68,7 +68,7 @@ def rosetta_strikes(option_chain):
     data=[]
     data1=[]
     data2=[]
-    increment=(n-i)/15
+    increment=1
     while i<end:
         i=i+increment
         init_ce=0
