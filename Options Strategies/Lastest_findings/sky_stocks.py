@@ -166,6 +166,7 @@ current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][oi_chain]['Expi
 while True:
     while True:
         try :
+            expiry_timestamps=prime_client['login'].get_expiry("N",company).copy()
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N",company,current_expiry_time_stamp_weekly)['Options'])
             x=expiry_timestamps['lastrate'][0]['LTP']
             break

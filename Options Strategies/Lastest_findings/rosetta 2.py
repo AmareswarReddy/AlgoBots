@@ -61,7 +61,6 @@ def rosetta_strikes(option_chain):
     pe_data=option_chain[option_chain['CPType']=='PE']
     ce_data=option_chain[option_chain['CPType']=='CE']
     i=np.array(pe_data['StrikeRate'])[0]
-    n=np.array(pe_data['StrikeRate'])[1]
     end=np.array(pe_data['StrikeRate'])[-1]
     ss=np.array(pe_data['StrikeRate'])
     p_lastrate=np.array(pe_data['LastRate'])
@@ -71,7 +70,7 @@ def rosetta_strikes(option_chain):
     data=[]
     data1=[]
     data2=[]
-    increment=2
+    increment=1
     while i<end:
         i=i+increment
         init_ce=0
@@ -440,6 +439,7 @@ current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'
 while True:
     while True:
         try :
+            expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
             x=expiry_timestamps['lastrate'][0]['LTP']
             break
