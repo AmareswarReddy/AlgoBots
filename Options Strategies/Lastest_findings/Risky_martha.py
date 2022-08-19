@@ -51,20 +51,23 @@ import sys
 client_name   = 'vinathi'
 #lots=int(input('lots (Eg:3):'))
 tron=int(input('enter the number of lots for buying :'))
-def rosetta_strikes(option_chain):
+change=600
+def rosetta_strikes(option_chain,x,change):
     pe_data=option_chain[option_chain['CPType']=='PE']
+    #pe_data=pe_data[pe_data['StrikeRate']<x+change]
     ce_data=option_chain[option_chain['CPType']=='CE']
+    #ce_data=ce_data[ce_data['StrikeRate']>x-change]
     i=np.array(pe_data['StrikeRate'])[0]
     end=np.array(pe_data['StrikeRate'])[-1]
     ss=np.array(pe_data['StrikeRate'])
-    p_lastrate=np.array(pe_data['LastRate'])
-    c_lastrate=np.array(ce_data['LastRate'])
-    p_openinterest=np.array(pe_data['OpenInterest'])
-    c_openinterest=np.array(ce_data['OpenInterest'])
+    p_lastrate=np.array(list(pe_data[pe_data['StrikeRate']<=x+change]['LastRate'])+list(pe_data[pe_data['StrikeRate']>x+change]['LastRate']*0))
+    c_lastrate=np.array(list(ce_data[ce_data['StrikeRate']<x-change]['LastRate']*0)+list(ce_data[ce_data['StrikeRate']>=x-change]['LastRate']))
+    p_openinterest=np.array(list(pe_data[pe_data['StrikeRate']<=x+change]['OpenInterest'])+list(pe_data[pe_data['StrikeRate']>x+change]['OpenInterest']*0))
+    c_openinterest=np.array(list(ce_data[ce_data['StrikeRate']<x-change]['OpenInterest']*0)+list(ce_data[ce_data['StrikeRate']>=x-change]['OpenInterest']))
     data=[]
     data1=[]
     data2=[]
-    increment=1
+    increment=2
     while i<end:
         i=i+increment
         init_ce=0
@@ -94,12 +97,6 @@ def past_picture(indicator,project_k,b_lastrate,x):
     div_factor=0
     local_div_factor=0
     instant_div_factor=0
-    '''if n>2:'''
-    '''    for i in range(1,n):'''
-    '''        a=(b_lastrate[n-1]-b_lastrate[i])'''
-    '''        b=(indicator[n-1]-indicator[i])'''
-    '''        div_factor=div_factor+b '''
-    '''    div_factor=div_factor/n'''
     if n>121:
         for i in range(n-120,n):
             b=(indicator[n-1]-indicator[i])
@@ -112,19 +109,6 @@ def past_picture(indicator,project_k,b_lastrate,x):
         instant_div_factor=instant_div_factor/20
     return indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor
 
-def strike_list(strike1,strike2):
-    k=[]
-    if strike1>strike2:
-        a=strike2
-        while a<=strike1:
-            k=k+[a]
-            a=a+100
-    else:
-        a=strike1
-        while a<=strike2:
-            k=k+[a]
-            a=a+100
-    return k
 
 def packup(option_chain,prime_client,taken_trade,exclusive_strike,tron):
     lots_tuner=tron
@@ -268,7 +252,7 @@ prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
-proj,c_striker,p_striker=rosetta_strikes(option_chain)
+proj,c_striker,p_striker=rosetta_strikes(option_chain,x,change)
 c_data=option_chain[option_chain['CPType']=='CE']
 p_data=option_chain[option_chain['CPType']=='PE']
 c_scrip=int(c_data[c_data['StrikeRate']==c_striker]['ScripCode'])
@@ -307,7 +291,7 @@ while True:
             break
         except Exception :
             pass
-    proj,Cyi,Phf=rosetta_strikes(option_chain)
+    proj,Cyi,Phf=rosetta_strikes(option_chain,x,change)
     project_k=(x-proj)
     print('Niftybank:  ',int(project_k))
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
