@@ -252,6 +252,7 @@ prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
+x=expiry_timestamps['lastrate'][0]['LTP']
 proj,c_striker,p_striker=rosetta_strikes(option_chain,x,change)
 c_data=option_chain[option_chain['CPType']=='CE']
 p_data=option_chain[option_chain['CPType']=='PE']
