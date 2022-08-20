@@ -130,59 +130,49 @@ def packup(option_chain,prime_client,taken_trade,exclusive_strike,tron):
         prime_client['login'].place_order(test_order)
     return 0
 
-def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,lots_tuner,tron,x):
+def decoy5(option_chain,exclusive_strike,taken_trade,to_deal,lots_tuner,x,to_deal_list,c_logic,p_logic):
     if local_div_factor!=0 :
-        if del_to_deal>0 and to_deal<-tempo and taken_trade==0 :
+        if c_logic==0 and to_deal>1 and taken_trade==0 :
             exclusive_strike=int(np.round(x/100)*100)
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
-            tempo=tempo+10
+            p_logic=0
             taken_trade=1
-        elif del_to_deal<0 and to_deal>tempo and taken_trade==0 :
+        elif p_logic==0  and to_deal<-1 and taken_trade==0 :
             exclusive_strike=int(np.round(x/100)*100)
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
-            tempo=tempo+10
+            c_logic=0
             taken_trade=-1
-        elif del_to_deal<0 and to_deal>0 and taken_trade==1 :
+        elif to_deal<0 and taken_trade==1 :
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*(lots_tuner), price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order)
-            ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-            hh=np.floor((int(ind_time[11:13])*60+int(ind_time[14:16])-630)/100)
-            tempo=hh*10+20
-            lots_tuner=tron
             taken_trade=0
-        elif del_to_deal>0 and to_deal<0 and taken_trade==-1:
+        elif to_deal>0 and taken_trade==-1:
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*(lots_tuner), price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order)
             taken_trade=0
-            lots_tuner=tron
-            ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-            hh=np.floor((int(ind_time[11:13])*60+int(ind_time[14:16])-630)/100)
-            tempo=hh*10+20
-        elif del_to_deal>0 and to_deal<-tempo and taken_trade==1 and lots_tuner<=24 :
+        elif max(to_deal_list)-to_deal>10  and taken_trade==1  :
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
-            tempo=tempo+10
-            lots_tuner=lots_tuner*2
-        elif del_to_deal<0 and to_deal>tempo and taken_trade==-1 and lots_tuner<=24 :
+            c_logic=1
+        elif to_deal-min(to_deal_list)>10 and taken_trade==-1 :
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
-            tempo=tempo+10
-            lots_tuner=lots_tuner*2
-    return taken_trade,exclusive_strike,tempo,lots_tuner
+            p_logic=1
+    return taken_trade,exclusive_strike,p_logic,c_logic
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
@@ -212,7 +202,10 @@ taken_trade=0
 oi_chain=0
 tempo=10
 nifty_bank=[]
+to_deal_list=[]
 lots_tuner=tron
+c_logic=0
+p_logic=0
 if datetime.today().weekday()==3:
     time=916
 else:
@@ -246,7 +239,11 @@ while True:
     if tron>0 and len(to_deal)>corr_window+1 and oi_chain==0:
         if to_deal[-1]>30 or to_deal[-1]<-30 :
             s.play()
-        taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,x)
+        taken_trade,exclusive_strike,p_logic,c_logic=decoy5(option_chain,exclusive_strike,taken_trade,to_deal[-1],lots_tuner,x,to_deal_list,c_logic,p_logic)
+    if taken_trade!=0:
+        to_deal_list=to_deal_list+[to_deal[-1]]
+    if taken_trade==0:
+        to_deal_list=[]
     if int(ind_time[11:13])*60+int(ind_time[14:16])>time :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator[corr_window+1:]))}
