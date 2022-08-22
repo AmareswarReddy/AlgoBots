@@ -254,7 +254,9 @@ to_deal=[]
 corr=[]
 corr_window=10
 exclusive_strike=0
+exclusive_strike_2=0
 taken_trade=0
+taken_trade_2=0
 oi_chain=0
 tempo=10
 nifty_bank=[]
@@ -305,7 +307,7 @@ while True:
     if int(ind_time[11:13])*60+int(ind_time[14:16])>time :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator[corr_window+1:]))}
-        with open('variables_data_1'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
+        with open('variables_data_2'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
             json.dump(json_data, json_file)
         if datetime.today().weekday()==3:
             oi_chain=1

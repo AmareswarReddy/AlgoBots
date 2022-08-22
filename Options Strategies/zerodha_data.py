@@ -41,7 +41,6 @@ def downloaddata(url):
     
     if(r.status_code == 200):
         json_data = json.loads(r.content)
-        print(json_data)
         return pd.DataFrame(json_data['data']['candles'])
     else:
         return None
@@ -97,4 +96,50 @@ for a in index:
 for day in days:
     indicator=tester(df2,day,indicator)
 df2[7]=indicator
+# %%
+p1=[]
+temp=0
+profit=0
+for i in range(0,len(df2)):
+    if df2[7].iloc[i]>0 and temp==0:
+        p1=p1+[df2[4].iloc[i]]
+        temp=1
+    if df2[7].iloc[i]<=0 and len(p1)!=0:
+        p1=p1+[df2[4].iloc[i]]
+        print(p1)
+        print('profit: ',p1[1]-p1[0])
+        profit=profit+p1[1]-p1[0]
+        p1=[]
+        temp=0
+    if df2[7].iloc[i]==0 and len(p1)!=0:
+        p1=p1+[df2[4].iloc[i-1]]
+        print(p1)
+        print('profit: ',p1[1]-p1[0])
+        profit=profit+p1[1]-p1[0]
+        p1=[]
+        temp=0
+print('total profit: ',profit)
+# %%
+p1=[]
+temp=0
+profit=0
+for i in range(0,len(df2)):
+    if df2[7].iloc[i]<0 and temp==0:
+        p1=p1+[df2[4].iloc[i]]
+        temp=1
+    if df2[7].iloc[i]>0 and len(p1)!=0:
+        p1=p1+[df2[4].iloc[i]]
+        print(p1)
+        print('profit: ',-p1[1]+p1[0])
+        profit=profit-p1[1]+p1[0]
+        p1=[]
+        temp=0
+    if df2[7].iloc[i]==0 and len(p1)!=0:
+        p1=p1+[df2[4].iloc[i-1]]
+        print(p1)
+        print('profit: ',-p1[1]+p1[0])
+        profit=profit-p1[1]+p1[0]
+        p1=[]
+        temp=0
+print('total profit: ',profit)
 # %%
