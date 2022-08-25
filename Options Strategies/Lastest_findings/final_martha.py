@@ -175,7 +175,7 @@ def decoy5(option_chain,exclusive_strike,taken_trade,to_deal,k,lots_tuner,x,to_d
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     hh=int(ind_time[11:13])*60+int(ind_time[14:16])
     if local_div_factor!=0 :
-        if c_logic==0 and to_deal>1 and taken_trade==0 and hh<900 and k>0:
+        if c_logic==0 and to_deal>1 and taken_trade==0 and hh<900 and k>0 and corr2>0.8:
             exclusive_strike=int(np.round(x/100)*100)
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
@@ -183,7 +183,7 @@ def decoy5(option_chain,exclusive_strike,taken_trade,to_deal,k,lots_tuner,x,to_d
             prime_client['login'].place_order(test_order) 
             p_logic=0
             taken_trade=1
-        elif p_logic==0  and to_deal<-1 and taken_trade==0 and hh<900 and k<0:
+        elif p_logic==0  and to_deal<-1 and taken_trade==0 and hh<900 and k<0 and corr2>0.8:
             exclusive_strike=int(np.round(x/100)*100)
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
