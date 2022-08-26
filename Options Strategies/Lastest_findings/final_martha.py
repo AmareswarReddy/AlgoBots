@@ -13,9 +13,9 @@ import requests
 from pytz import timezone 
 from cred import *
 from py5paisa.order import Basket_order
-import pygame
-pygame.init()
-s = pygame.mixer.Sound("alarm.wav")
+#import pygame
+#pygame.init()
+#s = pygame.mixer.Sound("alarm.wav")
 def pearsonr(x, y):
     n = len(x)
     x = np.asarray(x)
@@ -53,7 +53,7 @@ import sys
 client_name   = 'vinathi'
 #lots=int(input('lots (Eg:3):'))
 tron=int(input('enter the number of lots for buying :'))
-change=600
+change=1000
 def rosetta_strikes(option_chain,x,change):
     pe_data=option_chain[option_chain['CPType']=='PE']
     #pe_data=pe_data[pe_data['StrikeRate']<x+change]
@@ -171,25 +171,23 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             lots_tuner=lots_tuner*2
     return taken_trade,exclusive_strike,tempo,lots_tuner
 
-def decoy5(option_chain,exclusive_strike,taken_trade,to_deal,k,lots_tuner,x,to_deal_list,c_logic,p_logic,corr2):
+def decoy5(option_chain,exclusive_strike,taken_trade,to_deal,k,lots_tuner,x,to_deal_list,corr2):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     hh=int(ind_time[11:13])*60+int(ind_time[14:16])
     if local_div_factor!=0 :
-        if c_logic==0 and to_deal>1 and taken_trade==0 and hh<900 and k>0 and corr2>0.8:
+        if  to_deal>1 and taken_trade==0 and hh<900  and corr2>0.8:
             exclusive_strike=int(np.round(x/100)*100)
             c_data=option_chain[option_chain['CPType']=='CE']
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
-            p_logic=0
             taken_trade=1
-        elif p_logic==0  and to_deal<-1 and taken_trade==0 and hh<900 and k<0 and corr2>0.8:
+        elif  to_deal<-1 and taken_trade==0 and hh<900  and corr2>0.8:
             exclusive_strike=int(np.round(x/100)*100)
             p_data=option_chain[option_chain['CPType']=='PE']
             p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order) 
-            c_logic=0
             taken_trade=-1
         #elif to_deal<0 and taken_trade==1 :
         #    c_data=option_chain[option_chain['CPType']=='CE']
@@ -209,16 +207,14 @@ def decoy5(option_chain,exclusive_strike,taken_trade,to_deal,k,lots_tuner,x,to_d
                 c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
                 test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
                 prime_client['login'].place_order(test_order) 
-                c_logic=1
                 taken_trade=0
             elif to_deal-min(to_deal_list)>1 and taken_trade==-1 :
                 p_data=option_chain[option_chain['CPType']=='PE']
                 p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
                 test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots_tuner, price=0 ,is_intraday=False,remote_order_id="tag")
                 prime_client['login'].place_order(test_order) 
-                p_logic=1
                 taken_trade=0
-    return taken_trade,exclusive_strike,p_logic,c_logic
+    return taken_trade,exclusive_strike
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
@@ -289,7 +285,7 @@ while True:
         #if to_deal[-1]>30 or to_deal[-1]<-30 :
             #s.play()
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,x)
-        taken_trade_2,exclusive_strike_2,p_logic,c_logic=decoy5(option_chain,exclusive_strike_2,taken_trade_2,to_deal[-1]-to_deal[-6],to_deal[-1],lots_tuner_2,x,to_deal_list,c_logic,p_logic,corr[-1])
+        taken_trade_2,exclusive_strike_2=decoy5(option_chain,exclusive_strike_2,taken_trade_2,to_deal[-1]-to_deal[-6],to_deal[-1],lots_tuner_2,x,to_deal_list,corr[-1])
     if taken_trade_2!=0:
         to_deal_list=to_deal_list+[to_deal[-1]]
     if taken_trade_2==0:
