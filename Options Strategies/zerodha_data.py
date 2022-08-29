@@ -4,13 +4,15 @@ import json
 import pandas as pd
 import csv
 from io import StringIO
-def download_tickers(url):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; Rigor/1.0.0; http://rigor.com)",
-        "Accept": "*/*",
-        "authorization": "enctoken nL7CMcUPQ/xHPbd2xguSce3i1XC5QqdwpMAWbn3CH9+L8RT2VkxFs8WPwink48EWUXxjBGSDbwtqbyAg4/BhPLpbeud+HSl6pu/5ZbmvDUv8lbStYq/sqQ==",
-        "cookie": "public_token=1ekFsAD5dQpaRJ30BYfIPQMdkU0ZkLNF; enctoken=nL7CMcUPQ/xHPbd2xguSce3i1XC5QqdwpMAWbn3CH9+L8RT2VkxFs8WPwink48EWUXxjBGSDbwtqbyAg4/BhPLpbeud+HSl6pu/5ZbmvDUv8lbStYq/sqQ==; user_id=UW1001; kf_session=ASE75ZSJHhD9V63oDtKopnrPsYwZ3ltN; _ga=GA1.2.796226098.1661082037; _gid=GA1.2.815124478.1661082037"
-    }
+import matplotlib.pyplot as plt
+url3 = "https://kite.zerodha.com/oms/instruments/historical/9604098/minute?user_id=UW1001&oi=1&from=2022-08-29&to=2022-08-29"
+headers = {
+    "User-Agent": "Mozilla/5.0 (compatible; Rigor/1.0.0; http://rigor.com)",
+    "Accept": "*/*",
+    "authorization": "enctoken Ys3BVcWyzj4/aRynxsxeZPZxT8kz65k//hcj98jz5BQPxdiOBX6Bu0q09nC4VZ/KupaJlR17AVDe9u7S9is8cOoDn0GuYvcxXitwKic0hTvmnBntVOw5pQ==",
+    "cookie": "public_token=D5RU0SMIqFECvsCp8CdxG2j9nFaBAEVK; enctoken=Ys3BVcWyzj4/aRynxsxeZPZxT8kz65k//hcj98jz5BQPxdiOBX6Bu0q09nC4VZ/KupaJlR17AVDe9u7S9is8cOoDn0GuYvcxXitwKic0hTvmnBntVOw5pQ==; user_id=UW1001; kf_session=3nsWtQVFy5nPA0hYLjfoINiE6UPwmI7Y"
+}
+def download_tickers(url,headers):
     url = url
     r = requests.get(url, headers=headers)
     
@@ -29,27 +31,27 @@ def download_tickers(url):
     else:
         return None
 
-def downloaddata(url):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; Rigor/1.0.0; http://rigor.com)",
-        "Accept": "*/*",
-        "authorization": "enctoken nL7CMcUPQ/xHPbd2xguSce3i1XC5QqdwpMAWbn3CH9+L8RT2VkxFs8WPwink48EWUXxjBGSDbwtqbyAg4/BhPLpbeud+HSl6pu/5ZbmvDUv8lbStYq/sqQ==",
-        "cookie": "public_token=1ekFsAD5dQpaRJ30BYfIPQMdkU0ZkLNF; enctoken=nL7CMcUPQ/xHPbd2xguSce3i1XC5QqdwpMAWbn3CH9+L8RT2VkxFs8WPwink48EWUXxjBGSDbwtqbyAg4/BhPLpbeud+HSl6pu/5ZbmvDUv8lbStYq/sqQ==; user_id=UW1001; kf_session=ASE75ZSJHhD9V63oDtKopnrPsYwZ3ltN; _ga=GA1.2.796226098.1661082037; _gid=GA1.2.815124478.1661082037"
-    }
+def downloaddata(url,headers):
     url = url
     r = requests.get(url, headers=headers)
-    
+    #print(r.content)
     if(r.status_code == 200):
         json_data = json.loads(r.content)
+        #print(r.content)
         return pd.DataFrame(json_data['data']['candles'])
     else:
         return None
-url3 = "https://kite.zerodha.com/oms/instruments/historical/21048578/minute?user_id=UW1001&oi=1&from=2022-07-22&to=2022-08-21"
 url = "https://api.kite.trade/instruments"
-df=download_tickers(url)
-df2=downloaddata(url3)
+df=download_tickers(url,headers)
+df2=downloaddata(url3,headers)
+#print(df2)
 df2[7]=0
+df2['v']=df2[1]
+df2['o']=df2[1]
+df2['ch_o']=0
 indicator=list(df2[7])
+vwap=list(df2['v'])
+owap=list(df2['o'])
 # %%
 import numpy as np
 index=list(df2[0])
@@ -70,22 +72,36 @@ def pearsonr(x, y):
     r = np.dot(xm/normxm, ym/normym)
     r = max(min(r, 1.0), -1.0)
     return r,0
-def tester(df2,day,indicator):
+def tester(df2,day,indicator,vwap,owap):
     close=list(df2[4])
     volume=list(df2[5])
     oi=list(df2[6])
+    dayy=list(df2[6])
+    df2['day']=0
     c=[]
     o=[]
-    v=0
+    v=[]
     for i in range(0,len(df2)):
         if index[i][:10]==day:
+            dayy[i]=day
             c=c+[close[i]]
             o=o+[oi[i]]
-            v=v+volume[i]
+            v=v+[volume[i]]
             if len(o)>1:
                 corr=pearsonr(c, o)[0]
-                indicator[i]=corr*(((o[-1]-o[0])/v)+1)/2
-    return indicator
+                del_o=o[-1]-o[0]
+                indicator[i]=corr*((((del_o)/np.sum(v)+1))/2)
+                vwap[i]=np.dot(np.array(v),np.array(c))/np.sum(np.array(v))
+                #owap[i]=np.dot(np.array(o),np.array(c))/np.sum(np.array(o))
+                kratos=(np.dot(np.array(o),np.array(c))-o[0]*np.sum(np.array(c)))/(np.sum(np.array(o))-len(o)*o[0])
+                owap[i]=min(vwap[i]+100,max(vwap[i]-100,kratos))
+                
+                #a=np.array([0]+list(o))
+                #b=np.array(list(o)+[0])
+                #ch_o=np.array([1]+list((b-a)[1:]))[:-1]
+                #owap[i]=np.dot(np.array(ch_o),np.array(c))/np.sum(np.array(ch_o))
+    df2['day']=dayy
+    return indicator,owap,vwap
 
 
 # %%
@@ -94,8 +110,10 @@ for a in index:
     days=days+[a[:10]]
 [*set(days)]
 for day in days:
-    indicator=tester(df2,day,indicator)
+    indicator,owap,vwap=tester(df2,day,indicator,vwap,owap)
 df2[7]=indicator
+df2['v']=vwap
+df2['o']=owap
 # %%
 p1=[]
 temp=0
@@ -142,4 +160,29 @@ for i in range(0,len(df2)):
         p1=[]
         temp=0
 print('total profit: ',profit)
+# %%
+for loop in range(0,30):
+    lbu=df2.iloc[loop*375:loop*375+375]
+    fig, ax_left = plt.subplots()
+    ax_right = ax_left.twinx()
+    ax_left.plot(np.array(lbu[4]), color='blue')
+    #ax_right.plot(np.array(df2[7]), color='white')
+    #ax_right.plot(np.array(df2['o'])-np.array(df2['v']), color='green')
+    ax_left.plot(np.array(lbu['v']), color='red')
+    ax_left.plot(np.array(lbu['o']), color='yellow')
+    plt.show()
+    print(loop)
+#%%
+for day in days:
+    data=df2[df2['day']==day]
+    fig, ax_left = plt.subplots()
+    ax_right = ax_left.twinx()
+    ax_left.plot(np.array(data[4]), color='blue')
+    #ax_right.plot(np.array(df2[7]), color='white')
+    #ax_right.plot(np.array(df2['o'])-np.array(df2['v']), color='green')
+    ax_left.plot(np.array(data['v']), color='red')
+    ax_left.plot(np.array(data['o']), color='yellow')
+    plt.show()
+
+
 # %%

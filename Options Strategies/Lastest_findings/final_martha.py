@@ -142,7 +142,7 @@ def decoy4(option_chain,exclusive_strike,taken_trade,to_deal,del_to_deal,tempo,l
             c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
             test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*(lots_tuner), price=0 ,is_intraday=False,remote_order_id="tag")
             prime_client['login'].place_order(test_order)
-            hh=np.floor((hhh-630)/100)
+            hh=np.floor((hhh-750)/100)
             tempo=hh*10+20
             lots_tuner=tron
             taken_trade=0
