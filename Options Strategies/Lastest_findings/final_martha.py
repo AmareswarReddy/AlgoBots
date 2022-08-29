@@ -105,11 +105,11 @@ def past_picture(indicator,project_k,b_lastrate,x):
     '''        b=(indicator[n-1]-indicator[i])'''
     '''        div_factor=div_factor+b '''
     '''    div_factor=div_factor/n'''
-    if n>201:
-        for i in range(n-200,n):
+    if n>121:
+        for i in range(n-120,n):
             b=(indicator[n-1]-indicator[i])
             local_div_factor=local_div_factor+b
-        local_div_factor=local_div_factor/200
+        local_div_factor=local_div_factor/120
     if n>21:
         for i in range(n-20,n):
             b=(indicator[n-1]-indicator[i])
@@ -248,7 +248,7 @@ tempo=10
 nifty_bank=[]
 lots_tuner=tron
 to_deal_list=[]
-lots_tuner_2=tron*3
+lots_tuner_2=tron*2-1
 c_logic=0
 p_logic=0
 if datetime.today().weekday()==3:
@@ -292,7 +292,7 @@ while True:
         to_deal_list=[]
     if int(ind_time[11:13])*60+int(ind_time[14:16])>time :
         json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),'nifty_bank':list(np.array(indicator[corr_window+1:]))}
-        with open('variables_data_2'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
+        with open('variables_data_3'+str(datetime.today().weekday())+'.json', 'w') as  json_file:
             json.dump(json_data, json_file)
         if datetime.today().weekday()==3:
             oi_chain=1
