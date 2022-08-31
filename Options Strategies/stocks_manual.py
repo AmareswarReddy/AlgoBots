@@ -110,5 +110,4 @@ while True:
         stocks_manual_json[company]=loopin(company)
     with open('stocks_manual.json', 'w') as  json_file:
         json.dump(stocks_manual_json, json_file)
-        break
 # %%
