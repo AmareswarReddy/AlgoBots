@@ -39,9 +39,7 @@ fromTime = '09:30:00'
 toDate = '2021-03-25'
 toTime='15:35:00'
 expiry = '25MAR2021'
-cookies = {'AWSALBAPP-0=':'AAAAAAAAAABviR24uzsHIckJ3hpAnutFyhHk4cLqeUqFY2vZSn60lnDWZF+e8D9djNdsWOwTo9/FBkg/bAovO74xdhWY+HeLPmyOvrmR6ZFWu82ZFvNOXAN7ZJfugBkjxKRPN3inWaPTCQ=='
-, 'AWSALBAPP-1':'_remove_', 'AWSALBAPP-2':'_remove_', 'AWSALBAPP-3':'_remove_', 'JSESSIONID':'B4DB9612F58A2787CCA625EBEC3AB087'}
-
+cookies = {"JSESSIONID":"0CD55F1B78D6F0B061706467FE56FBC8"}
 
 def getOptionData(symbol = 'NIFTY', fromDate = '2018-12-25', fromTime = '09:20:00', toDate = '2018-12-25', toTime='15:35:00', expiry='02DEC2021' ):
     baseURL = 'https://opstra.definedge.com/api/optionsimulator/optionchain/'
