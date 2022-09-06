@@ -92,6 +92,25 @@ def rosetta_strikes(option_chain,x,change):
     c=np.array(option_chain['StrikeRate'])[0]+index2*increment
     return  a,round(b/100)*100,round(c/100)*100
 
+def rosetta_ratios(option_chain):
+    pe_data=option_chain[option_chain['CPType']=='PE']
+    #pe_data=pe_data[pe_data['StrikeRate']<x+change]
+    ce_data=option_chain[option_chain['CPType']=='CE']
+    #ce_data=ce_data[ce_data['StrikeRate']>x-change]
+    p_lastrate=np.array(list(pe_data['LastRate']))
+    c_lastrate=np.array(list(ce_data['LastRate']))
+    p_openinterest=np.array(list(pe_data['OpenInterest']))
+    c_openinterest=np.array(list(ce_data['OpenInterest']))
+    pp=p_lastrate[np.multiply(p_lastrate!=0, p_openinterest!=0)]
+    po=p_openinterest[np.multiply(p_lastrate!=0, p_openinterest!=0)]
+    cp=c_lastrate[np.multiply(c_lastrate!=0, c_openinterest!=0)]
+    co=c_openinterest[np.multiply(c_lastrate!=0, c_openinterest!=0)]
+    a1=np.dot(1/np.array(pp),np.array(po))
+    a2=np.dot(1/np.array(cp),np.array(co))
+    a=a2/a1
+    return  a
+
+
 def past_picture(indicator,project_k,b_lastrate,x):
     indicator=indicator+[project_k]
     b_lastrate=b_lastrate+[x]
@@ -189,7 +208,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*6
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 prime_client=client_login(client=client_name)
-#%%
+
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
@@ -230,7 +249,8 @@ while True:
             pass
     proj,Cyi,Phf=rosetta_strikes(option_chain,x,change)
     project_k=(x-proj)
-    print('Niftybank:  ',project_k)
+    print('rosetta:  ',project_k)
+    print('rosetta_ratio',rosetta_ratios(option_chain))
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x)
     diverge=diverge+[div_factor]
@@ -245,7 +265,8 @@ while True:
         print('')
     if tron>0 and len(to_deal)>corr_window+1 and oi_chain==0:
         if to_deal[-1]>30 or to_deal[-1]<-30 :
-            s.play()
+            #s.play()
+            pass
         taken_trade,exclusive_strike,tempo,lots_tuner=decoy4(option_chain,exclusive_strike,taken_trade,to_deal[-1],del_to_deal,tempo,lots_tuner,tron,x)
     if int(ind_time[11:13])*60+int(ind_time[14:16])>time :
         packup(option_chain,prime_client,taken_trade,exclusive_strike,lots_tuner)
