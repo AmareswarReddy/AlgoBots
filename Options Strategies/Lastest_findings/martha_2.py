@@ -92,7 +92,7 @@ def rosetta_strikes(option_chain,x,change):
     c=np.array(option_chain['StrikeRate'])[0]+index2*increment
     return  a,round(b/100)*100,round(c/100)*100
 
-def rosetta_ratios(option_chain):
+def rosetta_ratio(option_chain):
     pe_data=option_chain[option_chain['CPType']=='PE']
     #pe_data=pe_data[pe_data['StrikeRate']<x+change]
     ce_data=option_chain[option_chain['CPType']=='CE']
@@ -108,7 +108,7 @@ def rosetta_ratios(option_chain):
     a1=np.dot(1/np.array(pp),np.array(po))
     a2=np.dot(1/np.array(cp),np.array(co))
     a=a2/a1
-    return  a
+    return  np.round_(((1/np.exp(1))-(1/np.exp(a)))*100,2)
 
 
 def past_picture(indicator,project_k,b_lastrate,x):
@@ -250,7 +250,7 @@ while True:
     proj,Cyi,Phf=rosetta_strikes(option_chain,x,change)
     project_k=(x-proj)
     print('rosetta:  ',project_k)
-    print('rosetta_ratio',rosetta_ratios(option_chain))
+    print('rosetta_ratio',rosetta_ratio(option_chain))
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x)
     diverge=diverge+[div_factor]
