@@ -14,8 +14,8 @@ from pytz import timezone
 from cred import *
 from py5paisa.order import Basket_order
 import pygame
-pygame.init()
-s = pygame.mixer.Sound("alarm.wav")
+#pygame.init()
+#s = pygame.mixer.Sound("alarm.wav")
 def pearsonr(x, y):
     n = len(x)
     x = np.asarray(x)
@@ -265,6 +265,7 @@ while True:
     project_k=(x-proj)
     print('rosetta:  ',project_k)
     print('rosetta_ratio',rosetta_ratio(option_chain))
+    print('rosetta_ratio2: ',rosetta_ratio2(option_chain,x))
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x)
     diverge=diverge+[div_factor]

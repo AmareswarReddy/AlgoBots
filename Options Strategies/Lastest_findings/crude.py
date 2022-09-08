@@ -212,6 +212,7 @@ while True:
     project_k=(x-proj)
     print(company+': ',project_k)
     print('rosetta ratio: ',rosetta_ratio(option_chain))
+    print('rosetta_ratio2: ',rosetta_ratio2(option_chain,x))
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
