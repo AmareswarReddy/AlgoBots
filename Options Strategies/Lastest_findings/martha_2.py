@@ -108,7 +108,21 @@ def rosetta_ratio(option_chain):
     a1=np.dot(1/np.array(pp),np.array(po))
     a2=np.dot(1/np.array(cp),np.array(co))
     a=a2/a1
-    return  np.round_(((1/np.exp(1))-(1/np.exp(a)))*100,2)
+    return  np.round_(((1/np.exp(a))-(1/np.exp(1)))*158.2,2)
+
+def rosetta_ratio2(option_chain,x):
+    lower=int(np.floor(x/100)*100)
+    upper=int(np.ceil(x/100)*100)
+    pe_data=option_chain[option_chain['CPType']=='PE']
+    ce_data=option_chain[option_chain['CPType']=='CE']
+    p1=int(pe_data['LastRate'][pe_data['StrikeRate']==lower])
+    p2=int(pe_data['LastRate'][pe_data['StrikeRate']==upper])
+    c1=int(ce_data['LastRate'][ce_data['StrikeRate']==lower])
+    c2=int(ce_data['LastRate'][ce_data['StrikeRate']==upper])
+    p_oi=np.sum(np.array(list(pe_data['OpenInterest'])))
+    c_oi=np.sum(np.array(list(ce_data['OpenInterest'])))
+    a=(p_oi/c_oi)*(c1+c2)/(p1+p2)
+    return  np.round_(((1/np.exp(a))-(1/np.exp(1)))*158.2,2)
 
 
 def past_picture(indicator,project_k,b_lastrate,x):
@@ -255,13 +269,13 @@ while True:
     indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor=past_picture(indicator,project_k,b_lastrate,x)
     diverge=diverge+[div_factor]
     to_deal=to_deal+[instant_div_factor-local_div_factor]
-    print('sample no.: ',len(to_deal))
-    print('base_indicator :',to_deal[-1])
+    #print('sample no.: ',len(to_deal))
+    #print('base_indicator :',to_deal[-1])
     if len(to_deal)>corr_window+1:
         corr=corr+[pearsonr(to_deal[-corr_window:],b_lastrate[-corr_window:])[0]]
     if len(to_deal)>corr_window+1:
         del_to_deal=to_deal[-1]-to_deal[-2]
-        print('new_indicator',del_to_deal)
+        #print('new_indicator',del_to_deal)
         print('')
     if tron>0 and len(to_deal)>corr_window+1 and oi_chain==0:
         if to_deal[-1]>30 or to_deal[-1]<-30 :

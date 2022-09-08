@@ -14,8 +14,8 @@ from pytz import timezone
 from cred import *
 from py5paisa.order import Basket_order
 import pygame
-pygame.init()
-s = pygame.mixer.Sound("alarm.wav")
+#pygame.init()
+#s = pygame.mixer.Sound("alarm.wav")
 req_2=[{'Exch':'M','ExchType':'D','Symbol':'CRUDEOIL 19 Sep 2022','Expiry':'20220919','StrikePrice':'0','OptionType':'XX'}]
 def pearsonr(x, y):
     n = len(x)
@@ -104,6 +104,39 @@ def rosetta_strikes(option_chain):
     upper_strike=arr[t2]
     return  a,lower_strike,upper_strike
 
+def rosetta_ratio(option_chain):
+    pe_data=option_chain[option_chain['CPType']=='PE']
+    #pe_data=pe_data[pe_data['StrikeRate']<x+change]
+    ce_data=option_chain[option_chain['CPType']=='CE']
+    #ce_data=ce_data[ce_data['StrikeRate']>x-change]
+    p_lastrate=np.array(list(pe_data['LastRate']))
+    c_lastrate=np.array(list(ce_data['LastRate']))
+    p_openinterest=np.array(list(pe_data['OpenInterest']))
+    c_openinterest=np.array(list(ce_data['OpenInterest']))
+    pp=p_lastrate[np.multiply(p_lastrate!=0, p_openinterest!=0)]
+    po=p_openinterest[np.multiply(p_lastrate!=0, p_openinterest!=0)]
+    cp=c_lastrate[np.multiply(c_lastrate!=0, c_openinterest!=0)]
+    co=c_openinterest[np.multiply(c_lastrate!=0, c_openinterest!=0)]
+    a1=np.dot(1/np.array(pp),np.array(po))
+    a2=np.dot(1/np.array(cp),np.array(co))
+    a=a2/a1
+    return  np.round_(((1/np.exp(a))-(1/np.exp(1)))*158.2,2)
+
+def rosetta_ratio2(option_chain,x):
+    lower=int(np.floor(x/100)*100)
+    upper=int(np.ceil(x/100)*100)
+    pe_data=option_chain[option_chain['CPType']=='PE']
+    ce_data=option_chain[option_chain['CPType']=='CE']
+    p1=int(pe_data['LastRate'][pe_data['StrikeRate']==lower])
+    p2=int(pe_data['LastRate'][pe_data['StrikeRate']==upper])
+    c1=int(ce_data['LastRate'][ce_data['StrikeRate']==lower])
+    c2=int(ce_data['LastRate'][ce_data['StrikeRate']==upper])
+    p_oi=np.sum(np.array(list(pe_data['OpenInterest'])))
+    c_oi=np.sum(np.array(list(ce_data['OpenInterest'])))
+    a=(p_oi/c_oi)*(c1+c2)/(p1+p2)
+    return  np.round_(((1/np.exp(a))-(1/np.exp(1)))*158.2,2)
+
+
 def past_picture(indicator,project_k,b_lastrate,x):
     indicator=indicator+[project_k]
     b_lastrate=b_lastrate+[x]
@@ -130,10 +163,6 @@ def past_picture(indicator,project_k,b_lastrate,x):
     return indicator,b_lastrate,div_factor,local_div_factor,instant_div_factor
 
 
-#%%
-ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
-    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 prime_client=client_login(client=client_name)
 
@@ -182,6 +211,7 @@ while True:
     proj,Cyi,Phf=rosetta_strikes(option_chain)
     project_k=(x-proj)
     print(company+': ',project_k)
+    print('rosetta ratio: ',rosetta_ratio(option_chain))
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
@@ -199,8 +229,9 @@ while True:
         print('')
     if len(to_deal)>corr_window+1 and oi_chain==0:
         if to_deal[-1]>30 or to_deal[-1]<-30 :
-            s.play()
-    json_data = {'lastrate': list(b_lastrate[corr_window+1:][-240:]), 'k':list(to_deal[corr_window+1:][-240:]),'corr':list(np.array(corr[-240:])*10),company:list(np.array(indicator[-240:]))}
+            #s.play()
+            pass
+    json_data = {'lastrate': list(b_lastrate[corr_window+1:]), 'k':list(to_deal[corr_window+1:]),'corr':list(np.array(corr)*10),company:list(np.array(indicator))}
     with open(company+'.json', 'w') as  json_file:
         json.dump(json_data, json_file)
 fig, ax_left = plt.subplots()
