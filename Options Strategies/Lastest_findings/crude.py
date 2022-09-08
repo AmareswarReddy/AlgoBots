@@ -133,7 +133,7 @@ def rosetta_ratio2(option_chain,x):
     c2=int(ce_data['LastRate'][ce_data['StrikeRate']==upper])
     p_oi=np.sum(np.array(list(pe_data['OpenInterest'])))
     c_oi=np.sum(np.array(list(ce_data['OpenInterest'])))
-    a=(p_oi/c_oi)*(c1+c2)/(p1+p2)
+    a=(c_oi/p_oi)*(p1+p2)/(c1+c2)
     return  np.round_(((1/np.exp(a))-(1/np.exp(1)))*158.2,2)
 
 
