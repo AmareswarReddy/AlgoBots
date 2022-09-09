@@ -120,21 +120,7 @@ def rosetta_ratio(option_chain):
     a1=np.dot(1/np.array(pp),np.array(po))
     a2=np.dot(1/np.array(cp),np.array(co))
     a=a2/a1
-    return  np.round_(((1/np.exp(a))-(1/np.exp(1)))*158.2,2)
-
-def rosetta_ratio2(option_chain,x):
-    lower=int(np.floor(x/100)*100)
-    upper=int(np.ceil(x/100)*100)
-    pe_data=option_chain[option_chain['CPType']=='PE']
-    ce_data=option_chain[option_chain['CPType']=='CE']
-    p1=int(pe_data['LastRate'][pe_data['StrikeRate']==lower])
-    p2=int(pe_data['LastRate'][pe_data['StrikeRate']==upper])
-    c1=int(ce_data['LastRate'][ce_data['StrikeRate']==lower])
-    c2=int(ce_data['LastRate'][ce_data['StrikeRate']==upper])
-    p_oi=np.sum(np.array(list(pe_data['OpenInterest'])))
-    c_oi=np.sum(np.array(list(ce_data['OpenInterest'])))
-    a=(c_oi/p_oi)*(p1+p2)/(c1+c2)
-    return  np.round_(((1/np.exp(a))-(1/np.exp(1)))*158.2,2)
+    return  np.round_(((1/np.exp(1))-(1/np.exp(a)))*100,2)
 
 
 def past_picture(indicator,project_k,b_lastrate,x):
@@ -212,7 +198,6 @@ while True:
     project_k=(x-proj)
     print(company+': ',project_k)
     print('rosetta ratio: ',rosetta_ratio(option_chain))
-    print('rosetta_ratio2: ',rosetta_ratio2(option_chain,x))
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     c_data=option_chain[option_chain['CPType']=='CE']
     p_data=option_chain[option_chain['CPType']=='PE']
