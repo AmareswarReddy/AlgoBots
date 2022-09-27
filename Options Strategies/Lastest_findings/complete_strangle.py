@@ -292,11 +292,11 @@ while True:
     c_strke,p_strike=get_new_strikes(old_call=old_call,old_put=old_put,max_move_json=max_move_json)
     #strategy
     place_orders(old_put=old_put,old_call=old_call,c_strike=c_strike,p_strike=p_strike,tron=tron)
-fig, ax_left = plt.subplots()
-ax_right = ax_left.twinx()
-ax_left.plot(b_lastrate, color='blue')
-ax_right.plot(diverge, color='red')
-ax_right.plot(l_diverge, color='white')
-ax_right.plot(inst_diverge, color='orange')
+
+
+
+
+
+
 
 # %%

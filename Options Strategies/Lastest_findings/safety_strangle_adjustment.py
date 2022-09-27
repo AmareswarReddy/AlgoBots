@@ -176,11 +176,4 @@ while True:
     c_strke,p_strike=get_new_strikes(old_call=c_strke,old_put=p_strike,max_move_json=max_move_json)
     #safe straddle
 
-fig, ax_left = plt.subplots()
-ax_right = ax_left.twinx()
-ax_left.plot(b_lastrate, color='blue')
-ax_right.plot(diverge, color='red')
-ax_right.plot(l_diverge, color='white')
-ax_right.plot(inst_diverge, color='orange')
-
 # %%
