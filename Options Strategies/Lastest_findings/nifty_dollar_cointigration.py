@@ -1,5 +1,3 @@
-
-
 #if running on google colab
 !pip install yfinance
 #%%
@@ -8,8 +6,7 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn import linear_model
-import pickle
-period='10000d'
+period='1500d'
 interval='1d'
 data = yf.download('^NSEI', period=period, interval=interval)
 nifty = data[:]
