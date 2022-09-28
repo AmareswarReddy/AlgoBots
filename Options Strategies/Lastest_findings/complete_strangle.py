@@ -218,18 +218,18 @@ def get_new_strikes(old_call,old_put,max_move_json):
     call_strike=max_move_json['c_strike'][-1]
     put_strike=max_move_json['p_strike'][-1]
     if resistance>old_call:
-        t1=strike_list(resistance,call_strike)
+        t1=strike_list(resistance,call_strike+100)
         final_call=t1[int(np.floor((len(t1)-1)/2))]
     elif call_strike<old_call:
-        t1=strike_list(resistance,call_strike)
+        t1=strike_list(resistance,call_strike+100)
         final_call=t1[int(np.floor((len(t1)-1)/2))]
     else:
         final_call=old_call
     if support<old_put:
-        t1=strike_list(put_strike,support)
+        t1=strike_list(put_strike-100,support)
         final_put=t1[int(np.floor((len(t1)-1)/2))]
     elif put_strike>old_put:
-        t1=strike_list(put_strike,support)
+        t1=strike_list(put_strike-100,support)
         final_put=t1[int(np.floor((len(t1)-1)/2))]
     else:
         final_put=old_put
@@ -245,7 +245,7 @@ def place_orders(old_call,old_put,c_strike,p_strike,tron):
 
 #%%
 #variables to be initialised
-client_name   = 'vinathi'
+client_name   = 'bhaskar'
 tron=int(input('enter the number of lots for buying (Eg 3):'))
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
@@ -254,8 +254,8 @@ option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY"
 x=expiry_timestamps['lastrate'][0]['LTP']
 memory=0
 put_side1,put_side2,call_side1,call_side2=0,0,0,0
-c_strike=0
-p_strike=0
+c_strike=39000
+p_strike=37000
 max_move_json={'c_strike':[],'p_strike':[],'resistance':[],'support':[]}
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')

@@ -30,20 +30,11 @@ def client_login(client):
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
-
-def strike_list(strike1,strike2):
-    k=[]
-    if strike1>strike2:
-        a=strike2
-        while a<=strike1:
-            k=k+[a]
-            a=a+100
-    else:
-        a=strike1
-        while a<=strike2:
-            k=k+[a]
-            a=a+100
-    return k
+def strike_list(a,b):
+    a=np.linspace(int(np.floor(a/100)*100),int(np.ceil(b/100)*100),int((int(np.ceil(b/100)*100)-int(np.floor(a/100)*100))/100)+1)
+    if len(a)==1:
+        a=a+a[0]
+    return a
 
 
 def max_move2(option_chain,memory,x,put_side1,put_side2,call_side1,call_side2):
@@ -116,18 +107,18 @@ def get_new_strikes(old_call,old_put,max_move_json):
     call_strike=max_move_json['c_strike'][-1]
     put_strike=max_move_json['p_strike'][-1]
     if resistance>old_call:
-        t1=strike_list(resistance,call_strike)
+        t1=strike_list(resistance,call_strike+100)
         final_call=t1[int(np.floor((len(t1)-1)/2))]
     elif call_strike<old_call:
-        t1=strike_list(resistance,call_strike)
+        t1=strike_list(resistance,call_strike+100)
         final_call=t1[int(np.floor((len(t1)-1)/2))]
     else:
         final_call=old_call
     if support<old_put:
-        t1=strike_list(put_strike,support)
+        t1=strike_list(put_strike-100,support)
         final_put=t1[int(np.floor((len(t1)-1)/2))]
     elif put_strike>old_put:
-        t1=strike_list(put_strike,support)
+        t1=strike_list(put_strike-100,support)
         final_put=t1[int(np.floor((len(t1)-1)/2))]
     else:
         final_put=old_put
@@ -148,7 +139,7 @@ x=expiry_timestamps['lastrate'][0]['LTP']
 memory=0
 tron=int(input('enter the number of lots for buying :'))
 put_side1,put_side2,call_side1,call_side2=0,0,0,0
-c_strke=9999999999
+c_strike=9999999999
 p_strike=0
 max_move_json={'c_strike':[],'p_strike':[],'resistance':[],'support':[]}
 #%%
@@ -173,7 +164,8 @@ while True:
     max_move_json['resistance']=max_move_json['resistance']+[resistance]
     max_move_json['support']=max_move_json['support']+[support]
     #strategy
-    c_strke,p_strike=get_new_strikes(old_call=c_strke,old_put=p_strike,max_move_json=max_move_json)
+    old_call,old_put=c_strike,p_strike
+    c_strike,p_strike=get_new_strikes(old_call=old_call,old_put=old_put,max_move_json=max_move_json)
     #safe straddle
 
 # %%
