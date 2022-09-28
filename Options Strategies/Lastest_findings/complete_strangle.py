@@ -113,20 +113,12 @@ def order_button(exclusive_strike,type,lots):
             prime_client['login'].place_order(test_order) 
     return exclusive_strike
 
+def strike_list(a,b):
+    a=np.linspace(int(np.floor(a/100)*100),int(np.ceil(b/100)*100),int((int(np.ceil(b/100)*100)-int(np.floor(a/100)*100))/100)+1)
+    if len(a)==1:
+        a=a+a[0]
+    return a
 
-def strike_list(strike1,strike2):
-    k=[]
-    if strike1>strike2:
-        a=strike2
-        while a<=strike1:
-            k=k+[a]
-            a=a+100
-    else:
-        a=strike1
-        while a<=strike2:
-            k=k+[a]
-            a=a+100
-    return k
 
 def weighted_max_move2(option_chain,memory,x,put_side1,put_side2,call_side1,call_side2):
     #option_chain=option_chain[(option_chain['StrikeRate']>option_chain['lastrate'].iloc[0]-2000) & (option_chain['StrikeRate']<option_chain['lastrate'].iloc[0]+2000)].copy()
@@ -263,7 +255,7 @@ x=expiry_timestamps['lastrate'][0]['LTP']
 memory=0
 put_side1,put_side2,call_side1,call_side2=0,0,0,0
 c_strike=0
-p_strike=99999999
+p_strike=0
 max_move_json={'c_strike':[],'p_strike':[],'resistance':[],'support':[]}
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -289,14 +281,8 @@ while True:
     max_move_json['resistance']=max_move_json['resistance']+[resistance]
     max_move_json['support']=max_move_json['support']+[support]
     old_call,old_put=c_strike,p_strike
-    c_strke,p_strike=get_new_strikes(old_call=old_call,old_put=old_put,max_move_json=max_move_json)
+    c_strike,p_strike=get_new_strikes(old_call=old_call,old_put=old_put,max_move_json=max_move_json)
     #strategy
     place_orders(old_put=old_put,old_call=old_call,c_strike=c_strike,p_strike=p_strike,tron=tron)
-
-
-
-
-
-
 
 # %%
