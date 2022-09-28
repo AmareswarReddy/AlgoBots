@@ -4,7 +4,6 @@
 import numpy as np
 import yfinance as yf
 import matplotlib.pyplot as plt
-import pandas as pd
 from sklearn import linear_model
 period='1500d'
 interval='1d'
