@@ -169,7 +169,9 @@ def weighted_max_move2(option_chain,memory,x,put_side1,put_side2,call_side1,call
         put_side1=np.dot(put_strike_premium,put_open)+put_side1
         strikes_lastrate=c_strikeprices-lastrate
         strikes_lastrate[strikes_lastrate>0]=0
-        call_side1=np.dot(call_lastrates+strikes_lastrate,np.multiply(call_open,c_delta))+call_side1
+        variable1=call_lastrates+strikes_lastrate
+        variable1[variable1<0]=0
+        call_side1=np.dot(variable1,np.multiply(call_open,c_delta))+call_side1
         weight=np.dot(total_put_open,p_delta)
         put_strike=(put_side1/weight)-(1/weight)*(call_side1)
 
@@ -177,7 +179,9 @@ def weighted_max_move2(option_chain,memory,x,put_side1,put_side2,call_side1,call
         call_side2=np.dot(call_strike_premium,call_open)+call_side2
         strikes_lastrate=p_strikeprices-lastrate
         strikes_lastrate[strikes_lastrate<0]=0
-        put_side2=np.dot(put_lastrates-strikes_lastrate,np.multiply(put_open,p_delta))+put_side2
+        variable2=put_lastrates-strikes_lastrate
+        variable2[variable2<0]=0
+        put_side2=np.dot(variable2,np.multiply(put_open,p_delta))+put_side2
         weight2=np.dot(total_call_open,c_delta)
         call_strike=(call_side2/weight2)+(1/weight2)*(put_side2)
         resistance=(call_side2/weight2)
@@ -197,7 +201,9 @@ def weighted_max_move2(option_chain,memory,x,put_side1,put_side2,call_side1,call
         put_side1=np.dot(put_strike_premium,put_open)
         strikes_lastrate=c_strikeprices-lastrate
         strikes_lastrate[strikes_lastrate>0]=0
-        call_side1=np.dot(call_lastrates+strikes_lastrate,np.multiply(call_open,c_delta))
+        variable1=call_lastrates+strikes_lastrate
+        variable1[variable1<0]=0
+        call_side1=np.dot(variable1,np.multiply(call_open,c_delta))
         weight=np.dot(put_open,p_delta)
         put_strike=(put_side1/weight)-(1/weight)*(call_side1)
 
@@ -205,7 +211,9 @@ def weighted_max_move2(option_chain,memory,x,put_side1,put_side2,call_side1,call
         call_side2=np.dot(call_strike_premium,call_open)
         strikes_lastrate=p_strikeprices-lastrate
         strikes_lastrate[strikes_lastrate<0]=0
-        put_side2=np.dot(put_lastrates-strikes_lastrate,np.multiply(put_open,p_delta))
+        variable2=put_lastrates-strikes_lastrate
+        variable2[variable2<0]=0
+        put_side2=np.dot(variable2,np.multiply(put_open,p_delta))
         weight2=np.dot(call_open,c_delta)
         call_strike=(call_side2/weight2)+(1/weight2)*(put_side2)
         
