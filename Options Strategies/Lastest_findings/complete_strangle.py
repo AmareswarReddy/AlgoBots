@@ -149,6 +149,8 @@ def weighted_max_move2(option_chain,memory,x,put_side1,put_side2,call_side1,call
         memory_ce_data=memory[memory['CPType']=='CE']
         memory_pe_data=memory_pe_data[p_data['LastRate']>0].copy()
         memory_ce_data=memory_ce_data[c_data['LastRate']>0].copy()
+        memory_pe_data=memory_pe_data[w].copy()
+        memory_ce_data=memory_ce_data[v].copy()
         mp_open=np.array(list(memory_pe_data['OpenInterest']))
         mc_open=np.array(list(memory_ce_data['OpenInterest']))
         lastrate=x
@@ -236,16 +238,19 @@ def get_new_strikes(old_call,old_put,max_move_json):
     return int(final_call),int(final_put)
 #orders_placing_defination
 def place_orders(old_call,old_put,c_strike,p_strike,tron):
+
     if old_call!=c_strike:
-        order_button(old_call,'CE_B',tron)
+        if old_call!=0:
+            order_button(old_call,'CE_B',tron)
         order_button(c_strike,'CE_S',tron)
     if old_put!=p_strike:
-        order_button(old_put,'PE_B',tron)
+        if old_put!=0:
+            order_button(old_put,'PE_B',tron)
         order_button(p_strike,'PE_S',tron)
 
 #%%
 #variables to be initialised
-client_name   = 'bhaskar'
+client_name   = 'vinathi'
 tron=int(input('enter the number of lots for buying (Eg 3):'))
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
@@ -254,13 +259,14 @@ option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY"
 x=expiry_timestamps['lastrate'][0]['LTP']
 memory=0
 put_side1,put_side2,call_side1,call_side2=0,0,0,0
-c_strike=39000
-p_strike=37000
+c_strike=0
+p_strike=0
 max_move_json={'c_strike':[],'p_strike':[],'resistance':[],'support':[]}
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+#%%
 while True:
     while True:
         try :
