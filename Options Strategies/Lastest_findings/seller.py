@@ -119,8 +119,9 @@ def strike_list(a,b):
         a=a+a[0]
     return a
 def good_to_go(prev_x,x):
-    a=np.sign(x-int(np.round(x/50)*50))
-    b=np.sign(prev_x-int(np.round(prev_x/50)*50))
+    temp=int(np.round(x/50)*50)
+    a=np.sign(x-temp)
+    b=np.sign(prev_x-temp)
     return a-b
 
 #for single lot
@@ -162,12 +163,14 @@ while True:
             exclusive_strike=order_button(int(np.floor(x/100)*100),'PE_S',tron)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/50)*50)
+            start=1
+            side='PE_S'
         if good_to_go(x=x,prev_x=prev_x)<0:
             exclusive_strike=order_button(int(np.ceil(x/100)*100),'CE_S',tron)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/50)*50)
-        start=1
-
+            start=1
+            side='CE_S'
     if start==1:
         if change_of_strike(earlier_x=earlier_x,x=x)>1:
             order_button(exclusive_strike,'PE_B',tron)
@@ -189,6 +192,9 @@ while True:
                 side=side_
             if side=='PE_S':
                 order_button(exclusive_strike,'PE_B',tron)
-                exclusive_strike=order_button(int(np.floor(x/100)*100),side_,tron)
+                exclusive_strike=order_button(int(np.ceil(x/100)*100),side_,tron)
                 side=side_
     prev_x=x
+    sleep(3)
+
+# %%
