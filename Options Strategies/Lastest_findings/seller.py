@@ -190,10 +190,14 @@ while True:
                 order_button(exclusive_strike,'CE_B',tron)
                 exclusive_strike=order_button(int(np.floor(x/100)*100),side_,tron)
                 side=side_
+                u=(prev_x+x)/2
+                earlier_x=int(np.round(u/50)*50)
             if side=='PE_S':
                 order_button(exclusive_strike,'PE_B',tron)
                 exclusive_strike=order_button(int(np.ceil(x/100)*100),side_,tron)
                 side=side_
+                u=(prev_x+x)/2
+                earlier_x=int(np.round(u/50)*50)
     prev_x=x
     sleep(3)
 
