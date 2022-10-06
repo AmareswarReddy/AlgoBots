@@ -160,13 +160,13 @@ while True:
             pass
     if start==0:
         if good_to_go(x=x,prev_x=prev_x)>0:
-            exclusive_strike=order_button(int(np.floor(x/100)*100),'PE_S',tron)
+            exclusive_strike=order_button(int(np.ceil(x/100)*100),'PE_S',tron)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/50)*50)
             start=1
             side='PE_S'
         if good_to_go(x=x,prev_x=prev_x)<0:
-            exclusive_strike=order_button(int(np.ceil(x/100)*100),'CE_S',tron)
+            exclusive_strike=order_button(int(np.floor(x/100)*100),'CE_S',tron)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/50)*50)
             start=1
@@ -174,13 +174,13 @@ while True:
     if start==1:
         if change_of_strike(earlier_x=earlier_x,x=x)>1:
             order_button(exclusive_strike,'PE_B',tron)
-            exclusive_strike=order_button(int(np.floor(x/100)*100),'PE_S',tron)
+            exclusive_strike=order_button(int(np.ceil(x/100)*100),'PE_S',tron)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/50)*50)
             side='PE_S'
         if change_of_strike(earlier_x=earlier_x,x=x)<-1:
             order_button(exclusive_strike,'CE_B',tron)
-            exclusive_strike=order_button(int(np.ceil(x/100)*100),'CE_S',tron)
+            exclusive_strike=order_button(int(np.floor(x/100)*100),'CE_S',tron)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/50)*50)
             side='CE_S'
@@ -188,16 +188,13 @@ while True:
         if side_!=side:
             if side=='CE_S':
                 order_button(exclusive_strike,'CE_B',tron)
-                exclusive_strike=order_button(int(np.floor(x/100)*100),side_,tron)
-                side=side_
-                u=(prev_x+x)/2
-                earlier_x=int(np.round(u/50)*50)
+                exclusive_strike=order_button(int(np.ceil(x/100)*100),side_,tron)
             if side=='PE_S':
                 order_button(exclusive_strike,'PE_B',tron)
-                exclusive_strike=order_button(int(np.ceil(x/100)*100),side_,tron)
-                side=side_
-                u=(prev_x+x)/2
-                earlier_x=int(np.round(u/50)*50)
+                exclusive_strike=order_button(int(np.floor(x/100)*100),side_,tron)
+            u=(prev_x+x)/2
+            earlier_x=int(np.round(u/50)*50)
+            side=side_
     prev_x=x
     sleep(3)
 
