@@ -119,11 +119,20 @@ def strike_list(a,b):
         a=a+a[0]
     return a
 def good_to_go(prev_x,x):
-    temp=int(np.round(x/50)*50)
-    a=np.sign(x-temp)
-    b=np.sign(prev_x-temp)
-    return a-b
-
+    i=np.floor(x/100)
+    j=x%100
+    k=x%10
+    y=j-k
+    i=np.floor(prev_x/100)
+    j=prev_x%100
+    k=prev_x%10
+    y2=j-k
+    if y2==50 and y==40:
+        return 1
+    elif y==50 and y2==40:
+        return -1
+    else:
+        return 0
 #for single lot
 def change_of_strike(earlier_x,x):
     a=(x-earlier_x)/100
