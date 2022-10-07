@@ -135,16 +135,18 @@ def good_to_go(prev_x,x):
         return 0
 #for single lot
 def change_of_strike(earlier_x,x):
-    a=(x-earlier_x)/100
+    a=(x-earlier_x)/200
     return a
 
 
-def side_switch(earlier_x,x):
+def side_switch(earlier_x,x,side):
     a=(x-earlier_x)
-    if a>=0:
+    if a>3 and side=='CE_S':
         return 'PE_S'
-    elif a<0:
+    elif a<-3 and side=='PE_S':
         return 'CE_S'
+    else:
+        return side
 
 
 #%%
@@ -193,7 +195,7 @@ while True:
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/50)*50)
             side='CE_S'
-        side_=side_switch(earlier_x=earlier_x,x=x)
+        side_=side_switch(earlier_x=earlier_x,x=x,side=side)
         if side_!=side:
             if side=='CE_S':
                 order_button(exclusive_strike,'CE_B',tron)
