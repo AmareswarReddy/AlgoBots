@@ -124,8 +124,8 @@ def weighted_max_move2(option_chain,memory,x,put_side1,put_side2,call_side1,call
     #option_chain=option_chain[(option_chain['StrikeRate']>option_chain['lastrate'].iloc[0]-2000) & (option_chain['StrikeRate']<option_chain['lastrate'].iloc[0]+2000)].copy()
     p_data=option_chain[option_chain['CPType']=='PE']
     c_data=option_chain[option_chain['CPType']=='CE']
-    pe_data=p_data[(p_data['LastRate']>0)].copy()
-    ce_data=c_data[c_data['LastRate']>0].copy()
+    pe_data=p_data[(p_data['LastRate']-p_data['StrikeRate']+x)>0].copy()
+    ce_data=c_data[c_data['LastRate']-x+c_data['StrikeRate']>0].copy()
     sp=pe_data['StrikeRate']
     sc=ce_data['StrikeRate']
     k=np.intersect1d(np.array(sp),np.array(sc))
@@ -144,81 +144,39 @@ def weighted_max_move2(option_chain,memory,x,put_side1,put_side2,call_side1,call
     v=np.array(v)
     pe_data=pe_data[w].copy()
     ce_data=ce_data[v].copy()
-    try:
-        memory_pe_data=memory[memory['CPType']=='PE']
-        memory_ce_data=memory[memory['CPType']=='CE']
-        memory_pe_data=memory_pe_data[p_data['LastRate']>0].copy()
-        memory_ce_data=memory_ce_data[c_data['LastRate']>0].copy()
-        memory_pe_data=memory_pe_data[w].copy()
-        memory_ce_data=memory_ce_data[v].copy()
-        mp_open=np.array(list(memory_pe_data['OpenInterest']))
-        mc_open=np.array(list(memory_ce_data['OpenInterest']))
-        lastrate=x
-        p_strikeprices=np.array(list(pe_data['StrikeRate']))
-        c_strikeprices=np.array(list(ce_data['StrikeRate']))
-        put_lastrates=np.array(list(pe_data['LastRate']))
-        call_lastrates=np.array(list(ce_data['LastRate']))
-        put_open=np.array(list(pe_data['OpenInterest']))-mp_open
-        total_put_open=np.array(list(pe_data['OpenInterest']))
-        total_call_open=np.array(list(ce_data['OpenInterest']))
-        call_open=np.array(list(ce_data['OpenInterest']))-mc_open
-        c_delta=np.array(ce_data['LastRate'])/(np.array(ce_data['LastRate'])+np.array(pe_data['LastRate']))
-        p_delta=np.array(pe_data['LastRate'])/(np.array(ce_data['LastRate'])+np.array(pe_data['LastRate']))
 
-        put_strike_premium=np.multiply(p_strikeprices-put_lastrates,p_delta)
-        put_side1=np.dot(put_strike_premium,put_open)+put_side1
-        strikes_lastrate=c_strikeprices-lastrate
-        strikes_lastrate[strikes_lastrate>0]=0
-        variable1=call_lastrates+strikes_lastrate
-        variable1[variable1<0]=0
-        call_side1=np.dot(variable1,np.multiply(call_open,c_delta))+call_side1
-        weight=np.dot(total_put_open,p_delta)
-        put_strike=(put_side1/weight)-(1/weight)*(call_side1)
+    lastrate=x
+    p_strikeprices=np.array(list(pe_data['StrikeRate']))
+    c_strikeprices=np.array(list(ce_data['StrikeRate']))
+    put_lastrates=np.array(list(pe_data['LastRate']))
+    call_lastrates=np.array(list(ce_data['LastRate']))
+    put_open=np.array(list(pe_data['OpenInterest']))
+    call_open=np.array(list(ce_data['OpenInterest']))
+    c_delta=np.array(ce_data['LastRate'])/np.array((ce_data['LastRate'])+np.array(pe_data['LastRate']))
+    p_delta=np.array(pe_data['LastRate'])/(np.array(ce_data['LastRate'])+np.array(pe_data['LastRate']))
 
-        call_strike_premium=np.multiply(c_strikeprices+call_lastrates,c_delta)
-        call_side2=np.dot(call_strike_premium,call_open)+call_side2
-        strikes_lastrate=p_strikeprices-lastrate
-        strikes_lastrate[strikes_lastrate<0]=0
-        variable2=put_lastrates-strikes_lastrate
-        variable2[variable2<0]=0
-        put_side2=np.dot(variable2,np.multiply(put_open,p_delta))+put_side2
-        weight2=np.dot(total_call_open,c_delta)
-        call_strike=(call_side2/weight2)+(1/weight2)*(put_side2)
-        resistance=(call_side2/weight2)
-        support=(put_side1/weight)
-    except Exception:
-        lastrate=x
-        p_strikeprices=np.array(list(pe_data['StrikeRate']))
-        c_strikeprices=np.array(list(ce_data['StrikeRate']))
-        put_lastrates=np.array(list(pe_data['LastRate']))
-        call_lastrates=np.array(list(ce_data['LastRate']))
-        put_open=np.array(list(pe_data['OpenInterest']))
-        call_open=np.array(list(ce_data['OpenInterest']))
-        c_delta=np.array(ce_data['LastRate'])/np.array((ce_data['LastRate'])+np.array(pe_data['LastRate']))
-        p_delta=np.array(pe_data['LastRate'])/(np.array(ce_data['LastRate'])+np.array(pe_data['LastRate']))
+    put_strike_premium=np.multiply(p_strikeprices-put_lastrates,p_delta)
+    put_side1=np.dot(put_strike_premium,put_open)
+    strikes_lastrate=c_strikeprices-lastrate
+    strikes_lastrate[strikes_lastrate>0]=0
+    variable1=call_lastrates+strikes_lastrate
+    variable1[variable1<0]=0
+    call_side1=np.dot(variable1,np.multiply(call_open,c_delta))
+    weight=np.dot(put_open,p_delta)
+    put_strike=(put_side1/weight)-(1/weight)*(call_side1)
 
-        put_strike_premium=np.multiply(p_strikeprices-put_lastrates,p_delta)
-        put_side1=np.dot(put_strike_premium,put_open)
-        strikes_lastrate=c_strikeprices-lastrate
-        strikes_lastrate[strikes_lastrate>0]=0
-        variable1=call_lastrates+strikes_lastrate
-        variable1[variable1<0]=0
-        call_side1=np.dot(variable1,np.multiply(call_open,c_delta))
-        weight=np.dot(put_open,p_delta)
-        put_strike=(put_side1/weight)-(1/weight)*(call_side1)
-
-        call_strike_premium=np.multiply(c_strikeprices+call_lastrates,c_delta)
-        call_side2=np.dot(call_strike_premium,call_open)
-        strikes_lastrate=p_strikeprices-lastrate
-        strikes_lastrate[strikes_lastrate<0]=0
-        variable2=put_lastrates-strikes_lastrate
-        variable2[variable2<0]=0
-        put_side2=np.dot(variable2,np.multiply(put_open,p_delta))
-        weight2=np.dot(call_open,c_delta)
-        call_strike=(call_side2/weight2)+(1/weight2)*(put_side2)
-        
-        resistance=(call_side2/weight2)
-        support=(put_side1/weight)
+    call_strike_premium=np.multiply(c_strikeprices+call_lastrates,c_delta)
+    call_side2=np.dot(call_strike_premium,call_open)
+    strikes_lastrate=p_strikeprices-lastrate
+    strikes_lastrate[strikes_lastrate<0]=0
+    variable2=put_lastrates-strikes_lastrate
+    variable2[variable2<0]=0
+    put_side2=np.dot(variable2,np.multiply(put_open,p_delta))
+    weight2=np.dot(call_open,c_delta)
+    call_strike=(call_side2/weight2)+(1/weight2)*(put_side2)
+    
+    resistance=(call_side2/weight2)
+    support=(put_side1/weight)
     return call_strike,resistance,put_strike,support,put_side1,put_side2,call_side1,call_side2
 
 
@@ -299,4 +257,4 @@ while True:
     #strategy
     place_orders(old_put=old_put,old_call=old_call,c_strike=c_strike,p_strike=p_strike,tron=tron)
 
-# %%
+
