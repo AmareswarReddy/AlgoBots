@@ -128,9 +128,9 @@ def good_to_go(prev_x,x):
     k=prev_x%10
     y2=j-k
     if y2==50 and y==40:
-        return 1
-    elif y==50 and y2==40:
         return -1
+    elif y==50 and y2==40:
+        return 1
     else:
         return 0
 #for single lot
