@@ -119,7 +119,6 @@ def strike_list(a,b):
         a=a+a[0]
     return a
 def good_to_go(prev_x,x):
-    i=np.floor(x/100)
     j=x%100
     k=x%10
     y=j-k
@@ -169,6 +168,11 @@ def data(m):
             pass
     return option_chain,x
 
+def troner(tron,step):
+    tron2=np.floor(tron/step)
+    rest=tron-tron2*step
+    return tron2,rest
+
 #%%
 #variables to be initialised
 client_name = 'bhaskar'
@@ -179,10 +183,11 @@ current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
 prev_x=expiry_timestamps['lastrate'][0]['LTP']
 start=0
+step=3
 m=int(input('enter the lastrate at which you would like to enter trades Eg: 35,55,60,40'))
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
-    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+#while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
+#    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 daily_switch=daily_buy_sell_switch()
 if daily_switch<0:
@@ -228,9 +233,12 @@ if daily_switch<0:
         prev_x=x
 
 # %%
+step_raiser=1
 if daily_switch>=0:
+    tron2,rest=troner(tron,step)
     while True:
         option_chain,x=data(m)
+        #x=int(input('-----'))
         if start==0:
             if good_to_go(x=x,prev_x=prev_x)>0:
                 exclusive_strike=order_button(int(np.ceil(x/100)*100),'CE_B',tron)
@@ -246,17 +254,26 @@ if daily_switch>=0:
                 side='PE_B'
         if start==1:
             if change_of_strike(earlier_x=earlier_x,x=x)>1:
-                order_button(exclusive_strike,'CE_S',tron)
+                order_button(exclusive_strike,'CE_S',tron2+rest)
                 exclusive_strike=order_button(int(np.ceil(x/100)*100),'CE_B',tron)
                 u=(prev_x+x)/2
                 earlier_x=int(np.round(u/50)*50)
                 side='CE_B'
+                step_raiser=1
             if change_of_strike(earlier_x=earlier_x,x=x)<-1:
-                order_button(exclusive_strike,'PE_S',tron)
+                order_button(exclusive_strike,'PE_S',tron2+rest)
                 exclusive_strike=order_button(int(np.floor(x/100)*100),'PE_B',tron)
                 u=(prev_x+x)/2
                 earlier_x=int(np.round(u/50)*50)
                 side='PE_B'
+                step_raiser=1
+            if change_of_strike(earlier_x=earlier_x,x=x)>step_raiser/step and step_raiser<step:
+                order_button(exclusive_strike,'CE_S',tron2)
+                step_raiser+=1
+            if change_of_strike(earlier_x=earlier_x,x=x)<-step_raiser/step and step_raiser<step:
+                order_button(exclusive_strike,'PE_S',tron2)
+                step_raiser+=1
+
             side_=side_switch(earlier_x=earlier_x,x=x,side=side)
             if side_!=side:
                 if side=='PE_B':
