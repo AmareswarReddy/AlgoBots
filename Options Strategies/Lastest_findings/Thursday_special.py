@@ -133,7 +133,12 @@ def data():
         except Exception :
             pass
     return option_chain,x
-
+def exit(option_chain,exclusive_strike):
+    temp=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
+    if temp<180:
+        return 1
+    else:
+        0
 
 #%%
 #variables to be initialised
@@ -144,11 +149,9 @@ expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
 prev_x=expiry_timestamps['lastrate'][0]['LTP']
-start=0
-step=3
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-#while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
-#    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 while True:
     option_chain,x=data()
@@ -163,5 +166,9 @@ while True:
             order_button(exclusive_strike,'CE_B',tron)
             exclusive_strike=order_button(int(np.round(x/100)*100),'PE_S',tron)
             exclusive_strike=order_button(int(np.round(x/100)*100),'CE_S',tron)
+    if exit(option_chain,x)==1:
+        order_button(exclusive_strike,'PE_B',tron)
+        order_button(exclusive_strike,'CE_B',tron)        
     prev_x=x
+
 
