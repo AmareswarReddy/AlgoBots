@@ -175,7 +175,7 @@ def troner(tron,step):
 
 #%%
 #variables to be initialised
-client_name = 'bhaskar'
+client_name = 'vinathi'
 tron=int(input('enter the number of lots for trading (Eg 3):'))
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
@@ -190,7 +190,7 @@ ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f
 #    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 daily_switch=daily_buy_sell_switch()
-if daily_switch<0:
+if daily_switch<=0:
     while True:
         option_chain,x=data(m)
         if start==0:
@@ -234,7 +234,7 @@ if daily_switch<0:
 
 # %%
 step_raiser=1
-if daily_switch>=0:
+if daily_switch>0:
     tron2,rest=troner(tron,step)
     while True:
         option_chain,x=data(m)
