@@ -117,6 +117,8 @@ def good_to_go(prev_x,x):
     k=np.round(x/100)*100
     if (prev_x>k and k>x) or (prev_x<k and k<x):
         return 1
+    else:
+        return 0
 
 #for single lot
 def change_of_strike(earlier_x,x):
@@ -138,7 +140,7 @@ def exit(option_chain,exclusive_strike):
     if temp<180:
         return 1
     else:
-        0
+        return 0
 
 #%%
 #variables to be initialised
@@ -149,12 +151,16 @@ expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
 prev_x=expiry_timestamps['lastrate'][0]['LTP']
+start=0
+exclusive_strike=0
+#%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 while True:
     option_chain,x=data()
+    #x=int(input('--'))
     if start==0:
         if good_to_go(x=x,prev_x=prev_x)>0:
             exclusive_strike=order_button(int(np.round(x/100)*100),'PE_S',tron)
@@ -166,9 +172,11 @@ while True:
             order_button(exclusive_strike,'CE_B',tron)
             exclusive_strike=order_button(int(np.round(x/100)*100),'PE_S',tron)
             exclusive_strike=order_button(int(np.round(x/100)*100),'CE_S',tron)
-    if exit(option_chain,x)==1:
+    if exit(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
         order_button(exclusive_strike,'PE_B',tron)
         order_button(exclusive_strike,'CE_B',tron)        
     prev_x=x
 
 
+
+# %%
