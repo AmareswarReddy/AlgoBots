@@ -144,7 +144,7 @@ def exit(option_chain,exclusive_strike):
 
 #%%
 #variables to be initialised
-client_name = 'bhaskar'
+client_name = 'vinathi'
 tron=int(input('enter the number of lots for trading (Eg 3):'))
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
@@ -174,7 +174,8 @@ while True:
             exclusive_strike=order_button(int(np.round(x/100)*100),'CE_S',tron)
     if exit(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
         order_button(exclusive_strike,'PE_B',tron)
-        order_button(exclusive_strike,'CE_B',tron)        
+        order_button(exclusive_strike,'CE_B',tron)   
+        break     
     prev_x=x
 
 
