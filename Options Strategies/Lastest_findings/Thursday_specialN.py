@@ -159,8 +159,8 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*6
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 while True:
-    #option_chain,x=data()
-    x=int(input('--'))
+    option_chain,x=data()
+    #x=int(input('--'))
     if start==0:
         if good_to_go(x=x,prev_x=prev_x)>0:
             exclusive_strike=order_button(int(np.round(x/50)*50),'PE_S',tron)
