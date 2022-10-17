@@ -116,26 +116,13 @@ def order_button(exclusive_strike,type,lots):
 def buyer_adjustment_signal(c_strike,p_strike,exclusive_strike):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     timer=int(ind_time[11:13])*60+int(ind_time[14:16])
-    #d=pd.DataFrame(prime_client['login'].positions())
-    #k=d[d['NetQty']!=0]
-    #j=[]
-    #for a in list(k['ScripName']):
-    #    j=j+[int(float(a.split(' ')[-1]))]
-    #k['StrikeRate']=j
-    #lastrates=k[k['StrikeRate']==exclusive_strike]['LTP']
-    #if len(lastrates)==2:
-    #    lastrate_sum=np.sum(lastrates)
     c_lastrate=float(option_chain[(option_chain['StrikeRate']==c_strike) & (option_chain['CPType']=='CE')]['LastRate'])
     p_lastrate=float(option_chain[(option_chain['StrikeRate']==p_strike) & (option_chain['CPType']=='PE')]['LastRate'])
     lastrate_sum=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
-    if (c_strike-p_strike>np.floor(2*lastrate_sum/50)*50):
-        return 1,np.floor(lastrate_sum/50)*50,0 
-    elif timer>925:
-        return 1,np.floor(lastrate_sum/50)*50,1
-    elif c_lastrate/p_lastrate>3 or p_lastrate/c_lastrate>3:
-        return 1,np.floor(lastrate_sum/50)*50,0 
+    if (c_strike-p_strike>np.floor(2*lastrate_sum/50)*50) or timer>925 or c_lastrate/p_lastrate>3 or p_lastrate/c_lastrate>3:
+        return 1,np.floor(lastrate_sum/50)*50
     else:
-        return 0,0,0 #(change_of_buyside_strikes?, This_far_to_take_new_buy_side_positions, timer_trigger)
+        return 0,0 #(change_of_buyside_strikes?, This_far_to_take_new_buy_side_positions, timer_trigger)
 
 def buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron):
     #k=(change_of_buyside_strikes, This_far_to_take_new_buy_side_positions, timer_trigger)
@@ -178,10 +165,14 @@ def good_to_go(prev_x,x):
         return 0
 
 #for single lot
-def change_of_strike(earlier_x,x):
+def exclusive_strike_change_signal(earlier_x,x):
     a=(x-earlier_x)/50
     return abs(a)
-
+def exclusive_strike_change_trades(exclusive_strike,x):
+    order_button(exclusive_strike,'PE_B',tron)
+    order_button(exclusive_strike,'CE_B',tron)
+    exclusive_strike=order_button(int(np.round(x/50)*50),'PE_S',tron)
+    exclusive_strike=order_button(int(np.round(x/50)*50),'CE_S',tron)
 def data():
     while True:
         try :
@@ -192,13 +183,17 @@ def data():
         except Exception :
             pass
     return option_chain,x
-def exit(option_chain,exclusive_strike):
+def exit_signal(option_chain,exclusive_strike):
     temp=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
     if temp<75:
         return 1
     else:
         return 0
-
+def exit_trades(c_strike,p_strike,exclusive_strike):        
+    order_button(exclusive_strike,'PE_B',tron)
+    order_button(exclusive_strike,'CE_B',tron)   
+    order_button(c_strike,'CE_S',tron)
+    order_button(p_strike,'PE_S',tron)
 #%%
 #variables to be initialised
 client_name = 'rahul'
@@ -232,14 +227,9 @@ while True:
     if start==1:
         k=buyer_adjustment_signal(c_strike,p_strike,exclusive_strike) 
         c_strike,p_strike=buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron)
-        if change_of_strike(earlier_x=exclusive_strike,x=x)>1:
-            order_button(exclusive_strike,'PE_B',tron)
-            order_button(exclusive_strike,'CE_B',tron)
-            exclusive_strike=order_button(int(np.round(x/50)*50),'PE_S',tron)
-            exclusive_strike=order_button(int(np.round(x/50)*50),'CE_S',tron)
-    if exit(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
-        order_button(exclusive_strike,'PE_B',tron)
-        order_button(exclusive_strike,'CE_B',tron)   
+        if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
+            exclusive_strike_change_trades(exclusive_strike,x)
+    if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0: 
+        exit(c_strike=c_strike,p_strike=p_strike,exclusive_strike=exclusive_strike)   
         break   
     prev_x=x
-# %%
