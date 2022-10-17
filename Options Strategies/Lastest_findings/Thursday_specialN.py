@@ -125,11 +125,15 @@ def buyer_adjustment_signal(c_strike,p_strike,exclusive_strike):
     #lastrates=k[k['StrikeRate']==exclusive_strike]['LTP']
     #if len(lastrates)==2:
     #    lastrate_sum=np.sum(lastrates)
+    c_lastrate=float(option_chain[(option_chain['StrikeRate']==c_strike) & (option_chain['CPType']=='CE')]['LastRate'])
+    p_lastrate=float(option_chain[(option_chain['StrikeRate']==p_strike) & (option_chain['CPType']=='PE')]['LastRate'])
     lastrate_sum=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
     if (c_strike-p_strike>np.floor(2*lastrate_sum/50)*50):
         return 1,np.floor(lastrate_sum/50)*50,0 
     elif timer>925:
         return 1,np.floor(lastrate_sum/50)*50,1
+    elif c_lastrate/p_lastrate>3 or p_lastrate/c_lastrate>3:
+        return 1,np.floor(lastrate_sum/50)*50,0 
     else:
         return 0,0,0 #(change_of_buyside_strikes?, This_far_to_take_new_buy_side_positions, timer_trigger)
 
@@ -226,6 +230,8 @@ while True:
             exclusive_strike,c_strike,p_strike=initial_trades(option_chain=option_chain,x=x)
             start=1
     if start==1:
+        k=buyer_adjustment_signal(c_strike,p_strike,exclusive_strike) 
+        c_strike,p_strike=buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron)
         if change_of_strike(earlier_x=exclusive_strike,x=x)>1:
             order_button(exclusive_strike,'PE_B',tron)
             order_button(exclusive_strike,'CE_B',tron)
@@ -235,7 +241,5 @@ while True:
         order_button(exclusive_strike,'PE_B',tron)
         order_button(exclusive_strike,'CE_B',tron)   
         break   
-    k=buyer_adjustment_signal(c_strike,p_strike,exclusive_strike)  
-    c_strike,p_strike=buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron)
     prev_x=x
 # %%
