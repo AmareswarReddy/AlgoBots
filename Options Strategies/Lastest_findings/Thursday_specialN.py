@@ -119,7 +119,7 @@ def buyer_adjustment_signal(c_strike,p_strike,exclusive_strike):
     c_lastrate=float(option_chain[(option_chain['StrikeRate']==c_strike) & (option_chain['CPType']=='CE')]['LastRate'])
     p_lastrate=float(option_chain[(option_chain['StrikeRate']==p_strike) & (option_chain['CPType']=='PE')]['LastRate'])
     lastrate_sum=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
-    if (c_strike-p_strike>np.floor(2*lastrate_sum/50)*50) or timer>925 or c_lastrate/p_lastrate>3 or p_lastrate/c_lastrate>3:
+    if (c_strike-p_strike>np.floor(2*lastrate_sum/50)*50) or timer>925 or c_lastrate/p_lastrate>3.5 or p_lastrate/c_lastrate>3.5:
         return 1,np.floor(lastrate_sum/50)*50
     else:
         return 0,0 #(change_of_buyside_strikes?, This_far_to_take_new_buy_side_positions, timer_trigger)
