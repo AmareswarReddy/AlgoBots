@@ -173,6 +173,7 @@ def exclusive_strike_change_trades(exclusive_strike,x):
     order_button(exclusive_strike,'CE_B',tron)
     exclusive_strike=order_button(int(np.round(x/50)*50),'PE_S',tron)
     exclusive_strike=order_button(int(np.round(x/50)*50),'CE_S',tron)
+    return exclusive_strike
 def data():
     while True:
         try :
@@ -228,7 +229,7 @@ while True:
         k=buyer_adjustment_signal(c_strike,p_strike,exclusive_strike) 
         c_strike,p_strike=buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron)
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
-            exclusive_strike_change_trades(exclusive_strike,x)
+            exclusive_strike=exclusive_strike_change_trades(exclusive_strike,x)
     if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0: 
         exit(c_strike=c_strike,p_strike=p_strike,exclusive_strike=exclusive_strike)   
         break   
