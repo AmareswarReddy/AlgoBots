@@ -120,7 +120,7 @@ def buyer_adjustment_signal(c_strike,p_strike,exclusive_strike):
     p_lastrate=float(option_chain[(option_chain['StrikeRate']==p_strike) & (option_chain['CPType']=='PE')]['LastRate'])
     lastrate_sum=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
     if (c_strike-p_strike>np.floor(2*lastrate_sum/50)*50) or timer>925 or c_lastrate/p_lastrate>3.5 or p_lastrate/c_lastrate>3.5:
-        return 1,np.floor(lastrate_sum/50)*50
+        return 1,np.ceil(lastrate_sum/50)*50
     else:
         return 0,0 #(change_of_buyside_strikes?, This_far_to_take_new_buy_side_positions, timer_trigger)
 
@@ -146,7 +146,7 @@ def buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron):
 def initial_trades(option_chain,x):
     exclusive_strike=int(np.round(x/50)*50)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/50)*50)]['LastRate'])
-    factor=int(np.floor(f/50)*50)
+    factor=int(np.ceil(f/50)*50)
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
     #first buyside
@@ -205,7 +205,7 @@ expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
 prev_x=expiry_timestamps['lastrate'][0]['LTP']
-start=int(input('enter 0 if starting the strategy for the first time. else 1 :  '))
+start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
 if start==1:
     exclusive_strike=int(input('enter exclusive strike :  '))
     c_strike=int(input('enter call strike buyside :  '))
