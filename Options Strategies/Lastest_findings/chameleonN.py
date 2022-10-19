@@ -174,14 +174,14 @@ start=0
 step=3
 #m=int(input('enter the lastrate at which you would like to enter trades Eg: 35,55,60,40'))
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-#while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
-#    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+while int(ind_time[11:13])*60+int(ind_time[14:16])<=555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 daily_switch=daily_buy_sell_switch()
 if daily_switch<=0:
     while True:
-        #option_chain,x=data()
-        x=int(input('-----'))
+        option_chain,x=data()
+        #x=int(input('-----'))
         if start==0:
             if good_to_go(x=x,prev_x=prev_x)>0:
                 exclusive_strike=order_button(int(np.round(x/50)*50),'PE_S',tron)
