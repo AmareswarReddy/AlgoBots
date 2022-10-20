@@ -167,12 +167,12 @@ def daily_buy_sell_switch():
         k=1
     return -np.sign(k-1)
 
-def data():
+def data(m):
     while True:
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
-            x=expiry_timestamps['lastrate'][0]['LTP']
+            x=expiry_timestamps['lastrate'][0]['LTP']-m
             break
         except Exception :
             pass
@@ -201,6 +201,7 @@ expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
 prev_x=expiry_timestamps['lastrate'][0]['LTP']
+m=int(input('enter a random no. from -10 to 10 for reference of starting position: '))
 start=0
 #%%
 #m=int(input('enter the lastrate at which you would like to enter trades Eg: 35,55,60,40'))
@@ -211,7 +212,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<=555 or int(ind_time[11:13])*
 daily_switch=daily_buy_sell_switch()
 if daily_switch<=0:
     while True:
-        option_chain,x=data()
+        option_chain,x=data(m)
         #x=int(input('-----'))
         if start==0:
             if good_to_go(x=x,prev_x=prev_x)>0:
@@ -226,13 +227,23 @@ if daily_switch<=0:
                 side='CE_S'
         if start==1:
             if change_of_strike(earlier_x=exclusive_strike,x=x)>1:
+                earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
                 order_button(exclusive_strike,'PE_B',tron)
+                while True:
+                    later_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                    if later_margin>earlier_margin:
+                        break
                 tron=tron+1
                 exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S',tron)
                 tron=tron-lots_drop(int(np.round(x/50)*50),'PE_S',yet_to_place)
                 side='PE_S'
             if change_of_strike(earlier_x=exclusive_strike,x=x)<-1:
+                earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
                 order_button(exclusive_strike,'CE_B',tron)
+                while True:
+                    later_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                    if later_margin>earlier_margin:
+                        break
                 tron=tron+1
                 exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'CE_S',tron)
                 tron=tron-lots_drop(int(np.round(x/50)*50),'CE_S',yet_to_place)
@@ -240,11 +251,23 @@ if daily_switch<=0:
             side_=side_switch(earlier_x=exclusive_strike,x=x,side=side)
             if side_!=side:
                 if side=='CE_S':
+                    earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
                     order_button(exclusive_strike,'CE_B',tron)
+                    while True:
+                        later_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                        if later_margin>earlier_margin:
+                            break
+                    tron+=1
                     exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),side_,tron)
                     tron=tron-lots_drop(int(np.round(x/50)*50),side_,yet_to_place)
                 if side=='PE_S':
+                    earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
                     order_button(exclusive_strike,'PE_B',tron)
+                    while True:
+                        later_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                        if later_margin>earlier_margin:
+                            break
+                    tron+=1
                     exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),side_,tron)
                     tron=tron-lots_drop(int(np.round(x/50)*50),side_,yet_to_place)
                 side=side_
