@@ -194,7 +194,7 @@ def lots_drop(strike,side,yet_to_place):
 
 #%%
 #variables to be initialised
-client_name = 'rahul'
+client_name = 'vinathi'
 tron=int(input('enter the number of lots for trading (Eg 3):'))
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
@@ -228,7 +228,7 @@ if daily_switch<=0:
             if change_of_strike(earlier_x=exclusive_strike,x=x)>1:
                 order_button(exclusive_strike,'PE_B',tron)
                 tron=tron+1
-                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S')
+                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S',tron)
                 tron=tron-lots_drop(int(np.round(x/50)*50),'PE_S',yet_to_place)
                 side='PE_S'
             if change_of_strike(earlier_x=exclusive_strike,x=x)<-1:
