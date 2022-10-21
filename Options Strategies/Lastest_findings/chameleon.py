@@ -276,12 +276,15 @@ if daily_switch>0:
 
             side_=side_switch(earlier_x=earlier_x,x=x,side=side)
             if side_!=side:
+                k=tron-(step_raiser-1)*tron2
                 if side=='PE_B':
-                    order_button(exclusive_strike,'PE_S',tron)
+                    order_button(exclusive_strike,'PE_S',k)
                     exclusive_strike=order_button(int(np.ceil(x/100)*100),side_,tron)
+                    step_raiser=1
                 if side=='CE_B':
-                    order_button(exclusive_strike,'CE_S',tron)
+                    order_button(exclusive_strike,'CE_S',k)
                     exclusive_strike=order_button(int(np.floor(x/100)*100),side_,tron)
+                    step_raiser=1
                 u=(prev_x+x)/2
                 earlier_x=int(np.round(u/50)*50)
                 side=side_
