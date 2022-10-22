@@ -1,0 +1,166 @@
+#%%
+import pandas as pd
+import mysql.connector
+from mysql.connector import Error
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import scipy.interpolate
+from pyswarm import pso
+try:
+    connection  = mysql.connector.connect(
+        host    = 'localhost',
+        user    = 'root',
+        passwd  = 'vinay1@A',
+        database= "banknifty_data"
+    )
+except Error as e:
+    print(f"The error '{e}' occurred")
+print('Connected!')
+mycursor = connection.cursor(buffered=True)
+expiry="'2022-09-22'"
+k="select * from option_chain_data where expiry="+expiry+";"
+mycursor.execute(k)
+
+
+"""
+rows=mycursor.fetchall()
+aa=pd.DataFrame(rows,columns=['Volume_CE','OpenInterest_CE','LastRate_CE','StrikeRate','LastRate_PE','OpenInterest_PE','Volume_PE','expiry','day','seconds','lastrate'])
+"""
+
+
+aa=pd.read_sql(k,connection)
+k2="select seconds from option_chain_data where expiry="+expiry+" group by 1;"
+list_of_seconds=list(pd.read_sql(k2,connection)['seconds'])
+
+
+#positions_executed_lastrates={'exclusive_c_executed_lastrate':,'exclusive_p_executed_lastrate':,'c_executed_lastrate':,'p_executed_lastrate':}
+#positions={'exclusive_strike':,'c_strike':,'p_strike':}
+#positions={}
+profit=0
+def thursday_special_positions(positions,positions_executed_lastrates,profit,c_strike,p_strike,exclusive_strike,optionset,tron,buy_tron):
+    if profit==0:
+        positions={'exclusive_strike':exclusive_strike,'c_strike':c_strike,'p_strike':p_strike}
+        exclusive_c_executed_lastrate=float(optionset[optionset['StrikeRate']==exclusive_strike]['LastRate_CE'])
+        exclusive_p_executed_lastrate=float(optionset[optionset['StrikeRate']==exclusive_strike]['LastRate_PE'])
+        c_executed_lastrate=float(optionset[optionset['StrikeRate']==c_strike]['LastRate_CE'])
+        p_executed_lastrate=float(optionset[optionset['StrikeRate']==p_strike]['LastRate_PE'])
+        positions_executed_lastrates={'exclusive_c_executed_lastrate':exclusive_c_executed_lastrate,
+                                        'exclusive_p_executed_lastrate':exclusive_p_executed_lastrate,
+                                        'c_executed_lastrate':c_executed_lastrate,
+                                        'p_executed_lastrate':p_executed_lastrate}
+        return positions,positions_executed_lastrates,profit-0.1,0
+    else:
+        if positions=={'exclusive_strike':exclusive_strike,'c_strike':c_strike,'p_strike':p_strike}:
+            live_profit=0
+            exclusive_c_executed_lastrate=float(optionset[optionset['StrikeRate']==exclusive_strike]['LastRate_CE'])
+            exclusive_p_executed_lastrate=float(optionset[optionset['StrikeRate']==exclusive_strike]['LastRate_PE'])
+            c_executed_lastrate=float(optionset[optionset['StrikeRate']==c_strike]['LastRate_CE'])
+            p_executed_lastrate=float(optionset[optionset['StrikeRate']==p_strike]['LastRate_PE'])
+            live_profit+=(positions_executed_lastrates['exclusive_c_executed_lastrate']-exclusive_c_executed_lastrate)*tron
+            live_profit+=(positions_executed_lastrates['exclusive_p_executed_lastrate']-exclusive_p_executed_lastrate)*tron
+            live_profit+=(-positions_executed_lastrates['c_executed_lastrate']+c_executed_lastrate)*buy_tron
+            live_profit+=(-positions_executed_lastrates['p_executed_lastrate']+p_executed_lastrate)*buy_tron
+            return positions,positions_executed_lastrates,profit,live_profit 
+        elif positions!={'exclusive_strike':exclusive_strike,'c_strike':c_strike,'p_strike':p_strike}:
+            live_profit=0
+            exclusive_c_executed_lastrate=float(optionset[optionset['StrikeRate']==exclusive_strike]['LastRate_CE'])
+            exclusive_p_executed_lastrate=float(optionset[optionset['StrikeRate']==exclusive_strike]['LastRate_PE'])
+            c_executed_lastrate=float(optionset[optionset['StrikeRate']==c_strike]['LastRate_CE'])
+            p_executed_lastrate=float(optionset[optionset['StrikeRate']==p_strike]['LastRate_PE'])
+            live_profit+=(positions_executed_lastrates['exclusive_c_executed_lastrate']-exclusive_c_executed_lastrate)*tron
+            live_profit+=(positions_executed_lastrates['exclusive_p_executed_lastrate']-exclusive_p_executed_lastrate)*tron
+            live_profit+=(-positions_executed_lastrates['c_executed_lastrate']+c_executed_lastrate)*buy_tron
+            live_profit+=(-positions_executed_lastrates['p_executed_lastrate']+p_executed_lastrate)*buy_tron
+            positions={'exclusive_strike':exclusive_strike,'c_strike':c_strike,'p_strike':p_strike}
+            profit+=live_profit
+            positions_executed_lastrates={'exclusive_c_executed_lastrate':exclusive_c_executed_lastrate,
+                                            'exclusive_p_executed_lastrate':exclusive_p_executed_lastrate,
+                                            'c_executed_lastrate':c_executed_lastrate,
+                                            'p_executed_lastrate':p_executed_lastrate}
+            return positions,positions_executed_lastrates,profit,0
+
+def buyer_adjustment_signal(c_strike,p_strike,exclusive_strike):
+    c_lastrate=float(optionset[optionset['StrikeRate']==c_strike]['LastRate_CE'])
+    p_lastrate=float(optionset[optionset['StrikeRate']==p_strike]['LastRate_PE'])
+    lastrate_sum=float(optionset[optionset['StrikeRate']==exclusive_strike]['LastRate_CE'])+float(optionset[optionset['StrikeRate']==exclusive_strike]['LastRate_PE'])
+    if c_lastrate/p_lastrate>1000 or p_lastrate/c_lastrate>1000:
+        return 1,np.ceil(lastrate_sum/100)*100
+    else:
+        return 0,0 #(change_of_buyside_strikes?, This_far_to_take_new_buy_side_positions, timer_trigger)
+
+def buyer_adjustments(exclusive_strike,k,c_strike,p_strike):
+    #k=(change_of_buyside_strikes, This_far_to_take_new_buy_side_positions, timer_trigger)
+    if k[0]==1:
+        c_strike_new=exclusive_strike+k[1]
+        p_strike_new=exclusive_strike-k[1]
+        c_strike=c_strike_new
+        p_strike=p_strike_new
+    return c_strike,p_strike
+
+def initial_trades(option_chain,x):
+    exclusive_strike=int(np.round(x/100)*100)
+    f=float(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate_CE'])+float(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate_PE'])
+    factor=int(np.ceil(f/100)*100)
+    c_strike=exclusive_strike+factor
+    p_strike=exclusive_strike-factor
+    return exclusive_strike,c_strike,p_strike
+
+def good_to_go(prev_x,x):
+    k=np.round(x/100)*100
+    if (prev_x>k and k>x) or (prev_x<k and k<x):
+        return 1
+    else:
+        return 0
+
+#for single lot
+def exclusive_strike_change_signal(earlier_x,x):
+    a=(x-earlier_x)/100
+    return abs(a)
+def exclusive_strike_change_trades(exclusive_strike,x):
+    exclusive_strike=int(np.round(x/100)*100)
+    return exclusive_strike
+#%%
+days=[4,1,2,3]
+tron=0
+buy_tron=1
+start,profit=0,0
+positions={}
+profit_timeline=[]
+positions_executed_lastrates={}
+lastrate_store=[]
+lite=1
+for day in days:
+    single_day_option_set=aa[aa['day']==day].copy()
+    list_of_seconds=np.array(single_day_option_set['seconds'])
+    list_of_seconds=np.unique(list_of_seconds)
+    list_of_seconds=list_of_seconds[5:]
+    if len(list_of_seconds)!=0:
+        optionset=single_day_option_set[single_day_option_set['seconds']==list_of_seconds[0]].copy()
+        prev_x=float(optionset['lastrate'].iloc[0])
+    for second in list_of_seconds:
+        optionset=single_day_option_set[single_day_option_set['seconds']==second].copy()
+        x=float(optionset['lastrate'].iloc[0])
+        if start==0:
+            if good_to_go(x=x,prev_x=prev_x)>0:
+                exclusive_strike,c_strike,p_strike=initial_trades(option_chain=optionset,x=x)
+                start=1
+        if start==1:
+            k=buyer_adjustment_signal(c_strike,p_strike,exclusive_strike) 
+            c_strike,p_strike=buyer_adjustments(exclusive_strike,k,c_strike,p_strike)
+            if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
+                exclusive_strike=exclusive_strike_change_trades(exclusive_strike,x)
+            positions,positions_executed_lastrates,profit,live_profit=thursday_special_positions(positions,positions_executed_lastrates,profit,c_strike,p_strike,exclusive_strike,optionset,tron,buy_tron)
+            profit_timeline+=[profit+live_profit]
+        prev_x=x
+        lastrate_store=lastrate_store+[x]
+    #    if day==1:
+    #        lite=0
+    #        break
+    #if lite==0:
+    #    break
+    #break
+plt.plot(profit_timeline)
+plt.show()
+plt.plot(lastrate_store)
+# %%

@@ -119,7 +119,7 @@ def buyer_adjustment_signal(c_strike,p_strike,exclusive_strike):
     c_lastrate=float(option_chain[(option_chain['StrikeRate']==c_strike) & (option_chain['CPType']=='CE')]['LastRate'])
     p_lastrate=float(option_chain[(option_chain['StrikeRate']==p_strike) & (option_chain['CPType']=='PE')]['LastRate'])
     lastrate_sum=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
-    if (c_strike-p_strike>np.floor(2*lastrate_sum/50)*50) or timer>925 or c_lastrate/p_lastrate>3.5 or p_lastrate/c_lastrate>3.5:
+    if timer>925 or c_lastrate/p_lastrate>3.5 or p_lastrate/c_lastrate>3.5:
         return 1,np.ceil(lastrate_sum/50)*50
     else:
         return 0,0 #(change_of_buyside_strikes?, This_far_to_take_new_buy_side_positions, timer_trigger)
@@ -193,11 +193,11 @@ def exit_signal(option_chain,exclusive_strike):
 def exit_trades(c_strike,p_strike,exclusive_strike):        
     order_button(exclusive_strike,'PE_B',tron)
     order_button(exclusive_strike,'CE_B',tron)   
-    order_button(c_strike,'CE_S',tron)
-    order_button(p_strike,'PE_S',tron)
+    order_button(c_strike,'CE_S',buy_tron)
+    order_button(p_strike,'PE_S',buy_tron)
 #%%
 #variables to be initialised
-client_name = 'rahul'
+client_name = 'harish'
 tron=int(input('enter the number of lots for trading (Eg 3):'))
 buy_tron=int(tron*1.3)
 prime_client=client_login(client=client_name)
