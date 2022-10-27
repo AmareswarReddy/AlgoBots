@@ -119,7 +119,7 @@ def buyer_adjustment_signal(c_strike,p_strike,exclusive_strike):
     c_lastrate=float(option_chain[(option_chain['StrikeRate']==c_strike) & (option_chain['CPType']=='CE')]['LastRate'])
     p_lastrate=float(option_chain[(option_chain['StrikeRate']==p_strike) & (option_chain['CPType']=='PE')]['LastRate'])
     lastrate_sum=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
-    if timer>925 or c_lastrate/p_lastrate>3.5 or p_lastrate/c_lastrate>3.5:
+    if timer>925 or c_lastrate/p_lastrate>4 or p_lastrate/c_lastrate>4:
         return 1,np.ceil(lastrate_sum/50)*50
     else:
         return 0,0 #(change_of_buyside_strikes?, This_far_to_take_new_buy_side_positions, timer_trigger)
@@ -143,12 +143,13 @@ def buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron):
         p_strike=p_strike_new
     return c_strike,p_strike
 
-def initial_trades(option_chain,x):
+def initial_trades(option_chain,x,m):
     exclusive_strike=int(np.round(x/50)*50)
+    k2=int(np.round(x-m/50)*50)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/50)*50)]['LastRate'])
     factor=int(np.ceil(f/50)*50)
-    c_strike=exclusive_strike+factor
-    p_strike=exclusive_strike-factor
+    c_strike=k2+factor
+    p_strike=k2-factor
     #first buyside
     order_button(p_strike,'PE_B',buy_tron)
     order_button(c_strike,'CE_B',buy_tron)
@@ -174,6 +175,41 @@ def exclusive_strike_change_trades(exclusive_strike,x):
     exclusive_strike=order_button(int(np.round(x/50)*50),'PE_S',tron)
     exclusive_strike=order_button(int(np.round(x/50)*50),'CE_S',tron)
     return exclusive_strike
+
+def rosetta_strikes(option_chain,x,change):
+    #pe_data=option_chain[option_chain['CPType']=='PE']
+    pe_data=pe_data[pe_data['StrikeRate']<x+change]
+    #ce_data=option_chain[option_chain['CPType']=='CE']
+    ce_data=ce_data[ce_data['StrikeRate']>x-change]
+    i=np.array(pe_data['StrikeRate'])[0]
+    end=np.array(pe_data['StrikeRate'])[-1]
+    ss=np.array(pe_data['StrikeRate'])
+    p_lastrate=np.array(list(pe_data[pe_data['StrikeRate']<=x+change]['LastRate'])+list(pe_data[pe_data['StrikeRate']>x+change]['LastRate']*0))
+    c_lastrate=np.array(list(ce_data[ce_data['StrikeRate']<x-change]['LastRate']*0)+list(ce_data[ce_data['StrikeRate']>=x-change]['LastRate']))
+    p_openinterest=np.array(list(pe_data[pe_data['StrikeRate']<=x+change]['OpenInterest'])+list(pe_data[pe_data['StrikeRate']>x+change]['OpenInterest']*0))
+    c_openinterest=np.array(list(ce_data[ce_data['StrikeRate']<x-change]['OpenInterest']*0)+list(ce_data[ce_data['StrikeRate']>=x-change]['OpenInterest']))
+    data=[]
+    data1=[]
+    data2=[]
+    increment=2
+    while i<end:
+        i=i+increment
+        init_ce=0
+        init_pe=0
+        end_pe=0
+        end_ce=0
+        for k in range(0,len(ss)):
+            init_pe=init_pe+p_lastrate[k]*p_openinterest[k]
+            init_ce=init_ce+c_lastrate[k]*c_openinterest[k]
+            end_pe=end_pe+p_openinterest[k]*max((ss[k]-i),0)
+            end_ce=end_ce+c_openinterest[k]*max((i-ss[k]),0)
+        data=data+[init_ce-end_ce-init_pe+end_pe]
+        data1=data1+[init_ce-end_ce]
+        data2=data2+[-init_pe+end_pe]
+    index=np.argmin(np.abs(data))
+    a=np.array(option_chain['StrikeRate'])[0]+index*increment
+    return  a
+
 def data():
     while True:
         try :
@@ -183,10 +219,11 @@ def data():
             break
         except Exception :
             pass
-    return option_chain,x
+    m=rosetta_strikes(option_chain,x,500)
+    return option_chain,x+m,m
 def exit_signal(option_chain,exclusive_strike):
     temp=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
-    if temp<75:
+    if temp<25:
         return 1
     else:
         return 0
@@ -218,11 +255,11 @@ ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while True:
-    option_chain,x=data()
+    option_chain,x,m=data()
     #x=int(input('--'))
     if start==0:
         if good_to_go(x=x,prev_x=prev_x)>0:
-            exclusive_strike,c_strike,p_strike=initial_trades(option_chain=option_chain,x=x)
+            exclusive_strike,c_strike,p_strike=initial_trades(option_chain=option_chain,x=x,m=m)
             start=1
     if start==1:
         k=buyer_adjustment_signal(c_strike,p_strike,exclusive_strike) 
@@ -230,6 +267,6 @@ while True:
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike=exclusive_strike_change_trades(exclusive_strike,x)
     if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0: 
-        exit(c_strike=c_strike,p_strike=p_strike,exclusive_strike=exclusive_strike)   
+        exit_trades(c_strike=c_strike,p_strike=p_strike,exclusive_strike=exclusive_strike)   
         break   
     prev_x=x
