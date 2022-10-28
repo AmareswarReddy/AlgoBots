@@ -13,6 +13,7 @@ import requests
 from pytz import timezone 
 from cred import *
 from py5paisa.order import Basket_order
+from pyswarm import pso
 
 def client_login(client):
     import json
@@ -145,7 +146,7 @@ def buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron):
 
 def initial_trades(option_chain,x,m):
     exclusive_strike=int(np.round(x/50)*50)
-    k2=int(np.round(x-m/50)*50)
+    k2=int(np.round((x+m)/50)*50)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/50)*50)]['LastRate'])
     factor=int(np.ceil(f/50)*50)
     c_strike=k2+factor
@@ -176,36 +177,30 @@ def exclusive_strike_change_trades(exclusive_strike,x):
     exclusive_strike=order_button(int(np.round(x/50)*50),'CE_S',tron)
     return exclusive_strike
 
-def rosetta_strikes(option_chain,x,change):
-    pe_data=option_chain[option_chain['CPType']=='PE']
-    pe_data=pe_data[pe_data['StrikeRate']<x+change]
+def rosetta(option_chain):
     ce_data=option_chain[option_chain['CPType']=='CE']
-    ce_data=ce_data[ce_data['StrikeRate']>x-change]
+    pe_data=option_chain[option_chain['CPType']=='PE']
     i=np.array(pe_data['StrikeRate'])[0]
     end=np.array(pe_data['StrikeRate'])[-1]
     ss=np.array(pe_data['StrikeRate'])
-    p_lastrate=np.array(list(pe_data[pe_data['StrikeRate']<=x+change]['LastRate'])+list(pe_data[pe_data['StrikeRate']>x+change]['LastRate']*0))
-    c_lastrate=np.array(list(ce_data[ce_data['StrikeRate']<x-change]['LastRate']*0)+list(ce_data[ce_data['StrikeRate']>=x-change]['LastRate']))
-    p_openinterest=np.array(list(pe_data[pe_data['StrikeRate']<=x+change]['OpenInterest'])+list(pe_data[pe_data['StrikeRate']>x+change]['OpenInterest']*0))
-    c_openinterest=np.array(list(ce_data[ce_data['StrikeRate']<x-change]['OpenInterest']*0)+list(ce_data[ce_data['StrikeRate']>=x-change]['OpenInterest']))
-    data=[]
-    increment=2
-    while i<end:
-        i=i+increment
-        init_ce=0
-        init_pe=0
-        end_pe=0
-        end_ce=0
+    p_lastrate=np.array(list(pe_data['LastRate']))
+    c_lastrate=np.array(list(ce_data['LastRate']))
+    p_openinterest=np.array(list(pe_data['OpenInterest']))
+    c_openinterest=np.array(list(ce_data['OpenInterest']))
+    def loss_function(v):
         init_pe=np.dot(p_lastrate,p_openinterest)
         init_ce=np.dot(c_lastrate,c_openinterest)
-        for k in range(0,len(p_openinterest)):
-            end_pe=end_pe+p_openinterest[k]*max((ss[k]-i),0)
-        for k in range(0,len(c_openinterest)):
-            end_ce=end_ce+c_openinterest[k]*max((i-ss[k]),0)
-        data=data+[init_ce-end_ce-init_pe+end_pe]
-    index=np.argmin(np.abs(data))
-    a=np.array(option_chain['StrikeRate'])[0]+index*increment
-    return  a
+        tmax=ss-v[0]
+        tmax[tmax<0]=0
+        tmin=v[0]-ss
+        tmin[tmin<0]=0
+        end_pe=np.dot(p_openinterest,tmax)
+        end_ce=np.dot(c_openinterest,tmin)
+        data=init_ce-end_ce-init_pe+end_pe
+        return abs(data)
+    a,b=pso(func=loss_function,lb=[i],ub=[end],minfunc=0.1)
+    return  np.round_(a[0],1)
+
 
 def data():
     while True:
@@ -216,8 +211,8 @@ def data():
             break
         except Exception :
             pass
-    m=rosetta_strikes(option_chain,x,500)
-    return option_chain,x+m,m
+    m=rosetta(option_chain)
+    return option_chain,2*x-m,x-m
 def exit_signal(option_chain,exclusive_strike):
     temp=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
     if temp<25:
@@ -231,7 +226,7 @@ def exit_trades(c_strike,p_strike,exclusive_strike):
     order_button(p_strike,'PE_S',buy_tron)
 #%%
 #variables to be initialised
-client_name = 'harish'
+client_name = 'vinathi'
 tron=int(input('enter the number of lots for trading (Eg 3):'))
 buy_tron=int(tron*1.3)
 prime_client=client_login(client=client_name)
@@ -267,3 +262,4 @@ while True:
         exit_trades(c_strike=c_strike,p_strike=p_strike,exclusive_strike=exclusive_strike)   
         break   
     prev_x=x
+# %%
