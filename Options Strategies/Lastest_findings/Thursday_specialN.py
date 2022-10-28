@@ -177,9 +177,9 @@ def exclusive_strike_change_trades(exclusive_strike,x):
     return exclusive_strike
 
 def rosetta_strikes(option_chain,x,change):
-    #pe_data=option_chain[option_chain['CPType']=='PE']
+    pe_data=option_chain[option_chain['CPType']=='PE']
     pe_data=pe_data[pe_data['StrikeRate']<x+change]
-    #ce_data=option_chain[option_chain['CPType']=='CE']
+    ce_data=option_chain[option_chain['CPType']=='CE']
     ce_data=ce_data[ce_data['StrikeRate']>x-change]
     i=np.array(pe_data['StrikeRate'])[0]
     end=np.array(pe_data['StrikeRate'])[-1]
@@ -189,8 +189,6 @@ def rosetta_strikes(option_chain,x,change):
     p_openinterest=np.array(list(pe_data[pe_data['StrikeRate']<=x+change]['OpenInterest'])+list(pe_data[pe_data['StrikeRate']>x+change]['OpenInterest']*0))
     c_openinterest=np.array(list(ce_data[ce_data['StrikeRate']<x-change]['OpenInterest']*0)+list(ce_data[ce_data['StrikeRate']>=x-change]['OpenInterest']))
     data=[]
-    data1=[]
-    data2=[]
     increment=2
     while i<end:
         i=i+increment
@@ -198,14 +196,13 @@ def rosetta_strikes(option_chain,x,change):
         init_pe=0
         end_pe=0
         end_ce=0
-        for k in range(0,len(ss)):
-            init_pe=init_pe+p_lastrate[k]*p_openinterest[k]
-            init_ce=init_ce+c_lastrate[k]*c_openinterest[k]
+        init_pe=np.dot(p_lastrate,p_openinterest)
+        init_ce=np.dot(c_lastrate,c_openinterest)
+        for k in range(0,len(p_openinterest)):
             end_pe=end_pe+p_openinterest[k]*max((ss[k]-i),0)
+        for k in range(0,len(c_openinterest)):
             end_ce=end_ce+c_openinterest[k]*max((i-ss[k]),0)
         data=data+[init_ce-end_ce-init_pe+end_pe]
-        data1=data1+[init_ce-end_ce]
-        data2=data2+[-init_pe+end_pe]
     index=np.argmin(np.abs(data))
     a=np.array(option_chain['StrikeRate'])[0]+index*increment
     return  a
@@ -248,7 +245,7 @@ if start==1:
     c_strike=int(input('enter call strike buyside :  '))
     p_strike=int(input('enter put strike buyside :  '))
 elif start==0:
-    option_chain,x=data()
+    option_chain,x,m=data()
     exclusive_strike,c_strike,p_strike=0,0,0
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
