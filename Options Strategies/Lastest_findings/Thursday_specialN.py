@@ -33,86 +33,89 @@ def client_login(client):
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
 import sys
 def order_button(exclusive_strike,type,lots):
-    if exclusive_strike==0:
-        while True:
-            try :
-                expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
-                current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
-                option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
-                x=expiry_timestamps['lastrate'][0]['LTP']
-                break
-            except Exception :
-                pass
-        exclusive_strike=int(np.round(x/50)*50)
-    else:
-        while True:
-            try :
-                expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
-                current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
-                option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
-                x=expiry_timestamps['lastrate'][0]['LTP']
-                break
-            except Exception :
-                pass
-    if type=='CE_B':
-        c_data=option_chain[option_chain['CPType']=='CE']
-        c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        temp2=lots
-        temp=int(temp2/56)
-        end=temp2-temp*56
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
-        while temp>0:
-            prime_client['login'].place_order(test_order) 
-            temp=temp-1
-            sleep(0.5)
-        if temp==0 and end!=0:
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
-            prime_client['login'].place_order(test_order) 
-    if type=='PE_B':
-        p_data=option_chain[option_chain['CPType']=='PE']
-        p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        temp2=lots
-        temp=int(temp2/56)
-        end=temp2-temp*56
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
-        while temp>0:
-            prime_client['login'].place_order(test_order) 
-            temp=temp-1
-            sleep(0.5)
-        if temp==0 and end!=0:
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
-            prime_client['login'].place_order(test_order) 
-    if type=='CE_S':
-        c_data=option_chain[option_chain['CPType']=='CE']
-        c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        temp2=lots
-        temp=int(temp2/56)
-        end=temp2-temp*56
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
-        while temp>0:
-            prime_client['login'].place_order(test_order) 
-            temp=temp-1
-            sleep(0.5)
-        if temp==0 and end!=0:
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
-            prime_client['login'].place_order(test_order) 
-                
+    if lots!=0:
+        if exclusive_strike==0:
+            while True:
+                try :
+                    expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
+                    current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
+                    option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
+                    x=expiry_timestamps['lastrate'][0]['LTP']
+                    break
+                except Exception :
+                    pass
+            exclusive_strike=int(np.round(x/50)*50)
+        else:
+            while True:
+                try :
+                    expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
+                    current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
+                    option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
+                    x=expiry_timestamps['lastrate'][0]['LTP']
+                    break
+                except Exception :
+                    pass
+        if type=='CE_B':
+            c_data=option_chain[option_chain['CPType']=='CE']
+            c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
+            temp2=lots
+            temp=int(temp2/56)
+            end=temp2-temp*56
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
+            while temp>0:
+                prime_client['login'].place_order(test_order) 
+                temp=temp-1
+                sleep(0.5)
+            if temp==0 and end!=0:
+                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
+                prime_client['login'].place_order(test_order) 
+        if type=='PE_B':
+            p_data=option_chain[option_chain['CPType']=='PE']
+            p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
+            temp2=lots
+            temp=int(temp2/56)
+            end=temp2-temp*56
+            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
+            while temp>0:
+                prime_client['login'].place_order(test_order) 
+                temp=temp-1
+                sleep(0.5)
+            if temp==0 and end!=0:
+                test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
+                prime_client['login'].place_order(test_order) 
+        if type=='CE_S':
+            c_data=option_chain[option_chain['CPType']=='CE']
+            c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
+            temp2=lots
+            temp=int(temp2/56)
+            end=temp2-temp*56
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
+            while temp>0:
+                prime_client['login'].place_order(test_order) 
+                temp=temp-1
+                sleep(0.5)
+            if temp==0 and end!=0:
+                test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
+                prime_client['login'].place_order(test_order) 
 
-    if type=='PE_S':
-        p_data=option_chain[option_chain['CPType']=='PE']
-        p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        temp2=lots
-        temp=int(temp2/56)
-        end=temp2-temp*56
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
-        while temp>0:
-            prime_client['login'].place_order(test_order) 
-            temp=temp-1
-            sleep(0.5)
-        if temp==0 and end!=0:
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
-            prime_client['login'].place_order(test_order) 
-    return exclusive_strike
+
+        if type=='PE_S':
+            p_data=option_chain[option_chain['CPType']=='PE']
+            p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
+            temp2=lots
+            temp=int(temp2/56)
+            end=temp2-temp*56
+            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
+            while temp>0:
+                prime_client['login'].place_order(test_order) 
+                temp=temp-1
+                sleep(0.5)
+            if temp==0 and end!=0:
+                test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
+                prime_client['login'].place_order(test_order) 
+        return exclusive_strike
+    else:
+        return 0
 
 def buyer_adjustment_signal(c_strike,p_strike,exclusive_strike):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -201,6 +204,15 @@ def rosetta(option_chain):
     a,b=pso(func=loss_function,lb=[i],ub=[end],minfunc=0.1)
     return  np.round_(a[0],1)
 
+def rosetta_oi_indictor(option_chain):
+    ce_data=option_chain[option_chain['CPType']=='CE']
+    pe_data=option_chain[option_chain['CPType']=='PE']
+    p_openinterest=np.sum(np.array(list(pe_data['OpenInterest'])))
+    c_openinterest=np.sum(np.array(list(ce_data['OpenInterest'])))
+    k=np.sign(p_openinterest-c_openinterest)
+    print(p_openinterest)
+    print(c_openinterest)
+    return k*((k>0)*(p_openinterest/c_openinterest)+(k<0)*(c_openinterest/p_openinterest))
 
 def data():
     while True:
@@ -227,8 +239,8 @@ def exit_trades(c_strike,p_strike,exclusive_strike):
 #%%
 #variables to be initialised
 client_name = 'vinathi'
-tron=int(input('enter the number of lots for trading (Eg 3):'))
-buy_tron=int(tron*1.3)
+tron=int(input('Lots to Sell (Eg 3) :'))
+buy_tron=int(input('Lots to Buy (Eg: 4) : '))
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -246,16 +258,19 @@ elif start==0:
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+#%%
 while True:
     option_chain,x,m=data()
-    #x=int(input('--'))
+    #buyin=rosetta_oi_indictor(option_chain)
+    x=int(input('--'))
     if start==0:
         if good_to_go(x=x,prev_x=prev_x)>0:
             exclusive_strike,c_strike,p_strike=initial_trades(option_chain=option_chain,x=x,m=m)
             start=1
     if start==1:
-        k=buyer_adjustment_signal(c_strike,p_strike,exclusive_strike) 
-        c_strike,p_strike=buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron)
+        if buy_tron!=0:
+            k=buyer_adjustment_signal(c_strike,p_strike,exclusive_strike) 
+            c_strike,p_strike=buyer_adjustments(exclusive_strike,k,c_strike,p_strike,buy_tron)
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike=exclusive_strike_change_trades(exclusive_strike,x)
     if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0: 
