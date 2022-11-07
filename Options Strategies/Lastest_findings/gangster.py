@@ -427,14 +427,14 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
         ctron=parameters[1]
         ss=tron*(p_lastrate+c_lastrate)-ptron*p_e_lastrate-ctron*c_e_lastrate
         return [ss]
-    xopt,fopt=pso(objective_function,[0,0],[tron-1+(tron==1),tron-1+(tron==1)],f_ieqcons=constraints,swarmsize=100000,maxiter=10000)
+    xopt,fopt=pso(objective_function,[0,0],[tron-1+(tron==1),tron-1+(tron==1)],f_ieqcons=constraints,swarmsize=10000,maxiter=10000)
     ptron,ctron=int(xopt[0]),int(xopt[1])
     return ptron,ctron
 
 def overnight_safety_trades(x,m,c_strike,p_strike,tron):
     f1=3.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
     A=f1*opening_average()
-    if datetime.today().weekday()!=3:
+    if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>915:
         ptron,ctron=overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A)
         if  int(ind_time[11:13])*60+int(ind_time[14:16])>926 :
             k,y1=order_button(exclusive_strike,'PE_B',ptron)
