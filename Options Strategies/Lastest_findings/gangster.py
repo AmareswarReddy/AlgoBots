@@ -427,7 +427,7 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
         ctron=parameters[1]
         ss=tron*(p_lastrate+c_lastrate)-ptron*p_e_lastrate-ctron*c_e_lastrate
         return [ss]
-    xopt,fopt=pso(objective_function,[0,0],[tron-1,tron-1],f_ieqcons=constraints,swarmsize=100000,maxiter=10000)
+    xopt,fopt=pso(objective_function,[0,0],[tron-1+(tron==1),tron-1+(tron==1)],f_ieqcons=constraints,swarmsize=100000,maxiter=10000)
     ptron,ctron=int(xopt[0]),int(xopt[1])
     return ptron,ctron
 
