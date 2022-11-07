@@ -431,9 +431,9 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
     ptron,ctron=int(xopt[0]),int(xopt[1])
     return ptron,ctron
 
-def overnight_safety_trades(x,m,c_strike,p_strike,tron):
+def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
     f1=4.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
-    A=f1*opening_average()
+    A=f1*f2
     if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>915:
         ptron,ctron=overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A)
         if  int(ind_time[11:13])*60+int(ind_time[14:16])>926 :
@@ -461,6 +461,7 @@ is_t_special=0
 prime_client=client_login(client=client_name)
 option_chain,x,kiki=data(week=0)
 prev_x=x+kiki
+f2=opening_average()
 if start==1:
     exclusive_strike=int(input('enter exclusive strike :  '))
     c_strike=int(input('enter call strike :  '))
@@ -480,7 +481,7 @@ while True:
     c_strike,p_strike,tron=strangle_adjustments(x,c_strike,p_strike,tron)
     exclusive_strike,tron=initialise_straddle(c_strike,p_strike,x,tron)
     exclusive_strike,tron=straddle_special_adjustment(exclusive_strike,x,tron)
-    overnight_safety_trades(x,m,c_strike,p_strike,tron)
+    overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
     exclusive_strike,c_strike,p_strike,is_t_special=day_end_leg_trades(c_strike,p_strike,x,tron)
     if is_t_special==1:
         break
