@@ -449,7 +449,7 @@ def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
                     k,y1=order_button(exclusive_strike,'CE_B',ctron)
                 if y1==0:
                     break
-            return 0
+            return 1
     return 0
 
 #%%
@@ -481,9 +481,9 @@ while True:
     c_strike,p_strike,tron=strangle_adjustments(x,c_strike,p_strike,tron)
     exclusive_strike,tron=initialise_straddle(c_strike,p_strike,x,tron)
     exclusive_strike,tron=straddle_special_adjustment(exclusive_strike,x,tron)
-    overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
+    shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
     exclusive_strike,c_strike,p_strike,is_t_special=day_end_leg_trades(c_strike,p_strike,x,tron)
-    if is_t_special==1:
+    if is_t_special==1 or shoot==1:
         break
 
 # %%
