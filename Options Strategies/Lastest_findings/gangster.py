@@ -432,7 +432,7 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
     return ptron,ctron
 
 def overnight_safety_trades(x,m,c_strike,p_strike,tron):
-    f1=3.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
+    f1=4.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
     A=f1*opening_average()
     if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>915:
         ptron,ctron=overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A)
