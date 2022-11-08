@@ -219,8 +219,6 @@ def rosetta_oi_indicator(option_chain):
     p_openinterest=np.sum(np.array(list(pe_data['OpenInterest'])))
     c_openinterest=np.sum(np.array(list(ce_data['OpenInterest'])))
     k=np.sign(p_openinterest-c_openinterest)
-    print(p_openinterest)
-    print(c_openinterest)
     return k*((k>0)*(p_openinterest/c_openinterest)+(k<0)*(c_openinterest/p_openinterest))
 
 def data(week):
@@ -237,6 +235,8 @@ def data(week):
             pass
     m=rosetta(option_chain)
     return option_chain,2*x-m,x-m
+
+
 def initialise_straddle(c_strike,p_strike,x,tron):
     exclusive_strike=int(np.round((x)/100)*100)
     max_distance=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
@@ -434,22 +434,21 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
 def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
     f1=4.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
     A=f1*f2
-    if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>915:
+    if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>921:
         ptron,ctron=overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A)
-        if  int(ind_time[11:13])*60+int(ind_time[14:16])>926 :
-            k,y1=order_button(exclusive_strike,'PE_B',ptron)
-            while True:
-                if y1!=0:
-                    k,y1=order_button(exclusive_strike,'PE_B',ptron)
-                if y1==0:
-                    break
-            k,y1=order_button(exclusive_strike,'CE_B',ctron)
-            while True:
-                if y1!=0:
-                    k,y1=order_button(exclusive_strike,'CE_B',ctron)
-                if y1==0:
-                    break
-            return 1
+        k,y1=order_button(exclusive_strike,'PE_B',ptron)
+        while True:
+            if y1!=0:
+                k,y1=order_button(exclusive_strike,'PE_B',ptron)
+            if y1==0:
+                break
+        k,y1=order_button(exclusive_strike,'CE_B',ctron)
+        while True:
+            if y1!=0:
+                k,y1=order_button(exclusive_strike,'CE_B',ctron)
+            if y1==0:
+                break
+        return 1
     return 0
 
 #%%
@@ -457,7 +456,6 @@ def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
 tron=int(input('Lots to Sell (Eg 3) :'))
 start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
 client_name = input('enter the client name: ')
-is_t_special=0
 prime_client=client_login(client=client_name)
 option_chain,x,kiki=data(week=0)
 prev_x=x+kiki
