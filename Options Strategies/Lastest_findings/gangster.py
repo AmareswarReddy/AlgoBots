@@ -263,7 +263,7 @@ def straddle_special_adjustment(exclusive_strike,x,tron):
         def exclusive_strike_change_signal(earlier_x,x):
             a=(x-earlier_x)/100
             return abs(a)
-        def exclusive_strike_change_trades(exclusive_strike,x):
+        def exclusive_strike_change_trades(exclusive_strike,x,tron):
             k,y1=order_button(exclusive_strike,'PE_B',tron)
             while True:
                 if y1!=0:
@@ -280,7 +280,7 @@ def straddle_special_adjustment(exclusive_strike,x,tron):
             tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron)
             return exclusive_strike,tron
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
-            exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x)
+            exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
     return exclusive_strike,tron
 
 def day_end_leg_trades(c_strike,p_strike,x,tron):
@@ -474,7 +474,6 @@ if start==0:
     tron,c_strike,p_strike=initial_strangle_trades(option_chain,x,tron)
 
 while True:
-    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain,x,m=data(week=0)
     c_strike,p_strike,tron=strangle_adjustments(x,c_strike,p_strike,tron)
     exclusive_strike,tron=initialise_straddle(c_strike,p_strike,x,tron)
