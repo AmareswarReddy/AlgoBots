@@ -259,7 +259,7 @@ def initialise_straddle(c_strike,p_strike,x,tron):
     return exclusive_strike,tron
 
 def straddle_special_adjustment(exclusive_strike,x,tron):
-    if datetime.today().weekday()!=3 and exclusive_strike!=0:
+    if exclusive_strike!=0:
         def exclusive_strike_change_signal(earlier_x,x):
             a=(x-earlier_x)/100
             return abs(a)
@@ -284,9 +284,9 @@ def straddle_special_adjustment(exclusive_strike,x,tron):
     return exclusive_strike,tron
 
 def day_end_leg_trades(c_strike,p_strike,x,tron):
-    exclusive_strike=int(np.round((x)/100)*100)
-    max_distance=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
     if datetime.today().weekday()!=3:
+        exclusive_strike=int(np.round((x)/100)*100)
+        max_distance=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
         if ((c_strike-p_strike)<0.7*max_distance and int(ind_time[11:13])*60+int(ind_time[14:16])>926) :
             if c_strike!=p_strike:
                 k,y1=order_button(p_strike,'PE_B',tron)
