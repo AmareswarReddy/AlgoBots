@@ -236,8 +236,8 @@ def data(week):
     m=rosetta(option_chain)
     return option_chain,2*x-m,x-m
 
-def straddle_special_adjustment(exclusive_strike,x,tron):
-    if exclusive_strike!=0:
+def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
+    if exclusive_strike!=0 and chameleon_signal==0:
         def exclusive_strike_change_signal(earlier_x,x):
             a=(x-earlier_x)/100
             return abs(a)
@@ -259,7 +259,10 @@ def straddle_special_adjustment(exclusive_strike,x,tron):
             return exclusive_strike,tron
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
-    return exclusive_strike,tron
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    timer=int(ind_time[11:13])*60+int(ind_time[14:16])>855
+    chameleon_signal=(timer)*(datetime.today().weekday()==3)
+    return exclusive_strike,tron,chameleon_signal
 
 def day_end_leg_trades(c_strike,p_strike,x,tron):
     if datetime.today().weekday()!=3:
@@ -396,7 +399,7 @@ def strangle_adjustments(x,c_strike,p_strike,tron):
                 tron=finalise_tron(c_strike=at_strike,p_strike=at_strike,tron=tron)
                 c_strike=at_strike
                 p_strike=at_strike
-    exclusive_strike=(c_strike==p_strike)*int(np.round((x)/100)*100)
+    exclusive_strike=(c_strike==p_strike)*at_strike
     return exclusive_strike,c_strike,p_strike,tron
 
 def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
@@ -455,6 +458,7 @@ prime_client=client_login(client=client_name)
 option_chain,x,kiki=data(week=0)
 prev_x=x+kiki
 f2=opening_average()
+chameleon=0
 if start==1:
     c_strike=int(input('enter call strike :  '))
     p_strike=int(input('enter put strike :  '))
@@ -471,7 +475,7 @@ if start==0:
 while True:
     option_chain,x,m=data(week=0)
     exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x,c_strike,p_strike,tron)
-    exclusive_strike,tron=straddle_special_adjustment(exclusive_strike,x,tron)
+    exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal)
     shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
     exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(c_strike,p_strike,x,tron)
     if is_t_special==1 or shoot==1:
