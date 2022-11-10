@@ -236,28 +236,6 @@ def data(week):
     m=rosetta(option_chain)
     return option_chain,2*x-m,x-m
 
-
-def initialise_straddle(c_strike,p_strike,x,tron):
-    exclusive_strike=int(np.round((x)/100)*100)
-    max_distance=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
-    if c_strike-p_strike<=0.5*max_distance and c_strike!=p_strike:
-        k,y1=order_button(p_strike,'PE_B',tron)
-        while True:
-            if y1!=0:
-                k,y1=order_button(p_strike,'PE_B',tron)
-            if y1==0:
-                break
-        k,y1=order_button(p_strike,'CE_B',tron)
-        while True:
-            if y1!=0:
-                k,y1=order_button(p_strike,'CE_B',tron)
-            if y1==0:
-                break
-        tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron)
-    if c_strike==p_strike:
-        exclusive_strike=c_strike
-    return exclusive_strike,tron
-
 def straddle_special_adjustment(exclusive_strike,x,tron):
     if exclusive_strike!=0:
         def exclusive_strike_change_signal(earlier_x,x):
@@ -402,7 +380,24 @@ def strangle_adjustments(x,c_strike,p_strike,tron):
                         p_strike,yet_to_place=order_button(at_strike,'PE_S',tron)
                     if yet_to_place==0:
                         break
-    return c_strike,p_strike,tron
+            elif at_strike!=p_strike and at_strike!=c_strike:
+                k,y1=order_button(p_strike,'PE_B',tron)
+                while True:
+                    if y1!=0:
+                        k,y1=order_button(p_strike,'PE_B',tron)
+                    if y1==0:
+                        break
+                k,y1=order_button(p_strike,'CE_B',tron)
+                while True:
+                    if y1!=0:
+                        k,y1=order_button(p_strike,'CE_B',tron)
+                    if y1==0:
+                        break
+                tron=finalise_tron(c_strike=at_strike,p_strike=at_strike,tron=tron)
+                c_strike=at_strike
+                p_strike=at_strike
+    exclusive_strike=(c_strike==p_strike)*int(np.round((x)/100)*100)
+    return exclusive_strike,c_strike,p_strike,tron
 
 def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
     x1=x-m
@@ -461,9 +456,9 @@ option_chain,x,kiki=data(week=0)
 prev_x=x+kiki
 f2=opening_average()
 if start==1:
-    exclusive_strike=int(input('enter exclusive strike :  '))
     c_strike=int(input('enter call strike :  '))
     p_strike=int(input('enter put strike :  '))
+    exclusive_strike=int((c_strike==p_strike)*c_strike)
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
@@ -475,11 +470,10 @@ if start==0:
 
 while True:
     option_chain,x,m=data(week=0)
-    c_strike,p_strike,tron=strangle_adjustments(x,c_strike,p_strike,tron)
-    exclusive_strike,tron=initialise_straddle(c_strike,p_strike,x,tron)
+    exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x,c_strike,p_strike,tron)
     exclusive_strike,tron=straddle_special_adjustment(exclusive_strike,x,tron)
     shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
-    exclusive_strike,c_strike,p_strike,is_t_special=day_end_leg_trades(c_strike,p_strike,x,tron)
+    exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(c_strike,p_strike,x,tron)
     if is_t_special==1 or shoot==1:
         break
 
