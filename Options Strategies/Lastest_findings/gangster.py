@@ -236,6 +236,16 @@ def data(week):
     m=rosetta(option_chain)
     return option_chain,2*x-m,x-m
 
+def exit_signal(option_chain,exclusive_strike):
+    temp=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
+    if temp<100:
+        return 1
+    else:
+        return 0
+def exit_trades(exclusive_strike,tron):
+    order_button(exclusive_strike,'PE_B',tron)
+    order_button(exclusive_strike,'CE_B',tron)   
+
 def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
     if exclusive_strike!=0 and chameleon_signal==0:
         def exclusive_strike_change_signal(earlier_x,x):
@@ -259,9 +269,9 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
             return exclusive_strike,tron
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
-    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    timer=int(ind_time[11:13])*60+int(ind_time[14:16])>855
-    chameleon_signal=(timer)*(datetime.today().weekday()==3)
+        if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
+            exit_trades(exclusive_strike,tron)   
+            chameleon_signal=1
     return exclusive_strike,tron,chameleon_signal
 
 def day_end_leg_trades(c_strike,p_strike,x,tron):
@@ -449,6 +459,94 @@ def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
         return 1
     return 0
 
+def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal):
+    def good_to_go(prev_x,x):
+        a=np.floor(prev_x/50)
+        b=np.floor(x/50)
+        if a>b:
+            return -1
+        elif a<b:
+            return 1
+        else:
+            return 0
+
+    def change_of_strike(earlier_x,x):
+        a=(x-earlier_x)/50
+        return a
+    
+    def side_switch(earlier_x,x,side):
+        a=(x-earlier_x)
+        if a>0 and side=='CE_S':
+            return 'PE_S'
+        elif a<0 and side=='PE_S':
+            return 'CE_S'
+        if a>0 and side=='PE_B':
+            return 'CE_B'
+        elif a<0 and side=='CE_B':
+            return 'PE_B'
+        else:
+            return side
+
+    if chameleon_signal==1:
+        if chameleon_start==0:
+            if good_to_go(x=x,prev_x=prev_x)>0:
+                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S',tron)
+                tron=tron-lots_drop(int(np.round(x/50)*50),'PE_S',yet_to_place)
+                chameleon_start=1
+                side='PE_S'
+            if good_to_go(x=x,prev_x=prev_x)<0:
+                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'CE_S',tron)
+                tron=tron-lots_drop(int(np.round(x/50)*50),'CE_S',yet_to_place)
+                chameleon_start=1
+                side='CE_S'
+        if chameleon_start==1:
+            if change_of_strike(earlier_x=exclusive_strike,x=x)>1:
+                earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                order_button(exclusive_strike,'PE_B',tron)
+                while True:
+                    later_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                    if later_margin>earlier_margin:
+                        break
+                tron=tron+1
+                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S',tron)
+                tron=tron-lots_drop(int(np.round(x/50)*50),'PE_S',yet_to_place)
+                side='PE_S'
+            if change_of_strike(earlier_x=exclusive_strike,x=x)<-1:
+                earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                order_button(exclusive_strike,'CE_B',tron)
+                while True:
+                    later_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                    if later_margin>earlier_margin:
+                        break
+                tron=tron+1
+                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'CE_S',tron)
+                tron=tron-lots_drop(int(np.round(x/50)*50),'CE_S',yet_to_place)
+                side='CE_S'
+            side_=side_switch(earlier_x=exclusive_strike,x=x,side=side)
+            if side_!=side:
+                if side=='CE_S':
+                    earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                    order_button(exclusive_strike,'CE_B',tron)
+                    while True:
+                        later_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                        if later_margin>earlier_margin:
+                            break
+                    tron+=1
+                    exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),side_,tron)
+                    tron=tron-lots_drop(int(np.round(x/50)*50),side_,yet_to_place)
+                if side=='PE_S':
+                    earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                    order_button(exclusive_strike,'PE_B',tron)
+                    while True:
+                        later_margin=prime_client['login'].margin()[0]['AvailableMargin']
+                        if later_margin>earlier_margin:
+                            break
+                    tron+=1
+                    exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),side_,tron)
+                    tron=tron-lots_drop(int(np.round(x/50)*50),side_,yet_to_place)
+                side=side_
+        prev_x=x
+    return chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal
 #%%
 #variables to be initialised
 tron=int(input('Lots to Sell (Eg 3) :'))
@@ -458,7 +556,8 @@ prime_client=client_login(client=client_name)
 option_chain,x,kiki=data(week=0)
 prev_x=x+kiki
 f2=opening_average()
-chameleon=0
+chameleon_signal=0
+chameleon_start,side,side_=0,'',''
 if start==1:
     c_strike=int(input('enter call strike :  '))
     p_strike=int(input('enter put strike :  '))
@@ -476,9 +575,8 @@ while True:
     option_chain,x,m=data(week=0)
     exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x,c_strike,p_strike,tron)
     exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal)
+    chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal)
     shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
     exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(c_strike,p_strike,x,tron)
     if is_t_special==1 or shoot==1:
         break
-
-# %%
