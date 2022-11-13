@@ -274,11 +274,12 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
             chameleon_signal=1
     return exclusive_strike,tron,chameleon_signal
 
-def day_end_leg_trades(c_strike,p_strike,x,tron):
-    if datetime.today().weekday()!=3:
+def day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron):
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>926:
         exclusive_strike=int(np.round((x)/100)*100)
         max_distance=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
-        if ((c_strike-p_strike)<0.7*max_distance and int(ind_time[11:13])*60+int(ind_time[14:16])>926) :
+        if (c_strike-p_strike)<0.7*max_distance :
             if c_strike!=p_strike:
                 k,y1=order_button(p_strike,'PE_B',tron)
                 while True:
@@ -309,9 +310,9 @@ def day_end_leg_trades(c_strike,p_strike,x,tron):
                 if y1==0:
                     break
             return exclusive_strike,c_strike,p_strike,1
-    return 0,c_strike,p_strike,0
+    return exclusive_strike,c_strike,p_strike,0
 
-def strangle_adjustments(x,c_strike,p_strike,tron):
+def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
     if c_strike!=p_strike:
         ce_data=option_chain[option_chain['CPType']=='CE']
         pe_data=option_chain[option_chain['CPType']=='PE']
@@ -409,7 +410,7 @@ def strangle_adjustments(x,c_strike,p_strike,tron):
                 tron=finalise_tron(c_strike=at_strike,p_strike=at_strike,tron=tron)
                 c_strike=at_strike
                 p_strike=at_strike
-    exclusive_strike=(c_strike==p_strike)*at_strike
+                exclusive_strike=(c_strike==p_strike)*at_strike
     return exclusive_strike,c_strike,p_strike,tron
 
 def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
@@ -440,6 +441,7 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
     return ptron,ctron
 
 def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     f1=4.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
     A=f1*f2
     if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>921:
@@ -458,6 +460,15 @@ def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
                 break
         return 1
     return 0
+
+def chameleon_initial_trades():
+    maximum_effort=int(prime_client['login'].margin()[0]['AvailableMargin']/30000)
+    exclusive_strike=int(np.round((x)/100)*100)
+    c1=exclusive_strike+100
+    p1=exclusive_strike-100
+    p1,p_yet_to_place=order_button(p1,'PE_B',maximum_effort)
+    c1,c_yet_to_place=order_button(c1,'CE_B',maximum_effort)
+    return maximum_effort
 
 def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal):
     def good_to_go(prev_x,x):
@@ -490,11 +501,13 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
     if chameleon_signal==1:
         if chameleon_start==0:
             if good_to_go(x=x,prev_x=prev_x)>0:
+                tron=chameleon_initial_trades()
                 exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S',tron)
                 tron=tron-lots_drop(int(np.round(x/50)*50),'PE_S',yet_to_place)
                 chameleon_start=1
                 side='PE_S'
             if good_to_go(x=x,prev_x=prev_x)<0:
+                tron=chameleon_initial_trades()
                 exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'CE_S',tron)
                 tron=tron-lots_drop(int(np.round(x/50)*50),'CE_S',yet_to_place)
                 chameleon_start=1
@@ -573,7 +586,7 @@ if start==0:
 
 while True:
     option_chain,x,m=data(week=0)
-    exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x,c_strike,p_strike,tron)
+    exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron)
     exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal)
     chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal)
     shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
