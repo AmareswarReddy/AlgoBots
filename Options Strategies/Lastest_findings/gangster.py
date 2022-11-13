@@ -183,7 +183,7 @@ def finalise_tron(p_strike,c_strike,tron):
 def initial_strangle_trades(option_chain,x,tron):
     exclusive_strike=int(np.round((x)/100)*100)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
-    factor=2*int(np.ceil(f/100)*100)
+    factor=float(1.5+np.random.rand(1)/2)*int(np.ceil(f/100)*100)
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
     tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron)
