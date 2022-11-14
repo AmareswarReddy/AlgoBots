@@ -472,8 +472,8 @@ def chameleon_initial_trades():
 
 def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal):
     def good_to_go(prev_x,x):
-        a=np.floor(prev_x/50)
-        b=np.floor(x/50)
+        a=np.floor(prev_x/100)
+        b=np.floor(x/100)
         if a>b:
             return -1
         elif a<b:
@@ -482,7 +482,7 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
             return 0
 
     def change_of_strike(earlier_x,x):
-        a=(x-earlier_x)/50
+        a=(x-earlier_x)/100
         return a
     
     def side_switch(earlier_x,x,side):
@@ -502,14 +502,14 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
         if chameleon_start==0:
             if good_to_go(x=x,prev_x=prev_x)>0:
                 tron=chameleon_initial_trades()
-                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S',tron)
-                tron=tron-lots_drop(int(np.round(x/50)*50),'PE_S',yet_to_place)
+                exclusive_strike,yet_to_place=order_button(int(np.round(x/100)*100),'PE_S',tron)
+                tron=tron-lots_drop(int(np.round(x/100)*100),'PE_S',yet_to_place)
                 chameleon_start=1
                 side='PE_S'
             if good_to_go(x=x,prev_x=prev_x)<0:
                 tron=chameleon_initial_trades()
-                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'CE_S',tron)
-                tron=tron-lots_drop(int(np.round(x/50)*50),'CE_S',yet_to_place)
+                exclusive_strike,yet_to_place=order_button(int(np.round(x/100)*100),'CE_S',tron)
+                tron=tron-lots_drop(int(np.round(x/100)*100),'CE_S',yet_to_place)
                 chameleon_start=1
                 side='CE_S'
         if chameleon_start==1:
@@ -521,8 +521,8 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
                     if later_margin>earlier_margin:
                         break
                 tron=tron+1
-                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S',tron)
-                tron=tron-lots_drop(int(np.round(x/50)*50),'PE_S',yet_to_place)
+                exclusive_strike,yet_to_place=order_button(int(np.round(x/100)*100),'PE_S',tron)
+                tron=tron-lots_drop(int(np.round(x/100)*100),'PE_S',yet_to_place)
                 side='PE_S'
             if change_of_strike(earlier_x=exclusive_strike,x=x)<-1:
                 earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
@@ -532,8 +532,8 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
                     if later_margin>earlier_margin:
                         break
                 tron=tron+1
-                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'CE_S',tron)
-                tron=tron-lots_drop(int(np.round(x/50)*50),'CE_S',yet_to_place)
+                exclusive_strike,yet_to_place=order_button(int(np.round(x/100)*100),'CE_S',tron)
+                tron=tron-lots_drop(int(np.round(x/100)*100),'CE_S',yet_to_place)
                 side='CE_S'
             side_=side_switch(earlier_x=exclusive_strike,x=x,side=side)
             if side_!=side:
@@ -545,8 +545,8 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
                         if later_margin>earlier_margin:
                             break
                     tron+=1
-                    exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),side_,tron)
-                    tron=tron-lots_drop(int(np.round(x/50)*50),side_,yet_to_place)
+                    exclusive_strike,yet_to_place=order_button(int(np.round(x/100)*100),side_,tron)
+                    tron=tron-lots_drop(int(np.round(x/100)*100),side_,yet_to_place)
                 if side=='PE_S':
                     earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
                     order_button(exclusive_strike,'PE_B',tron)
@@ -555,8 +555,8 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
                         if later_margin>earlier_margin:
                             break
                     tron+=1
-                    exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),side_,tron)
-                    tron=tron-lots_drop(int(np.round(x/50)*50),side_,yet_to_place)
+                    exclusive_strike,yet_to_place=order_button(int(np.round(x/100)*100),side_,tron)
+                    tron=tron-lots_drop(int(np.round(x/100)*100),side_,yet_to_place)
                 side=side_
         prev_x=x
     return chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal
