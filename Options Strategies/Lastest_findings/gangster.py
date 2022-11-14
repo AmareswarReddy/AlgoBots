@@ -246,6 +246,10 @@ def exit_trades(exclusive_strike,tron):
     order_button(exclusive_strike,'PE_B',tron)
     order_button(exclusive_strike,'CE_B',tron)   
 
+def to_exit_at_start(strike,call_lots_bought,put_lots_bought):
+    order_button(strike,'PE_S',put_lots_bought)
+    order_button(strike,'CE_S',call_lots_bought)  
+
 def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
     if exclusive_strike!=0 and chameleon_signal==0:
         def exclusive_strike_change_signal(earlier_x,x):
@@ -564,6 +568,7 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
 #variables to be initialised
 tron=int(input('Lots to Sell (Eg 3) :'))
 start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
+overnight_safety=int(input('enter 0 if no overnight trades were taken else 1 :  '))
 client_name = input('enter the client name: ')
 prime_client=client_login(client=client_name)
 option_chain,x,kiki=data(week=0)
@@ -571,6 +576,10 @@ prev_x=x+kiki
 f2=opening_average()
 chameleon_signal=0
 chameleon_start,side,side_=0,'',''
+if overnight_safety==1:
+    strike=int(input('enter the strike at which overnight safety trades were taken: '))
+    call_lots_bought=int(input('enter the no. of call lots bought for safety: '))
+    put_lots_bought=int(input('enter the no. of puts lots bought for safety: '))
 if start==1:
     c_strike=int(input('enter call strike :  '))
     p_strike=int(input('enter put strike :  '))
@@ -584,6 +593,9 @@ if start==0:
     exclusive_strike,c_strike,p_strike=0,0,0
     tron,c_strike,p_strike=initial_strangle_trades(option_chain,x,tron)
 
+if overnight_safety==1:
+    to_exit_at_start(strike,call_lots_bought,put_lots_bought)
+    
 while True:
     option_chain,x,m=data(week=0)
     exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron)
