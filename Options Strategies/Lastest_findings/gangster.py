@@ -590,6 +590,6 @@ while True:
     exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal)
     chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal)
     shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
-    exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(c_strike,p_strike,x,tron)
+    exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron)
     if is_t_special==1 or shoot==1:
         break
