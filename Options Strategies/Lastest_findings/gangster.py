@@ -184,6 +184,7 @@ def initial_strangle_trades(option_chain,x,tron):
     exclusive_strike=int(np.round((x)/100)*100)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
     factor=float(1.5+np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=int(np.round((factor)/100)*100)
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
     tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron)
@@ -605,3 +606,5 @@ while True:
     exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron)
     if is_t_special==1 or shoot==1:
         break
+
+# %%
