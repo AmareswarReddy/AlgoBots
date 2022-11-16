@@ -382,7 +382,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                         c_strike,yet_to_place=order_button(at_strike,'CE_S',tron)
                     if yet_to_place==0:
                         break
-                exclusive_strike=at_strike
+                exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
             elif at_strike!=p_strike and at_strike==c_strike:
                 while True:
                     strike,yet_to_place=order_button(p_strike,'PE_B',tron)
@@ -400,7 +400,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                         p_strike,yet_to_place=order_button(at_strike,'PE_S',tron)
                     if yet_to_place==0:
                         break
-                exclusive_strike=at_strike
+                exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
             elif at_strike!=p_strike and at_strike!=c_strike:
                 k,y1=order_button(p_strike,'PE_B',tron)
                 while True:
