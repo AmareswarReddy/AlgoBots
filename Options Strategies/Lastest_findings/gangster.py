@@ -382,6 +382,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                         c_strike,yet_to_place=order_button(at_strike,'CE_S',tron)
                     if yet_to_place==0:
                         break
+                exclusive_strike=at_strike
             elif at_strike!=p_strike and at_strike==c_strike:
                 while True:
                     strike,yet_to_place=order_button(p_strike,'PE_B',tron)
@@ -399,6 +400,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                         p_strike,yet_to_place=order_button(at_strike,'PE_S',tron)
                     if yet_to_place==0:
                         break
+                exclusive_strike=at_strike
             elif at_strike!=p_strike and at_strike!=c_strike:
                 k,y1=order_button(p_strike,'PE_B',tron)
                 while True:
@@ -485,11 +487,9 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
             return 1
         else:
             return 0
-
     def change_of_strike(earlier_x,x):
         a=(x-earlier_x)/100
         return a
-    
     def side_switch(earlier_x,x,side):
         a=(x-earlier_x)
         if a>0 and side=='CE_S':
@@ -502,7 +502,6 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
             return 'PE_B'
         else:
             return side
-
     if chameleon_signal==1:
         if chameleon_start==0:
             if good_to_go(x=x,prev_x=prev_x)>0:
@@ -608,3 +607,41 @@ while True:
         break
 
 # %%
+def get_strike_from_scrip(scripcode):
+    option_chain,a1,a2=data(weeek=0)
+    k1=option_chain[option_chain['ScripCode']==scripcode]
+    return int(k1['StrikeRate']),k1['CPType'].iloc[0]
+
+def positions_store():
+    json_store1={'strangle':[]}
+    json_store2={'overnight_safety_trades':[]}
+    a=pd.DataFrame(prime_client['login'].positions())
+    s_p=a[a['NetQty']<0]
+    b_p=a[a['NetQty']>0]
+    s_p_tron1=-(s_p['NetQty'][0]/25)
+    s_p_tron2=-(s_p['NetQty'][1]/25)
+    b_p_strike1,b_type1=get_strike_from_scrip(b_p.iloc[0]['ScripCode'])
+    b_p_strike2,b_type2=get_strike_from_scrip(b_p.iloc[1]['ScripCode'])
+    if len(s_p)==2 and s_p_tron1==s_p_tron2 :
+        s_p_strike1,type1=get_strike_from_scrip(s_p.iloc[0]['ScripCode'])
+        s_p_strike2,type2=get_strike_from_scrip(s_p.iloc[1]['ScripCode'])
+        if type1=='PE' and type2=='CE':
+            call_strike,put_strike=s_p_strike2,s_p_strike1
+        elif type1=='CE' and type2=='PE':
+            call_strike,put_strike=s_p_strike1,s_p_strike2
+        json_store1= {'strangle':[call_strike,put_strike,s_p_tron1]}
+    if len(b_p)<=2 and b_p_strike1==b_p_strike2:
+        b_p_tron1=(b_p['NetQty'][0]/25)
+        b_p_tron2=(b_p['NetQty'][1]/25)
+        if b_type1=='PE' and b_type2=='CE':
+            call_tron,put_tron=b_p_tron2,b_p_tron1
+        elif b_type1=='PE' and b_type2=='CE':
+            call_tron,put_tron=b_p_tron1,b_p_tron2
+        json_store2={'overnight_safety_trades':[strike,call_tron,put_tron]}
+    
+    #{strangle:[call_strike,put_strike,tron],
+    # overnight_safety_trades:[strike,call_tron,put_tron],
+    # leg1_trades:[exclusive_strike,call_strike,put_strike,tron]}
+
+
+
