@@ -451,7 +451,7 @@ def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     f1=4.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
     A=f1*f2
-    if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>921:
+    if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>921 and c_strike!=p_strike:
         ptron,ctron=overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A)
         k,y1=order_button(exclusive_strike,'PE_B',ptron)
         while True:
@@ -586,7 +586,7 @@ if start==1:
     exclusive_strike=int((c_strike==p_strike)*c_strike)
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
+while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>1085 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 if start==0:
     option_chain,x,m=data(week=0)
