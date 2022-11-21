@@ -445,14 +445,14 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
         return [ss]
     xopt,fopt=pso(objective_function,[0,0],[tron-1+(tron==1),tron-1+(tron==1)],f_ieqcons=constraints,swarmsize=10000,maxiter=10000)
     ptron,ctron=int(xopt[0]),int(xopt[1])
-    return ptron,ctron
+    return ptron,ctron,exclusive_strike
 
 def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     f1=4.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
     A=f1*f2
     if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>921 and c_strike!=p_strike:
-        ptron,ctron=overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A)
+        ptron,ctron,exclusive_strike=overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A)
         k,y1=order_button(exclusive_strike,'PE_B',ptron)
         while True:
             if y1!=0:
@@ -600,7 +600,7 @@ while True:
     option_chain,x,m=data(week=0)
     exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron)
     exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal)
-    chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal)
+    chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x-m,tron,chameleon_signal)
     shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
     exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron)
     if is_t_special==1 or shoot==1:
