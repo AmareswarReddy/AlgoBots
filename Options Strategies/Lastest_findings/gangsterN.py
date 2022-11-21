@@ -183,7 +183,7 @@ def finalise_tron(p_strike,c_strike,tron):
 def initial_strangle_trades(option_chain,x,tron):
     exclusive_strike=int(np.round((x)/50)*50)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/50)*50)]['LastRate'])
-    factor=float(1.5+np.random.rand(1)/2)*int(np.ceil(f/50)*50)
+    factor=float(1.3+1.1*np.random.rand(1)/2)*int(np.ceil(f/50)*50)
     factor=int(np.round((factor)/50)*50)
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
@@ -443,16 +443,16 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
         ctron=parameters[1]
         ss=tron*(p_lastrate+c_lastrate)-ptron*p_e_lastrate-ctron*c_e_lastrate
         return [ss]
-    xopt,fopt=pso(objective_function,[0,0],[tron-1+(tron==1),tron-1+(tron==1)],f_ieqcons=constraints,swarmsize=10000,maxiter=10000)
+    xopt,fopt=pso(objective_function,[0,0],[tron-1+(tron==1),tron-1+(tron==1)],f_ieqcons=constraints,swarmsize=5000,maxiter=5000)
     ptron,ctron=int(xopt[0]),int(xopt[1])
-    return ptron,ctron
+    return ptron,ctron,exclusive_strike
 
 def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     f1=4.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
     A=f1*f2
     if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>921 and c_strike!=p_strike:
-        ptron,ctron=overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A)
+        ptron,ctron,exclusive_strike=overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A)
         k,y1=order_button(exclusive_strike,'PE_B',ptron)
         while True:
             if y1!=0:
