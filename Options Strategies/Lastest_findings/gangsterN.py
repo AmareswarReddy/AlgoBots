@@ -563,7 +563,7 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
                     tron=tron-lots_drop(int(np.round(x/50)*50),side_,yet_to_place)
                 side=side_
         prev_x=x
-    return chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal
+    return chameleon_start,exclusive_strike,side,side_,prev_x,tron,chameleon_signal
 #%%
 #variables to be initialised
 tron=int(input('Lots to Sell (Eg 3) :'))
@@ -595,12 +595,12 @@ if start==0:
 
 if overnight_safety==1:
     to_exit_at_start(strike,call_lots_bought,put_lots_bought)
-    
+#%%
 while True:
     option_chain,x,m=data(week=0)
     exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron)
     exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal)
-    chameleon_start,exclusive_strike,side,side_,prev_x,x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x-m,tron,chameleon_signal)
+    chameleon_start,exclusive_strike,side,side_,prev_x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x-m,tron,chameleon_signal)
     shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
     exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron)
     if is_t_special==1 or shoot==1:
