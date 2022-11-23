@@ -308,10 +308,10 @@ def day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron):
                     k,y1=order_button(p_strike,'PE_B',tron)
                 if y1==0:
                     break
-            k,y1=order_button(p_strike,'CE_B',tron)
+            k,y1=order_button(c_strike,'CE_B',tron)
             while True:
                 if y1!=0:
-                    k,y1=order_button(p_strike,'CE_B',tron)
+                    k,y1=order_button(c_strike,'CE_B',tron)
                 if y1==0:
                     break
             return exclusive_strike,c_strike,p_strike,1
@@ -598,11 +598,11 @@ if overnight_safety==1:
 #%%
 while True:
     option_chain,x,m=data(week=0)
-    exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron)
-    exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal)
+    exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x-m,exclusive_strike,c_strike,p_strike,tron)
+    exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x-m,tron,chameleon_signal)
     chameleon_start,exclusive_strike,side,side_,prev_x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x-m,tron,chameleon_signal)
     shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
-    exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron)
+    exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x-m,tron)
     if is_t_special==1 or shoot==1:
         break
 
