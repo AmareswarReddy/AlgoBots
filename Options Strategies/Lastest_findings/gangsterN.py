@@ -254,7 +254,7 @@ def to_exit_at_start(strike,call_lots_bought,put_lots_bought):
 def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
     if exclusive_strike!=0 and chameleon_signal==0:
         def exclusive_strike_change_signal(earlier_x,x):
-            a=(x-earlier_x)/50
+            a=(x-earlier_x)/33
             return abs(a)
         def exclusive_strike_change_trades(exclusive_strike,x,tron):
             k,y1=order_button(exclusive_strike,'PE_B',tron)
