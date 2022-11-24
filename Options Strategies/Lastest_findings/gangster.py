@@ -341,7 +341,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     p_strike,yet_to_place=order_button(2*at_strike-c_strike,'PE_S',tron)
                 if yet_to_place==0:
                     break
-
+            exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
         if p_lastrate/c_lastrate>2.13 and (2*at_strike-p_strike)<c_strike:
             while True:
                 strike,yet_to_place=order_button(c_strike,'CE_B',tron)
@@ -360,7 +360,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     c_strike,yet_to_place=order_button(2*at_strike-p_strike,'CE_S',tron)
                 if yet_to_place==0:
                     break
-                
+            exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
         if x>=c_strike or x<=p_strike:
             at_strike=int(np.round((x)/100)*100)
             if at_strike==p_strike and at_strike==c_strike:
@@ -415,9 +415,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     if y1==0:
                         break
                 tron=finalise_tron(c_strike=at_strike,p_strike=at_strike,tron=tron)
-                c_strike=at_strike
-                p_strike=at_strike
-                exclusive_strike=(c_strike==p_strike)*at_strike
+                exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
     return exclusive_strike,c_strike,p_strike,tron
 
 def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
