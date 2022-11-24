@@ -76,29 +76,18 @@ def pnl_graph(positions,option_chain,lastrate):
     x=np.linspace(min(a)-500,max(a)+500,int((max(a)-min(a)+1000)/100)+1)
     y1=np.zeros(len(x))
     for i in range(0,len(positions)):
-        y1+=np.array(y_axis(x,positions[i],option_chain))
-        
+        y1+=np.array(y_axis(x,positions[i],option_chain))  
     return x,y1
 
 
 #%%
 #variables to be initialised
 client_name = 'harish'
-tron=int(input('enter the number of lots for trading (Eg 3):'))
-buy_tron=int(tron*1.3)
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","BANKNIFTY",current_expiry_time_stamp_weekly)['Options'])
 prev_x=expiry_timestamps['lastrate'][0]['LTP']
-start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
-if start==1:
-    exclusive_strike=int(input('enter exclusive strike :  '))
-    c_strike=int(input('enter call strike buyside :  '))
-    p_strike=int(input('enter put strike buyside :  '))
-elif start==0:
-    option_chain,x=data()
-    exclusive_strike,c_strike,p_strike=0,0,0
 #%%
 def get_strike_from_scrip(scripcode,exchange):
     option_chain,a1=data(exchange)
