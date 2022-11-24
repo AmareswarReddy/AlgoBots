@@ -239,7 +239,7 @@ def data(week):
 
 def exit_signal(option_chain,exclusive_strike):
     temp=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
-    if temp<45:
+    if temp<25:
         return 1
     else:
         return 0
