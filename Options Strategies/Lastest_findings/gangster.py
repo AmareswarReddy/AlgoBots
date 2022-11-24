@@ -33,6 +33,7 @@ def client_login(client):
 #client_name=input('enter the client name Eg: vinathi,bhaskar '
 
 def order_button(exclusive_strike,type,lots):
+    sleep(0.5)
     exchange='BANKNIFTY'
     lot_size=25
     max_lots_per_order=48
@@ -279,6 +280,43 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
             chameleon_signal=1
     return exclusive_strike,tron,chameleon_signal
 
+def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg):
+    if exclusive_strike!=0 and leg==1:
+        def exclusive_strike_change_signal(earlier_x,x):
+            a=(x-earlier_x)/66
+            return abs(a)
+        def exclusive_strike_change_trades(exclusive_strike,x,tron):
+            k,y1=order_button(exclusive_strike,'PE_B',tron)
+            while True:
+                if y1!=0:
+                    k,y1=order_button(exclusive_strike,'PE_B',tron)
+                if y1==0:
+                    break
+            k,y1=order_button(exclusive_strike,'CE_B',tron)
+            while True:
+                if y1!=0:
+                    k,y1=order_button(exclusive_strike,'CE_B',tron)
+                if y1==0:
+                    break
+            exclusive_strike=int(np.round((x)/100)*100)
+            tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron)
+            return exclusive_strike,tron
+        if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
+            exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
+        if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
+            exit_trades(exclusive_strike,tron)   
+        if (c_strike_b-x)/(x-p_strike_b)>10:
+            at_strike=int(np.round((x)/100)*100)
+            order_button(2*at_strike-p_strike_b,'CE_B',tron)
+            order_button(c_strike_b,'CE_S',tron)
+            c_strike_b=2*at_strike-p_strike_b
+        if (c_strike_b-x)/(x-p_strike_b)<0.1:
+            at_strike=int(np.round((x)/100)*100)
+            order_button(2*at_strike-c_strike_b,'PE_B',tron)
+            order_button(p_strike_b,'PE_S',tron)
+            p_strike_b=2*at_strike-c_strike_b
+    return exclusive_strike,c_strike_b,p_strike_b,tron
+
 def day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     if datetime.today().weekday()!=3 and int(ind_time[11:13])*60+int(ind_time[14:16])>926:
@@ -315,6 +353,7 @@ def day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron):
                 if y1==0:
                     break
             return exclusive_strike,c_strike,p_strike,1
+        seller_tron,sell_c_strike,sell_p_strike=initial_strangle_trades(option_chain,x,tron)
     return exclusive_strike,c_strike,p_strike,0
 
 def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
