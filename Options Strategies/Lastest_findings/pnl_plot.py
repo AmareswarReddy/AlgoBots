@@ -71,18 +71,22 @@ def y_axis(x,single_position,option_chain):
     return y
 
 def pnl_graph(positions,option_chain,lastrate):
-    k=pd.DataFrame(positions)
-    a=np.array(k.iloc[0])
-    x=np.linspace(min(a)-500,max(a)+500,int((max(a)-min(a)+1000)/100)+1)
-    y1=np.zeros(len(x))
-    for i in range(0,len(positions)):
-        y1+=np.array(y_axis(x,positions[i],option_chain))  
+    try:
+        k=pd.DataFrame(positions)
+        a=np.array(k.iloc[0])
+        x=np.linspace(min(a)-500,max(a)+500,int((max(a)-min(a)+1000)/100)+1)
+        y1=np.zeros(len(x))
+        for i in range(0,len(positions)):
+            y1+=np.array(y_axis(x,positions[i],option_chain))  
+    except Exception:
+        x=[0]
+        y1=[0]
     return x,y1
 
 
 #%%
 #variables to be initialised
-client_name = 'harish'
+client_name = 'rohit'
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -92,7 +96,7 @@ prev_x=expiry_timestamps['lastrate'][0]['LTP']
 def get_strike_from_scrip(scripcode,exchange):
     option_chain,a1=data(exchange)
     k1=option_chain[option_chain['ScripCode']==scripcode]
-    return int(k1['StrikeRate']),k1['CPType'].iloc[0]
+    return int(k1['StrikeRate'])
 while True:
     Noption_chain,Nx=data('NIFTY') 
     Boption_chain,Bx=data('BANKNIFTY') 
@@ -121,8 +125,10 @@ while True:
                 type_='PE_B'
             banknifty_positions=add_position(banknifty_positions,get_strike_from_scrip(S['ScripCode'].iloc[i],'BANKNIFTY'),type_,abs(S['NetQty'].iloc[i]))
     x1,y1=pnl_graph(nifty_positions,Noption_chain,Nx)
-    x2,y2=pnl_graph(nifty_positions,Boption_chain,Bx)
+    x2,y2=pnl_graph(banknifty_positions,Boption_chain,Bx)
     plt.plot(x1,y1)
     plt.show()
     plt.plot(x2,y2)
     plt.show()
+
+# %%
