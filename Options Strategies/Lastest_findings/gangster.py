@@ -380,7 +380,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     p_strike,yet_to_place=order_button(2*at_strike-c_strike,'PE_S',tron)
                 if yet_to_place==0:
                     break
-            exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
+            exclusive_strike=(c_strike==p_strike)*c_strike
         if p_lastrate/c_lastrate>2.13 and (2*at_strike-p_strike)<c_strike:
             while True:
                 strike,yet_to_place=order_button(c_strike,'CE_B',tron)
@@ -399,7 +399,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     c_strike,yet_to_place=order_button(2*at_strike-p_strike,'CE_S',tron)
                 if yet_to_place==0:
                     break
-            exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
+            exclusive_strike=(c_strike==p_strike)*c_strike
         if x>=c_strike or x<=p_strike:
             at_strike=int(np.round((x)/100)*100)
             if at_strike==p_strike and at_strike==c_strike:
@@ -609,7 +609,7 @@ overnight_safety=int(input('enter 0 if no overnight trades were taken else 1 :  
 client_name = input('enter the client name: ')
 prime_client=client_login(client=client_name)
 option_chain,x,kiki=data(week=0)
-prev_x=x+kiki
+prev_x=x-kiki
 f2=opening_average()
 chameleon_signal=0
 chameleon_start,side,side_=0,'',''
