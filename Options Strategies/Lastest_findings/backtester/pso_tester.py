@@ -4,29 +4,21 @@ import numpy as np
 import pandas as pd
 import json
 from pyswarm import pso
+import os
+from numba import njit
 #data import
-f=open('4_08.json')
-f1=open('2_08.json')
-f2=open('1_15.json')
-f3=open('3_08.json')
-f4=open('4_15.json')
-f5=open('0_15.json')
-f6=open('1_08.json')
-f7=open('4_22.json')
-f8=open('3_15.json')
-
-day1_data=pd.DataFrame(json.load(f))
-day2_data=pd.DataFrame(json.load(f1))
-day3_data=pd.DataFrame(json.load(f2))
-day4_data=pd.DataFrame(json.load(f3))
-day5_data=pd.DataFrame(json.load(f4))
-day6_data=pd.DataFrame(json.load(f5))
-day7_data=pd.DataFrame(json.load(f6))
-day8_data=pd.DataFrame(json.load(f7))
-day9_data=pd.DataFrame(json.load(f8))
-
-train_data=[day7_data,day5_data,day3_data,day4_data,day5_data,day6_data,day7_data,day8_data,day9_data]
+list_of_data=os.listdir()
+train_data=[]
+test_data=[]
+for file_name in list_of_data:
+    if 'json' in file_name:
+        if np.random.rand()<0.95:
+            train_data=train_data+[pd.DataFrame(json.load(open(file_name)))]
+        else:
+            test_data=test_data+[pd.DataFrame(json.load(open(file_name)))]
+#%%
 #model
+@njit
 def pnl(data):
     b=list(data['indicator']>0)+[0]
     b[0]=0
@@ -38,6 +30,7 @@ def pnl(data):
     net_pnl=np.dot(buyer,np.array(data['lastrate']))+np.dot(seller,np.array(data['lastrate']))-trades*5
     return net_pnl
 
+@njit
 def indicator(w11,w12,w13,w14,c11,c12,c13,c14,outw11,outw12,outw13,outw14,outc11,outw21,outw22,outw23,outw24,outc21,data):
     #layer1
     A1=np.tanh(w11*data['hightime']+c11)
@@ -53,6 +46,7 @@ def indicator(w11,w12,w13,w14,c11,c12,c13,c14,outw11,outw12,outw13,outw14,outc11
     return data
 
 # loss function
+@njit
 def lossfunc(x):
     # define data
     net_profit=0
@@ -66,14 +60,12 @@ def lossfunc(x):
 # optimisation
 lb=[-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5]
 ub=list(np.array(lb)+10)
-xopt,fopt=pso(lossfunc,lb,ub,maxiter=100,swarmsize=100)
+xopt,fopt=pso(lossfunc,lb,ub,maxiter=100,swarmsize=500)
 
 #%%
 #cross check plots
-f=open('2_15.json')
-data_1=pd.DataFrame(json.load(f))
-test_data=[data_1]
 fopt_test=[]
+@njit
 def lossfunc_test(x):
     net_profit=0
     # define data
