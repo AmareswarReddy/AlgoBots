@@ -14,7 +14,7 @@ from pytz import timezone
 from cred import *
 from py5paisa.order import Basket_order
 from pyswarm import pso
-
+from itertools import permutations
 def client_login(client):
     import json
     f = open ('credentials.json', "r")
@@ -252,27 +252,28 @@ def to_exit_at_start(strike,call_lots_bought,put_lots_bought):
     order_button(strike,'PE_S',put_lots_bought)
     order_button(strike,'CE_S',call_lots_bought)  
 
+def exclusive_strike_change_trades(exclusive_strike,x,tron):
+    k,y1=order_button(exclusive_strike,'PE_B',tron)
+    while True:
+        if y1!=0:
+            k,y1=order_button(exclusive_strike,'PE_B',tron)
+        if y1==0:
+            break
+    k,y1=order_button(exclusive_strike,'CE_B',tron)
+    while True:
+        if y1!=0:
+            k,y1=order_button(exclusive_strike,'CE_B',tron)
+        if y1==0:
+            break
+    exclusive_strike=int(np.round((x)/50)*50)
+    tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron)
+    return exclusive_strike,tron
+
 def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
     if exclusive_strike!=0 and chameleon_signal==0:
         def exclusive_strike_change_signal(earlier_x,x):
             a=(x-earlier_x)/33
             return abs(a)
-        def exclusive_strike_change_trades(exclusive_strike,x,tron):
-            k,y1=order_button(exclusive_strike,'PE_B',tron)
-            while True:
-                if y1!=0:
-                    k,y1=order_button(exclusive_strike,'PE_B',tron)
-                if y1==0:
-                    break
-            k,y1=order_button(exclusive_strike,'CE_B',tron)
-            while True:
-                if y1!=0:
-                    k,y1=order_button(exclusive_strike,'CE_B',tron)
-                if y1==0:
-                    break
-            exclusive_strike=int(np.round((x)/50)*50)
-            tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron)
-            return exclusive_strike,tron
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
@@ -285,36 +286,22 @@ def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg):
         def exclusive_strike_change_signal(earlier_x,x):
             a=(x-earlier_x)/33
             return abs(a)
-        def exclusive_strike_change_trades(exclusive_strike,x,tron):
-            k,y1=order_button(exclusive_strike,'PE_B',tron)
-            while True:
-                if y1!=0:
-                    k,y1=order_button(exclusive_strike,'PE_B',tron)
-                if y1==0:
-                    break
-            k,y1=order_button(exclusive_strike,'CE_B',tron)
-            while True:
-                if y1!=0:
-                    k,y1=order_button(exclusive_strike,'CE_B',tron)
-                if y1==0:
-                    break
-            exclusive_strike=int(np.round((x)/50)*50)
-            tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron)
-            return exclusive_strike,tron
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)   
-        if (c_strike_b-x)/(x-p_strike_b)>10:
+        if (c_strike_b-x)<10:
             at_strike=int(np.round((x)/50)*50)
-            order_button(2*at_strike-p_strike_b,'CE_B',tron)
-            order_button(c_strike_b,'CE_S',tron)
-            c_strike_b=2*at_strike-p_strike_b
-        if (c_strike_b-x)/(x-p_strike_b)<0.1:
+            k,j=order_button(2*at_strike-p_strike_b,'CE_B',tron)
+            if j==0:
+                order_button(c_strike_b,'CE_S',tron)
+                c_strike_b=k
+        if x-p_strike_b<10:
             at_strike=int(np.round((x)/50)*50)
-            order_button(2*at_strike-c_strike_b,'PE_B',tron)
-            order_button(p_strike_b,'PE_S',tron)
-            p_strike_b=2*at_strike-c_strike_b
+            k,j=order_button(2*at_strike-c_strike_b,'PE_B',tron)
+            if j==0:
+                order_button(p_strike_b,'PE_S',tron)
+                p_strike_b=2*at_strike-c_strike_b
     return exclusive_strike,c_strike_b,p_strike_b,tron
 
 def day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron):
@@ -353,8 +340,8 @@ def day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron):
                 if y1==0:
                     break
             seller_tron,sell_c_strike,sell_p_strike=initial_strangle_trades(option_chain,x,tron)
-            return exclusive_strike,c_strike,p_strike,1
-    return exclusive_strike,c_strike,p_strike,0
+            return tron,exclusive_strike,c_strike,p_strike,1,[seller_tron,sell_c_strike,sell_p_strike]
+    return tron,exclusive_strike,c_strike,p_strike,0,[0,0,0]
 
 def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
     if c_strike!=p_strike:
@@ -466,24 +453,18 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
     p_lastrate=int(pe_data[pe_data['StrikeRate']==p_strike]['LastRate'])
     c_e_lastrate=int(ce_data[ce_data['StrikeRate']==exclusive_strike]['LastRate'])
     p_e_lastrate=int(pe_data[pe_data['StrikeRate']==exclusive_strike]['LastRate'])
-    def breakeven_finder(ptron,ctron):
-        call_breakeven=(ctron*(exclusive_strike+c_e_lastrate)-tron*(c_strike+c_lastrate+p_lastrate)+ptron*(p_e_lastrate))/(ctron-tron)
-        put_breakeven=(ptron*(p_e_lastrate-exclusive_strike)+tron*(p_strike-p_lastrate-c_lastrate)+ctron*c_e_lastrate)/(tron-ptron)
-        return put_breakeven,call_breakeven
-    def objective_function(parameters):
-        ptron=parameters[0]
-        ctron=parameters[1]
-        put_breakeven,call_breakeven=breakeven_finder(ptron,ctron)
-        return ((exclusive_strike-put_breakeven-A)*(exclusive_strike-put_breakeven-A))+((call_breakeven-exclusive_strike-A)*(call_breakeven-exclusive_strike-A))
-    def constraints(parameters):
-        ptron=parameters[0]
-        ctron=parameters[1]
-        ss=tron*(p_lastrate+c_lastrate)-ptron*p_e_lastrate-ctron*c_e_lastrate
-        return [ss]
-    xopt,fopt=pso(objective_function,[0,0],[tron-1+(tron==1),tron-1+(tron==1)],f_ieqcons=constraints,swarmsize=5000,maxiter=5000)
-    ptron,ctron=int(xopt[0]),int(xopt[1])
-    return ptron,ctron,exclusive_strike
-
+    def optimisation():
+        kk=pd.DataFrame(permutations(np.linspace(0,tron-1,tron),2))
+        kk[2]=tron*(p_lastrate+c_lastrate)-kk[0]*p_e_lastrate-kk[1]*c_e_lastrate
+        to_check=kk[kk[2]>=0]
+        call_breakeven=(to_check[1]*(exclusive_strike+c_e_lastrate)-tron*(c_strike+c_lastrate+p_lastrate)+to_check[0]*(p_e_lastrate))/(to_check[1]-tron)
+        put_breakeven=(to_check[0]*(p_e_lastrate-exclusive_strike)+tron*(p_strike-p_lastrate-c_lastrate)+to_check[1]*c_e_lastrate)/(tron-to_check[0])
+        to_optimise=((exclusive_strike-put_breakeven-A)*(exclusive_strike-put_breakeven-A))+((call_breakeven-exclusive_strike-A)*(call_breakeven-exclusive_strike-A))
+        indexer=np.argmin(to_optimise)
+        return np.array(to_check[0])[indexer],np.array(to_check[1])[indexer]
+    ptron,ctron=optimisation()
+    return int(ptron),int(ctron),exclusive_strike
+    
 def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     f1=4.2-(1+datetime.today().weekday()-5*(datetime.today().weekday()==4))
@@ -502,8 +483,28 @@ def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
                 k,y1=order_button(exclusive_strike,'CE_B',ctron)
             if y1==0:
                 break
-        return 1
-    return 0
+        return 1,strike,ptron,ctron
+    return 0,0,0,0
+
+def reset_day_leg_trades(positions_json):
+    if positions_json['leg']['exclusive_strike']!=positions_json['day_end_leg']['exclusive_strike']:
+        exclusive_strike,tron=exclusive_strike_change_trades(positions_json['leg']['exclusive_strike'],positions_json['day_end_leg']['exclusive_strike'],positions_json['leg']['tron'])
+        positions_json['leg']['tron']+=tron
+        positions_json['day_end_leg']['tron']=0
+    if positions_json['leg']['call_strike']!=positions_json['day_end_leg']['call_strike']:
+        k,j=order_button(positions_json['leg']['call_strike'],'CE_B',tron)
+        if j==0:
+            order_button(positions_json['day_end_leg']['call_strike'],'CE_S',tron)
+    if positions_json['leg']['put_strike']!=positions_json['day_end_leg']['put_strike']:
+        k,j=order_button(positions_json['leg']['put_strike'],'CE_B',tron)
+        if j==0:
+            order_button(positions_json['day_end_leg']['put_strike'],'CE_S',tron)
+    positions_json['leg']['tron']+=positions_json['day_end_leg']['tron']
+    positions_json['day_end_leg']['tron']=0
+    positions_json['day_end_leg']['exclusive_strike']=0
+    positions_json['day_end_leg']['call_strike']=0
+    positions_json['day_end_leg']['put_strike']=0
+    return positions_json
 
 def chameleon_initial_trades():
     maximum_effort=int(prime_client['login'].margin()[0]['AvailableMargin']/30000)
@@ -603,9 +604,6 @@ def chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x,tron
     return chameleon_start,exclusive_strike,side,side_,prev_x,tron,chameleon_signal
 #%%
 #variables to be initialised
-tron=int(input('Lots to Sell (Eg 3) :'))
-start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
-overnight_safety=int(input('enter 0 if no overnight trades were taken else 1 :  '))
 client_name = input('enter the client name: ')
 prime_client=client_login(client=client_name)
 option_chain,x,kiki=data(week=0)
@@ -613,14 +611,40 @@ prev_x=x-kiki
 f2=opening_average()
 chameleon_signal=0
 chameleon_start,side,side_=0,'',''
-if overnight_safety==1:
-    strike=int(input('enter the strike at which overnight safety trades were taken: '))
-    call_lots_bought=int(input('enter the no. of call lots bought for safety: '))
-    put_lots_bought=int(input('enter the no. of puts lots bought for safety: '))
-if start==1:
-    c_strike=int(input('enter call strike :  '))
-    p_strike=int(input('enter put strike :  '))
+start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
+to_take_from_positions=input('do you wish to take positions from existing json(y/n): ')
+if to_take_from_positions=='y':
+    positions_record=json.load(open(client_name+'_positions.json'))
+    tron=positions_record['strangle']['tron']
+    overnight_safety=(positions_record['overnight_safety']['put_tron']+positions_record['overnight_safety']['call_tron'])!=0
+    leg=(positions_record['leg']['tron']!=0)
+    strike=positions_record['overnight_safety']['exclusive_strike']
+    call_lots_bought=positions_record['overnight_safety']['call_tron']
+    put_lots_bought=positions_record['overnight_safety']['put_tron']
+    c_strike=positions_record['strangle']['call_strike']
+    p_strike=positions_record['strangle']['put_strike']
     exclusive_strike=int((c_strike==p_strike)*c_strike)
+    tron_leg=positions_record['leg']['tron']
+    exclusive_strike_leg=positions_record['leg']['exclusive_strike']
+    c_strike_b=positions_record['leg']['call_strike']
+    p_strike_b=positions_record['leg']['put_strike']
+else:
+    tron=int(input('Lots to Sell (Eg 3) :'))
+    overnight_safety=int(input('enter 0 if no overnight trades were taken else 1 :  '))
+    leg=int(input('enter 0 if no leg trades were taken else 1 :  '))
+    if overnight_safety==1:
+        strike=int(input('enter the strike at which overnight safety trades were taken: '))
+        call_lots_bought=int(input('enter the no. of call lots bought for safety: '))
+        put_lots_bought=int(input('enter the no. of puts lots bought for safety: '))
+    if start==1:
+        c_strike=int(input('enter strangle call strike :  '))
+        p_strike=int(input('enter strangle put strike :  '))
+        exclusive_strike=int((c_strike==p_strike)*c_strike)
+    if leg==1:
+        tron_leg=int(input('Lots for leg (Eg 3) :'))
+        exclusive_strike_leg=int(input('enter leg exclusive strike :  '))
+        c_strike_b=int(input('enter leg call buy strike :  '))
+        p_strike_b=int(input('enter leg put buy strike :  '))
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>1085 :
@@ -637,48 +661,25 @@ while True:
     option_chain,x,m=data(week=0)
     exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x-m,exclusive_strike,c_strike,p_strike,tron)
     exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x-m,tron,chameleon_signal)
+    exclusive_strike_leg,c_strike_b,p_strike_b,tron_leg=leg_adjustments(exclusive_strike_leg,c_strike_b,p_strike_b,x-m,tron_leg,leg)
     chameleon_start,exclusive_strike,side,side_,prev_x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x-m,tron,chameleon_signal)
-    shoot=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
-    exclusive_strike,c_strike_b,p_strike_b,is_t_special=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x-m,tron)
-    if is_t_special==1 or shoot==1:
+    shoot,overnight_exclusive_strike,ptron,ctron=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
+    day_end_tron,day_end_exclusive_strike,day_end_c_strike_b,day_end_p_strike_b,is_t_special,strangle_list=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x-m,tron)
+    if shoot==1:
+        positions_json={'strangle':{'call_strike':c_strike,'put_strike':p_strike,'tron':tron},
+                        'overnight_safety':{'exclusive_strike':overnight_exclusive_strike,'put_tron':ptron,'call_tron':ctron},
+                        'leg':{'exclusive_strike':exclusive_strike_leg,'call_strike':c_strike_b,'put_strike':p_strike_b,'tron':tron_leg},
+                        'day_end_leg':{'exclusive_strike':0,'call_strike':0,'put_strike':0,'tron':0}}
+        break
+    if is_t_special==1:
+        positions_json={'strangle':{'call_strike':strangle_list[1],'put_strike':strangle_list[2],'tron':strangle_list[0]},
+                        'overnight_safety':{'exclusive_strike':0,'put_tron':0,'call_tron':0},
+                        'leg':{'exclusive_strike':exclusive_strike_leg,'call_strike':c_strike_b,'put_strike':p_strike_b,'tron':tron_leg},
+                        'day_end_leg':{'exclusive_strike':day_end_exclusive_strike,'call_strike':day_end_c_strike_b,'put_strike':day_end_p_strike_b,'tron':day_end_tron}}
+        positions_json=reset_day_leg_trades(positions_json)
         break
 
-# %%
-def get_strike_from_scrip(scripcode):
-    option_chain,a1,a2=data(weeek=0)
-    k1=option_chain[option_chain['ScripCode']==scripcode]
-    return int(k1['StrikeRate']),k1['CPType'].iloc[0]
-
-def positions_store():
-    json_store1={'strangle':[]}
-    json_store2={'overnight_safety_trades':[]}
-    a=pd.DataFrame(prime_client['login'].positions())
-    s_p=a[a['NetQty']<0]
-    b_p=a[a['NetQty']>0]
-    s_p_tron1=-(s_p['NetQty'][0]/25)
-    s_p_tron2=-(s_p['NetQty'][1]/25)
-    b_p_strike1,b_type1=get_strike_from_scrip(b_p.iloc[0]['ScripCode'])
-    b_p_strike2,b_type2=get_strike_from_scrip(b_p.iloc[1]['ScripCode'])
-    if len(s_p)==2 and s_p_tron1==s_p_tron2 :
-        s_p_strike1,type1=get_strike_from_scrip(s_p.iloc[0]['ScripCode'])
-        s_p_strike2,type2=get_strike_from_scrip(s_p.iloc[1]['ScripCode'])
-        if type1=='PE' and type2=='CE':
-            call_strike,put_strike=s_p_strike2,s_p_strike1
-        elif type1=='CE' and type2=='PE':
-            call_strike,put_strike=s_p_strike1,s_p_strike2
-        json_store1= {'strangle':[call_strike,put_strike,s_p_tron1]}
-    if len(b_p)<=2 and b_p_strike1==b_p_strike2:
-        b_p_tron1=(b_p['NetQty'][0]/25)
-        b_p_tron2=(b_p['NetQty'][1]/25)
-        if b_type1=='PE' and b_type2=='CE':
-            call_tron,put_tron=b_p_tron2,b_p_tron1
-        elif b_type1=='PE' and b_type2=='CE':
-            call_tron,put_tron=b_p_tron1,b_p_tron2
-        json_store2={'overnight_safety_trades':[strike,call_tron,put_tron]}
-    
-    #{strangle:[call_strike,put_strike,tron],
-    # overnight_safety_trades:[strike,call_tron,put_tron],
-    # leg1_trades:[exclusive_strike,call_strike,put_strike,tron]}
-
-
-
+print(positions_json)
+out_file = open(client_name+'_positions.json', "w")
+json.dump(positions_json, out_file, indent = 6)
+out_file.close()
