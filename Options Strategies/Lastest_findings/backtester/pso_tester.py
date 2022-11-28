@@ -72,9 +72,9 @@ def lossfunc_test(x):
     return -net_profit
 for item in xopt:
     fopt_test+=[lossfunc_test(item)]
-plt.plot(fopt/len(train_data))
-plt.show()
-plt.plot(fopt_test/len(test_data))
+plt.plot(np.array(fopt)/len(train_data),'g')
+plt.plot(np.array(fopt_test)/len(test_data),'r')
+plt.legend(['train','test'])
 plt.show()
 
 # %%
