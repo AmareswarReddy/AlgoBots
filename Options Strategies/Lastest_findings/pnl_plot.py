@@ -13,7 +13,7 @@ import requests
 from pytz import timezone 
 from cred import *
 from py5paisa.order import Basket_order
-
+from scipy.interpolate import interp1d
 def client_login(client):
     import json
     f = open ('credentials.json', "r")
@@ -70,11 +70,11 @@ def y_axis(x,single_position,option_chain):
         y=single_position[2]*(k+lastrate)
     return y
 
-def pnl_graph(positions,option_chain,lastrate):
+def pnl_graph_B(positions,option_chain,lastrate):
     try:
         k=pd.DataFrame(positions)
         a=np.array(k.iloc[0])
-        x=np.linspace(min(a)-500,max(a)+500,int((max(a)-min(a)+1000)/100)+1)
+        x=np.linspace(min(a)-300,max(a)+300,int((max(a)-min(a)+600)/100)+1)
         y1=np.zeros(len(x))
         for i in range(0,len(positions)):
             y1+=np.array(y_axis(x,positions[i],option_chain))  
@@ -83,10 +83,22 @@ def pnl_graph(positions,option_chain,lastrate):
         y1=[0]
     return x,y1
 
+def pnl_graph_N(positions,option_chain,lastrate):
+    try:
+        k=pd.DataFrame(positions)
+        a=np.array(k.iloc[0])
+        x=np.linspace(min(a)-150,max(a)+150,int((max(a)-min(a)+300)/50)+1)
+        y1=np.zeros(len(x))
+        for i in range(0,len(positions)):
+            y1+=np.array(y_axis(x,positions[i],option_chain))  
+    except Exception:
+        x=[0]
+        y1=[0]
+    return x,y1
 
 #%%
 #variables to be initialised
-client_name = 'rohit'
+client_name = 'harish'
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -124,11 +136,33 @@ while True:
             elif S['NetQty'].iloc[i]>0 and ('PE' in S['ScripName'].iloc[i]):
                 type_='PE_B'
             banknifty_positions=add_position(banknifty_positions,get_strike_from_scrip(S['ScripCode'].iloc[i],'BANKNIFTY'),type_,abs(S['NetQty'].iloc[i]))
-    x1,y1=pnl_graph(nifty_positions,Noption_chain,Nx)
-    x2,y2=pnl_graph(banknifty_positions,Boption_chain,Bx)
-    plt.plot(x1,y1)
+    x1,y1=pnl_graph_N(nifty_positions,Noption_chain,Nx)
+    x2,y2=pnl_graph_B(banknifty_positions,Boption_chain,Bx)
+    def get_break_evens(x,y):
+        k=[]
+        if len(y)>2:
+            for i in range(1,len(y)):
+                if np.sign(y[i-1])!=np.sign(y[i]):
+                    f=interp1d([y[i-1],y[i]],[x[i-1],x[i]])
+                    k+=[f(0)]
+        return np.array(k)
+    break_even_N=get_break_evens(x1,y1)
+    break_even_B=get_break_evens(x2,y2)
+    plt.plot(x1,y1,'g')
+    plt.plot(x1,np.array(y1)*0,'r')
+    l=[]
+    for i in break_even_N:
+        plt.plot([i,i],[max(y1),min(y1)],'y')
+        l+=['break_even: '+str(i)]
+    plt.legend(['pnl_at_expiry','zero_line']+l)
     plt.show()
+    l=[]
     plt.plot(x2,y2)
+    plt.plot(x2,np.array(y2)*0,'r')
+    for i in break_even_B:
+        plt.plot([i,i],[max(y2),min(y2)],'y')
+        l+=['break_even: '+str(i)]
+    plt.legend(['pnl_at_expiry','zero_line']+l)
     plt.show()
 
 # %%
