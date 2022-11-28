@@ -460,8 +460,12 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
         call_breakeven=(to_check[1]*(exclusive_strike+c_e_lastrate)-tron*(c_strike+c_lastrate+p_lastrate)+to_check[0]*(p_e_lastrate))/(to_check[1]-tron)
         put_breakeven=(to_check[0]*(p_e_lastrate-exclusive_strike)+tron*(p_strike-p_lastrate-c_lastrate)+to_check[1]*c_e_lastrate)/(tron-to_check[0])
         to_optimise=((exclusive_strike-put_breakeven-A)*(exclusive_strike-put_breakeven-A))+((call_breakeven-exclusive_strike-A)*(call_breakeven-exclusive_strike-A))
-        indexer=np.argmin(to_optimise)
-        return np.array(to_check[0])[indexer],np.array(to_check[1])[indexer]
+        if len(to_optimise)>0:
+            indexer=np.argmin(to_optimise)
+            return np.array(to_check[0])[indexer],np.array(to_check[1])[indexer]
+        else:
+            return 0,0
+        
     ptron,ctron=optimisation()
     return int(ptron),int(ctron),exclusive_strike
     
