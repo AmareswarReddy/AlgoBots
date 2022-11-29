@@ -98,7 +98,7 @@ def pnl_graph_N(positions,option_chain,lastrate):
 
 #%%
 #variables to be initialised
-client_name = 'harish'
+client_name = 'digambar'
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -151,12 +151,16 @@ while True:
     plt.plot(x1,y1,'g')
     plt.plot(x1,np.array(y1)*0,'r')
     l=[]
+    plt.plot([Nx,Nx],[max(y1),min(y1)],'b',linestyle='dashed')
+    l+=['lastrate: ']
     for i in break_even_N:
         plt.plot([i,i],[max(y1),min(y1)],'y')
         l+=['break_even: '+str(i)]
     plt.legend(['pnl_at_expiry','zero_line']+l)
     plt.show()
     l=[]
+    plt.plot([Bx,Bx],[max(y1),min(y1)],'b',linestyle='dashed')
+    l+=['lastrate: ']
     plt.plot(x2,y2)
     plt.plot(x2,np.array(y2)*0,'r')
     for i in break_even_B:
