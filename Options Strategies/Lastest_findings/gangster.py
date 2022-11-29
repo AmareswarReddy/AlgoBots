@@ -486,7 +486,7 @@ def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
                 k,y1=order_button(exclusive_strike,'CE_B',ctron)
             if y1==0:
                 break
-        return 1,strike,ptron,ctron
+        return 1,exclusive_strike,ptron,ctron
     return 0,0,0,0
 
 def reset_day_leg_trades(positions_json):
