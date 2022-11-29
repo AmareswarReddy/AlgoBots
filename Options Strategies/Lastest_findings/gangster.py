@@ -648,6 +648,8 @@ else:
         exclusive_strike_leg=int(input('enter leg exclusive strike :  '))
         c_strike_b=int(input('enter leg call buy strike :  '))
         p_strike_b=int(input('enter leg put buy strike :  '))
+    if leg==0:
+        tron,exclusive_strike_leg,c_strike_b,p_strike_b=0,0,0,0
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>1085 :
