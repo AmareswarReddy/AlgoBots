@@ -290,13 +290,13 @@ def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg):
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)   
-        if c_strike_b-x<25:
+        if c_strike_b-x<50:
             at_strike=int(np.round((x)/100)*100)
             k,j=order_button(2*at_strike-p_strike_b,'CE_B',tron)
             if j==0:
                 order_button(c_strike_b,'CE_S',tron)
                 c_strike_b=k
-        if x-p_strike_b<25:
+        if x-p_strike_b<50:
             at_strike=int(np.round((x)/100)*100)
             k,j=order_button(2*at_strike-c_strike_b,'PE_B',tron)
             if j==0:
