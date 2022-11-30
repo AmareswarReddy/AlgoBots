@@ -494,6 +494,9 @@ def reset_day_leg_trades(positions_json):
     if positions_json['leg']['exclusive_strike']!=positions_json['day_end_leg']['exclusive_strike']:
         exclusive_strike,tron=exclusive_strike_change_trades(positions_json['leg']['exclusive_strike'],positions_json['day_end_leg']['exclusive_strike'],positions_json['leg']['tron'])
         positions_json['day_end_leg']['tron']+=tron
+    elif positions_json['leg']['exclusive_strike']==positions_json['day_end_leg']['exclusive_strike']:
+        tron=positions_json['leg']['tron']
+        positions_json['day_end_leg']['tron']+=tron
     if positions_json['leg']['call_strike']!=positions_json['day_end_leg']['call_strike']:
         k,j=order_button(positions_json['day_end_leg']['call_strike'],'CE_B',tron)
         if j==0:
@@ -699,6 +702,9 @@ def reset_day_leg_trades(positions_json):
     if positions_json['leg']['exclusive_strike']!=positions_json['day_end_leg']['exclusive_strike']:
         exclusive_strike,tron=exclusive_strike_change_trades(positions_json['leg']['exclusive_strike'],positions_json['day_end_leg']['exclusive_strike'],positions_json['leg']['tron'])
         positions_json['day_end_leg']['tron']+=tron
+    
+    
+    
     if positions_json['leg']['call_strike']!=positions_json['day_end_leg']['call_strike']:
         k,j=order_button(positions_json['day_end_leg']['call_strike'],'CE_B',tron)
         order_button(positions_json['leg']['call_strike'],'CE_S',tron)
@@ -719,7 +725,7 @@ def reset_day_leg_trades(positions_json):
 positions_json={'strangle':{'call_strike':0,'put_strike':0,'tron':0},
                 'overnight_safety':{'exclusive_strike':0,'put_tron':0,'call_tron':0},
                 'leg':{'exclusive_strike':18700,'call_strike':18850,'put_strike':18600,'tron':1},
-                'day_end_leg':{'exclusive_strike':18750,'call_strike':18800,'put_strike':18650,'tron':2}}
+                'day_end_leg':{'exclusive_strike':18700,'call_strike':18800,'put_strike':18650,'tron':2}}
 def exclusive_strike_change_trades(exclusive_strike,x,tron):
     k,y1=order_button(exclusive_strike,'PE_B',tron)
     k,y1=order_button(exclusive_strike,'CE_B',tron)
