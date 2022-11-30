@@ -493,17 +493,19 @@ def overnight_safety_trades(x,m,c_strike,p_strike,tron,f2):
 def reset_day_leg_trades(positions_json):
     if positions_json['leg']['exclusive_strike']!=positions_json['day_end_leg']['exclusive_strike']:
         exclusive_strike,tron=exclusive_strike_change_trades(positions_json['leg']['exclusive_strike'],positions_json['day_end_leg']['exclusive_strike'],positions_json['leg']['tron'])
-        positions_json['leg']['tron']+=tron
-        positions_json['day_end_leg']['tron']=0
+        positions_json['day_end_leg']['tron']+=tron
     if positions_json['leg']['call_strike']!=positions_json['day_end_leg']['call_strike']:
-        k,j=order_button(positions_json['leg']['call_strike'],'CE_B',tron)
+        k,j=order_button(positions_json['day_end_leg']['call_strike'],'CE_B',tron)
         if j==0:
-            order_button(positions_json['day_end_leg']['call_strike'],'CE_S',tron)
+            order_button(positions_json['leg']['call_strike'],'CE_S',tron)
     if positions_json['leg']['put_strike']!=positions_json['day_end_leg']['put_strike']:
-        k,j=order_button(positions_json['leg']['put_strike'],'CE_B',tron)
+        k,j=order_button(positions_json['day_end_leg']['put_strike'],'PE_B',tron)
         if j==0:
-            order_button(positions_json['day_end_leg']['put_strike'],'CE_S',tron)
+            order_button(positions_json['leg']['put_strike'],'PE_S',tron)
     positions_json['leg']['tron']+=positions_json['day_end_leg']['tron']
+    positions_json['leg']['exclusive_strike']+=positions_json['day_end_leg']['exclusive_strike']
+    positions_json['leg']['call_strike']+=positions_json['day_end_leg']['call_strike']
+    positions_json['leg']['put_strike']+=positions_json['day_end_leg']['put_strike']
     positions_json['day_end_leg']['tron']=0
     positions_json['day_end_leg']['exclusive_strike']=0
     positions_json['day_end_leg']['call_strike']=0
