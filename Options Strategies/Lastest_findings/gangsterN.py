@@ -281,8 +281,8 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
             chameleon_signal=1
     return exclusive_strike,tron,chameleon_signal
 
-def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg):
-    if exclusive_strike!=0 and leg==1:
+def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg,exit_signal2):
+    if exclusive_strike!=0 and leg==1 and exit_signal2==0:
         def exclusive_strike_change_signal(earlier_x,x):
             a=(x-earlier_x)/33
             return abs(a)
@@ -290,6 +290,7 @@ def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg):
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)   
+            exit_signal2=1
         if (c_strike_b-x)<25:
             at_strike=int(np.round((x)/50)*50)
             k,j=order_button(2*at_strike-p_strike_b,'CE_B',tron)
@@ -302,7 +303,7 @@ def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg):
             if j==0:
                 order_button(p_strike_b,'PE_S',tron)
                 p_strike_b=2*at_strike-c_strike_b
-    return exclusive_strike,c_strike_b,p_strike_b,tron
+    return exclusive_strike,c_strike_b,p_strike_b,tron,exit_signal2
 
 def day_end_leg_trades(exclusive_strike,c_strike,p_strike,x,tron):
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -619,6 +620,7 @@ option_chain,x,kiki=data(week=0)
 prev_x=x-kiki
 f2=opening_average()
 chameleon_signal=0
+exit_signal2=0
 chameleon_start,side,side_=0,'',''
 start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
 to_take_from_positions=input('do you wish to take positions from existing json(y/n): ')
@@ -672,7 +674,7 @@ while True:
     option_chain,x,m=data(week=0)
     exclusive_strike,c_strike,p_strike,tron=strangle_adjustments(x-m,exclusive_strike,c_strike,p_strike,tron)
     exclusive_strike,tron,chameleon_signal=straddle_special_adjustment(exclusive_strike,x-m,tron,chameleon_signal)
-    exclusive_strike_leg,c_strike_b,p_strike_b,tron_leg=leg_adjustments(exclusive_strike_leg,c_strike_b,p_strike_b,x-m,tron_leg,leg)
+    exclusive_strike_leg,c_strike_b,p_strike_b,tron_leg,exit_signal2=leg_adjustments(exclusive_strike_leg,c_strike_b,p_strike_b,x-m,tron_leg,leg,exit_signal2)
     chameleon_start,exclusive_strike,side,side_,prev_x,tron,chameleon_signal=chameleon_on_grass(chameleon_start,exclusive_strike,side,side_,prev_x,x-m,tron,chameleon_signal)
     shoot,overnight_exclusive_strike,ptron,ctron=overnight_safety_trades(x,m,c_strike,p_strike,tron,f2)
     day_end_tron,day_end_exclusive_strike,day_end_c_strike_b,day_end_p_strike_b,is_t_special,strangle_list=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x-m,tron)
