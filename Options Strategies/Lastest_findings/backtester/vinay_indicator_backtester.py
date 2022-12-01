@@ -19,8 +19,8 @@ except Error as e:
     print(f"The error '{e}' occurred")
 print('Connected!')
 mycursor = connection.cursor(buffered=True)
-expiry="'2022-09-22'"
-day='1'
+expiry="'2022-12-01'"
+day='4'
 k="select * from option_chain_data where expiry="+expiry+" and day="+day+";"
 mycursor.execute(k)
 
@@ -515,6 +515,6 @@ plt.show()
 json_file={'hightime':final1,'oi_ratio':final2,'rosetta_ratio':final3,'rosetta':final4,'lastrate':lastrate[:]}
 import json
 
-with open("1_22.json", "w") as outfile:
+with open(day+'_'+expiry+".json", "w") as outfile:
     json.dump(json_file,outfile)
 # %%
