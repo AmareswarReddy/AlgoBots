@@ -277,8 +277,9 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
-            exit_trades(exclusive_strike,tron)   
-            chameleon_signal=1
+            exit_trades(exclusive_strike,tron)  
+            if client_name=='vinathi': 
+                chameleon_signal=1
     return exclusive_strike,tron,chameleon_signal
 
 def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg,exit_signal2):

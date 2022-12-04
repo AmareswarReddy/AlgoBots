@@ -36,7 +36,7 @@ def order_button(exclusive_strike,type,lots):
     sleep(0.5)
     exchange='BANKNIFTY'
     lot_size=25
-    max_lots_per_order=48
+    max_lots_per_order=36
     strike_difference=100
     if exclusive_strike==0:
         while True:
@@ -140,6 +140,7 @@ def order_button(exclusive_strike,type,lots):
                 already_placed+=end
         yet_to_place=lots-already_placed
     return exclusive_strike,yet_to_place
+    
 def lots_drop(strike,side,yet_to_place):
     k=yet_to_place
     while yet_to_place>0:
@@ -278,7 +279,8 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)   
-            chameleon_signal=1
+            if client_name=='vinathi':
+                chameleon_signal=1
     return exclusive_strike,tron,chameleon_signal
 
 def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg,exit_signal2):
