@@ -402,16 +402,27 @@ def straddle_special_adjustment(exclusive_strike,x,tron):
 
 #%%
 client_name = input('enter the client name: ')
-leg_tron=int(input('leg_tron'))
 prime_client=client_login(client=client_name)
 option_chain,x=data(week=0)
-c_leg_tron,p_leg_tron,c_strike_b,p_strike_b=initial_leg_trades(x,leg_tron)
-tron=int(prime_client['login'].margin()[0]['AvailableMargin']/140000)
-strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x,tron)
-exclusive_strike=0
+start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
+if start==0:
+    leg_tron=int(input('leg_tron'))
+    c_leg_tron,p_leg_tron,c_strike_b,p_strike_b=initial_leg_trades(x,leg_tron)
+    tron=int(prime_client['login'].margin()[0]['AvailableMargin']/140000)
+    strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x,tron)
+    exclusive_strike=0
+elif start==1:
+    c_leg_tron=int(input('enter number of existing lots on call side: '))
+    p_leg_tron=int(input('enter number of existing lots on put side: '))
+    c_strike_b=int(input('enter the call bought strike: '))
+    p_strike_b=int(input('enter the put bought strike: '))
+    strangle_tron=int(input('strangle tron:  '))
+    strangle_c_strike=int(input('enter strangle call strike: '))
+    strangle_p_strike=int(input('enter strangle put strike: '))
+    exclusive_strike=int((strangle_c_strike==strangle_p_strike)*strangle_p_strike)
 while True:
     option_chain,x=data(week=0)
-    exclusive_strike,strangle_c_strike,strangle_p_strike,tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,tron)
+    exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
     exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron)
-    new_c_strike_b,new_p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
+    c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
 # %%
