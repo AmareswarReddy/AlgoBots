@@ -412,8 +412,8 @@ if start==0:
     strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x,tron)
     exclusive_strike=0
 elif start==1:
-    c_leg_tron=int(input('enter number of existing lots on call side: '))
-    p_leg_tron=int(input('enter number of existing lots on put side: '))
+    c_leg_tron=int(input('enter number of existing lots on call side buy: '))
+    p_leg_tron=int(input('enter number of existing lots on put side buy: '))
     c_strike_b=int(input('enter the call bought strike: '))
     p_strike_b=int(input('enter the put bought strike: '))
     strangle_tron=int(input('strangle tron:  '))
