@@ -328,6 +328,7 @@ def initial_leg_trades(x,tron):
 def surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron):
     strangle_c_strike=(exclusive_strike==0)*strangle_c_strike+exclusive_strike
     strangle_p_strike=(exclusive_strike==0)*strangle_p_strike+exclusive_strike
+    new_p_strike_b,new_c_strike_b=0,0
     if x>c_strike_b:
         new_c_strike_b,y=order_button(c_strike_b+100,'CE_B',c_leg_tron+1)
         while y!=0:
@@ -356,8 +357,7 @@ def surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangl
             strangle_tron-=1
             o,y=order_button(p_strike_b,'PE_S',p_leg_tron+1)
         p_leg_tron+=1
-    else:
-        new_c_strike_b,new_p_strike_b=c_strike_b,p_strike_b
+    new_c_strike_b,new_p_strike_b=c_strike_b*(new_c_strike_b==0)+new_c_strike_b,p_strike_b*(new_p_strike_b==0)+new_p_strike_b
     return new_c_strike_b,new_p_strike_b,c_leg_tron,p_leg_tron,strangle_tron
 
 def exclusive_strike_change_trades(exclusive_strike,x,tron):
