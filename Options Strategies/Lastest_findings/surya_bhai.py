@@ -1,3 +1,4 @@
+#%%
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -341,7 +342,7 @@ def surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangl
             strangle_tron-=1
             o,y=order_button(c_strike_b,'CE_S',c_leg_tron+1)
         c_leg_tron+=1
-    if x<p_strike_b:
+    elif x<p_strike_b:
         new_p_strike_b,y=order_button(p_strike_b-100,'PE_B',p_leg_tron+1)
         while y!=0:
             order_button(strangle_c_strike,'CE_B',1)
@@ -355,6 +356,8 @@ def surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangl
             strangle_tron-=1
             o,y=order_button(p_strike_b,'PE_S',p_leg_tron+1)
         p_leg_tron+=1
+    else:
+        new_c_strike_b,new_p_strike_b=c_strike_b,p_strike_b
     return new_c_strike_b,new_p_strike_b,c_leg_tron,p_leg_tron,strangle_tron
 
 def exclusive_strike_change_trades(exclusive_strike,x,tron):
@@ -410,4 +413,5 @@ while True:
     option_chain,x=data(week=0)
     exclusive_strike,strangle_c_strike,strangle_p_strike,tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,tron)
     exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron)
-    new_c_strike_b,new_p_strike_b,leg_tron,strangle_tron=surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
+    new_c_strike_b,new_p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
+# %%
