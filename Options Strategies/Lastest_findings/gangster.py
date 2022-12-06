@@ -140,7 +140,7 @@ def order_button(exclusive_strike,type,lots):
                 already_placed+=end
         yet_to_place=lots-already_placed
     return exclusive_strike,yet_to_place
-    
+
 def lots_drop(strike,side,yet_to_place):
     k=yet_to_place
     while yet_to_place>0:
@@ -458,14 +458,15 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
     p_e_lastrate=int(pe_data[pe_data['StrikeRate']==exclusive_strike]['LastRate'])
     def optimisation():
         kk=pd.DataFrame(permutations(np.linspace(0,tron-1,tron),2))
-        kk[2]=tron*(p_lastrate+c_lastrate)-kk[0]*p_e_lastrate-kk[1]*c_e_lastrate
-        to_check=kk[kk[2]>=0]
-        call_breakeven=(to_check[1]*(exclusive_strike+c_e_lastrate)-tron*(c_strike+c_lastrate+p_lastrate)+to_check[0]*(p_e_lastrate))/(to_check[1]-tron)
-        put_breakeven=(to_check[0]*(p_e_lastrate-exclusive_strike)+tron*(p_strike-p_lastrate-c_lastrate)+to_check[1]*c_e_lastrate)/(tron-to_check[0])
-        to_optimise=((exclusive_strike-put_breakeven-A)*(exclusive_strike-put_breakeven-A))+((call_breakeven-exclusive_strike-A)*(call_breakeven-exclusive_strike-A))
-        if len(to_optimise)>0:
-            indexer=np.argmin(to_optimise)
-            return np.array(to_check[0])[indexer],np.array(to_check[1])[indexer]
+        if len(kk)>0:
+            kk[2]=tron*(p_lastrate+c_lastrate)-kk[0]*p_e_lastrate-kk[1]*c_e_lastrate
+            to_check=kk[kk[2]>=0]
+            call_breakeven=(to_check[1]*(exclusive_strike+c_e_lastrate)-tron*(c_strike+c_lastrate+p_lastrate)+to_check[0]*(p_e_lastrate))/(to_check[1]-tron)
+            put_breakeven=(to_check[0]*(p_e_lastrate-exclusive_strike)+tron*(p_strike-p_lastrate-c_lastrate)+to_check[1]*c_e_lastrate)/(tron-to_check[0])
+            to_optimise=((exclusive_strike-put_breakeven-A)*(exclusive_strike-put_breakeven-A))+((call_breakeven-exclusive_strike-A)*(call_breakeven-exclusive_strike-A))
+            if len(to_optimise)>0:
+                indexer=np.argmin(to_optimise)
+                return np.array(to_check[0])[indexer],np.array(to_check[1])[indexer]
         else:
             return 0,0
     ptron,ctron=optimisation()
