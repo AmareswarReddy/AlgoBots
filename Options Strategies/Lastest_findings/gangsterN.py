@@ -684,13 +684,15 @@ while True:
         positions_json={'strangle':{'call_strike':c_strike,'put_strike':p_strike,'tron':tron},
                         'overnight_safety':{'exclusive_strike':overnight_exclusive_strike,'put_tron':ptron,'call_tron':ctron},
                         'leg':{'exclusive_strike':exclusive_strike_leg,'call_strike':c_strike_b,'put_strike':p_strike_b,'tron':tron_leg},
-                        'day_end_leg':{'exclusive_strike':0,'call_strike':0,'put_strike':0,'tron':0}}
+                        'day_end_leg':{'exclusive_strike':0,'call_strike':0,'put_strike':0,'tron':0},
+                        'exit':{'shoot':0,'is_t_special':0,'exit_signal2':0,'chameleon_signal':0}}
         break
     if is_t_special==1:
         positions_json={'strangle':{'call_strike':strangle_list[1],'put_strike':strangle_list[2],'tron':strangle_list[0]},
                         'overnight_safety':{'exclusive_strike':0,'put_tron':0,'call_tron':0},
                         'leg':{'exclusive_strike':exclusive_strike_leg,'call_strike':c_strike_b,'put_strike':p_strike_b,'tron':tron_leg},
-                        'day_end_leg':{'exclusive_strike':day_end_exclusive_strike,'call_strike':day_end_c_strike_b,'put_strike':day_end_p_strike_b,'tron':day_end_tron}}
+                        'day_end_leg':{'exclusive_strike':day_end_exclusive_strike,'call_strike':day_end_c_strike_b,'put_strike':day_end_p_strike_b,'tron':day_end_tron},
+                        'exit':{'shoot':0,'is_t_special':0,'exit_signal2':0,'chameleon_signal':0}}
         positions_json=reset_day_leg_trades(positions_json)
         break
 
