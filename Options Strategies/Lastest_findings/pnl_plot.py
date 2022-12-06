@@ -98,7 +98,7 @@ def pnl_graph_N(positions,option_chain,lastrate):
 
 #%%
 #variables to be initialised
-client_name = 'digambar'
+client_name = 'vinathi'
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","BANKNIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
@@ -109,64 +109,65 @@ def get_strike_from_scrip(scripcode,exchange):
     option_chain,a1=data(exchange)
     k1=option_chain[option_chain['ScripCode']==scripcode]
     return int(k1['StrikeRate'])
-while True:
-    Noption_chain,Nx=data('NIFTY') 
-    Boption_chain,Bx=data('BANKNIFTY') 
-    S=pd.DataFrame(prime_client['login'].positions())
-    nifty_positions={}
-    banknifty_positions={}
-    for i in range(0,len(S)):
-        if ('NIFTY' in S['ScripName'].iloc[i]) and S['NetQty'].iloc[i]!=0:
-            if S['NetQty'].iloc[i]<0 and ('PE' in S['ScripName'].iloc[i]):
-                type_='PE_S'
-            elif S['NetQty'].iloc[i]<0 and ('CE' in S['ScripName'].iloc[i]):
-                type_='CE_S'
-            elif S['NetQty'].iloc[i]>0 and ('CE' in S['ScripName'].iloc[i]):
-                type_='CE_B'
-            elif S['NetQty'].iloc[i]>0 and ('PE' in S['ScripName'].iloc[i]):
-                type_='PE_B'
-            nifty_positions=add_position(nifty_positions,get_strike_from_scrip(S['ScripCode'].iloc[i],'NIFTY'),type_,abs(S['NetQty'].iloc[i]))
-        elif ('BANKNIFTY' in S['ScripName'].iloc[i]) and S['NetQty'].iloc[i]!=0:
-            if S['NetQty'].iloc[i]<0 and ('PE' in S['ScripName'].iloc[i]):
-                type_='PE_S'
-            elif S['NetQty'].iloc[i]<0 and ('CE' in S['ScripName'].iloc[i]):
-                type_='CE_S'
-            elif S['NetQty'].iloc[i]>0 and ('CE' in S['ScripName'].iloc[i]):
-                type_='CE_B'
-            elif S['NetQty'].iloc[i]>0 and ('PE' in S['ScripName'].iloc[i]):
-                type_='PE_B'
-            banknifty_positions=add_position(banknifty_positions,get_strike_from_scrip(S['ScripCode'].iloc[i],'BANKNIFTY'),type_,abs(S['NetQty'].iloc[i]))
-    x1,y1=pnl_graph_N(nifty_positions,Noption_chain,Nx)
-    x2,y2=pnl_graph_B(banknifty_positions,Boption_chain,Bx)
-    def get_break_evens(x,y):
-        k=[]
-        if len(y)>2:
-            for i in range(1,len(y)):
-                if np.sign(y[i-1])!=np.sign(y[i]):
-                    f=interp1d([y[i-1],y[i]],[x[i-1],x[i]])
-                    k+=[f(0)]
-        return np.array(k)
-    break_even_N=get_break_evens(x1,y1)
-    break_even_B=get_break_evens(x2,y2)
-    plt.plot(x1,y1,'g')
-    plt.plot(x1,np.array(y1)*0,'r')
-    l=[]
-    plt.plot([Nx,Nx],[max(y1),min(y1)],'b',linestyle='dashed')
-    l+=['lastrate: ']
-    for i in break_even_N:
-        plt.plot([i,i],[max(y1),min(y1)],'y')
-        l+=['break_even: '+str(i)]
-    plt.legend(['pnl_at_expiry','zero_line']+l)
-    plt.show()
-    l=[]
-    plt.plot([Bx,Bx],[max(y1),min(y1)],'b',linestyle='dashed')
-    l+=['lastrate: ']
-    plt.plot(x2,y2)
-    plt.plot(x2,np.array(y2)*0,'r')
-    for i in break_even_B:
-        plt.plot([i,i],[max(y2),min(y2)],'y')
-        l+=['break_even: '+str(i)]
-    plt.legend(['pnl_at_expiry','zero_line']+l)
-    plt.show()
 
+Noption_chain,Nx=data('NIFTY') 
+Boption_chain,Bx=data('BANKNIFTY') 
+S=pd.DataFrame(prime_client['login'].positions())
+nifty_positions={}
+banknifty_positions={}
+for i in range(0,len(S)):
+    if ('NIFTY' in S['ScripName'].iloc[i]) and S['NetQty'].iloc[i]!=0 and ('BANKNIFTY' not in S['ScripName'].iloc[i]):
+        if S['NetQty'].iloc[i]<0 and ('PE' in S['ScripName'].iloc[i]):
+            type_='PE_S'
+        elif S['NetQty'].iloc[i]<0 and ('CE' in S['ScripName'].iloc[i]):
+            type_='CE_S'
+        elif S['NetQty'].iloc[i]>0 and ('CE' in S['ScripName'].iloc[i]):
+            type_='CE_B'
+        elif S['NetQty'].iloc[i]>0 and ('PE' in S['ScripName'].iloc[i]):
+            type_='PE_B'
+        nifty_positions=add_position(nifty_positions,get_strike_from_scrip(S['ScripCode'].iloc[i],'NIFTY'),type_,abs(S['NetQty'].iloc[i]))
+    elif ('BANKNIFTY' in S['ScripName'].iloc[i]) and S['NetQty'].iloc[i]!=0:
+        if S['NetQty'].iloc[i]<0 and ('PE' in S['ScripName'].iloc[i]):
+            type_='PE_S'
+        elif S['NetQty'].iloc[i]<0 and ('CE' in S['ScripName'].iloc[i]):
+            type_='CE_S'
+        elif S['NetQty'].iloc[i]>0 and ('CE' in S['ScripName'].iloc[i]):
+            type_='CE_B'
+        elif S['NetQty'].iloc[i]>0 and ('PE' in S['ScripName'].iloc[i]):
+            type_='PE_B'
+        banknifty_positions=add_position(banknifty_positions,get_strike_from_scrip(S['ScripCode'].iloc[i],'BANKNIFTY'),type_,abs(S['NetQty'].iloc[i]))
+x1,y1=pnl_graph_N(nifty_positions,Noption_chain,Nx)
+x2,y2=pnl_graph_B(banknifty_positions,Boption_chain,Bx)
+def get_break_evens(x,y):
+    k=[]
+    if len(y)>2:
+        for i in range(1,len(y)):
+            if np.sign(y[i-1])!=np.sign(y[i]):
+                f=interp1d([y[i-1],y[i]],[x[i-1],x[i]])
+                k+=[f(0)]
+    return np.array(k)
+break_even_N=get_break_evens(x1,y1)
+break_even_B=get_break_evens(x2,y2)
+plt.plot(x1,y1,'g')
+plt.plot(x1,np.array(y1)*0,'r')
+l=[]
+plt.plot([Nx,Nx],[max(y1),min(y1)],'b',linestyle='dashed')
+l+=['lastrate: '+str(Nx)]
+for i in break_even_N:
+    plt.plot([i,i],[max(y1),min(y1)],'y')
+    l+=['break_even: '+str(i)]
+plt.legend(['pnl_at_expiry','zero_line']+l)
+plt.show()
+plt.plot(x2,y2,'g')
+plt.plot(x2,np.array(y2)*0,'r')
+l=[]
+plt.plot([Bx,Bx],[max(y2),min(y2)],'b',linestyle='dashed')
+l+=['lastrate:'+str(Bx)]
+for i in break_even_B:
+    plt.plot([i,i],[max(y2),min(y2)],'y')
+    l+=['break_even: '+str(i)]
+plt.legend(['pnl_at_expiry','zero_line']+l)
+plt.show()
+
+print('total profit: ',sum(S['MTOM'])+sum(S['BookedPL']))
 # %%
