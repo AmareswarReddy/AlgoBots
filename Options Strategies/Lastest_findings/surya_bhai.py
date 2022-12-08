@@ -325,11 +325,15 @@ def initial_leg_trades(x,tron):
     return final_tron,final_tron,c_strike,p_strike
 
 
-def surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron):
+def surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron):
     strangle_c_strike=(exclusive_strike==0)*strangle_c_strike+exclusive_strike
     strangle_p_strike=(exclusive_strike==0)*strangle_p_strike+exclusive_strike
+    ce_data=option_chain[option_chain['CPType']=='CE']
+    pe_data=option_chain[option_chain['CPType']=='PE']
+    c_lastrate=float(ce_data[ce_data['StrikeRate']==c_strike_b]['LastRate'])
+    p_lastrate=float(pe_data[pe_data['StrikeRate']==p_strike_b]['LastRate'])
     new_p_strike_b,new_c_strike_b=0,0
-    if x>c_strike_b:
+    if x>c_strike_b and c_lastrate>100:
         new_c_strike_b,y=order_button(c_strike_b+100,'CE_B',c_leg_tron+1)
         while y!=0:
             order_button(strangle_c_strike,'CE_B',1)
@@ -343,7 +347,7 @@ def surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangl
             strangle_tron-=1
             o,y=order_button(c_strike_b,'CE_S',c_leg_tron+1)
         c_leg_tron+=1
-    elif x<p_strike_b:
+    elif x<p_strike_b and p_lastrate>100:
         new_p_strike_b,y=order_button(p_strike_b-100,'PE_B',p_leg_tron+1)
         while y!=0:
             order_button(strangle_c_strike,'CE_B',1)
@@ -378,8 +382,9 @@ def exclusive_strike_change_trades(exclusive_strike,x,tron):
     return exclusive_strike,tron
 
 def exit_signal(option_chain,exclusive_strike):
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     temp=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
-    if temp<66:
+    if temp<66 or int(ind_time[11:13])*60+int(ind_time[14:16])>925:
         return 1
     else:
         return 0
@@ -420,9 +425,20 @@ elif start==1:
     strangle_c_strike=int(input('enter strangle call strike: '))
     strangle_p_strike=int(input('enter strangle put strike: '))
     exclusive_strike=int((strangle_c_strike==strangle_p_strike)*strangle_p_strike)
-while True:
+ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
     option_chain,x=data(week=0)
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
     exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron)
-    c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
+    c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
+    if strangle_tron==0:
+        exclusive_strike==0
+        strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x,tron)
+positions_json={'strangle':{'c_strike':strangle_c_strike,'p_strike':strangle_p_strike,'tron':strangle_tron},
+                'surya':{'c_strike_b':c_strike_b,'p_strike_b':p_strike_b,'c_leg_tron':c_leg_tron,'p_leg_tron':p_leg_tron}}
+print(positions_json)
+out_file = open(client_name+'_suryabhai_positions.json', "w")
+json.dump(positions_json, out_file, indent = 6)
+out_file.close()
 # %%
