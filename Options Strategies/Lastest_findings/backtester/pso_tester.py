@@ -115,7 +115,7 @@ list_of_data=os.listdir()
 train_data=[]
 test_data=[]
 for file_name in list_of_data:
-    if 'json' in file_name:
+    if ('json' in file_name) and ('cred' not in file_name) and ('4' in file_name[0]):
         if np.random.rand()<0.8:
             train_data=train_data+[pd.DataFrame(json.load(open(file_name)))]
         else:
@@ -130,17 +130,18 @@ def pnl(data):
     buyer=np.array(b[1:])-np.array(b[:-1])
     seller=np.array(s[1:])-np.array(s[:-1])
     trades=np.sum(buyer>0)+np.sum(seller<0)
-    net_pnl=np.dot(buyer,np.array(data['lastrate']))+np.dot(seller,np.array(data['lastrate']))-trades*5
+    net_pnl=-np.dot(buyer,np.array(data['lastrate']))-np.dot(seller,np.array(data['lastrate']))-trades*5
     return net_pnl
 
-def indicator(w11,w12,w13,w14,c11,c12,c13,c14,outw11,outw12,outw13,outw14,outc11,outw21,outw22,outw23,outw24,outc21,data):
+def indicator(w11,w12,w13,w14,w15,c11,c12,c13,c14,c15,outw11,outw12,outw13,outw14,outw15,outc11,outw21,outw22,outw23,outw24,outw25,outc21,data):
     #layer1
     A1=np.tanh(w11*np.array(data['hightime'])+c11)
     A2=np.tanh(w12*np.array(data['oi_ratio'])+c12)
     A3=np.tanh(w13*np.array(data['rosetta_ratio'])+c13)
     A4=np.tanh(w14*np.array(data['rosetta'])+c14)
-    layer11=outw11*A1+outw12*A2+outw13*A3+outw14*A4
-    layer12=outw21*A1+outw22*A2+outw23*A3+outw24*A4
+    A5=np.tanh(w15*np.array(data['time']/22440)+c15)
+    layer11=outw11*A1+outw12*A2+outw13*A3+outw14*A4+outw15*A5
+    layer12=outw21*A1+outw22*A2+outw23*A3+outw24*A4+outw25*A5
     output1=np.tanh(layer11+outc11)
     output2=(np.tanh(layer12+outc21)+1)/2
     final_indicator=np.multiply((np.array(output2)>0.5),(np.array(output1>0)+np.array(output1<0)*-1))
@@ -152,16 +153,16 @@ def lossfunc(x):
     # define data
     net_profit=0
     global train_data
-    w11,w12,w13,w14,c11,c12,c13,c14,outw11,outw12,outw13,outw14,outc11,outw21,outw22,outw23,outw24,outc21=x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16],x[17]
+    w11,w12,w13,w14,w15,c11,c12,c13,c14,c15,outw11,outw12,outw13,outw14,outw15,outc11,outw21,outw22,outw23,outw24,outw25,outc21=x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16],x[17],x[18],x[19],x[20],x[21]
     for data in train_data:
-        data_=indicator(w11,w12,w13,w14,c11,c12,c13,c14,outw11,outw12,outw13,outw14,outc11,outw21,outw22,outw23,outw24,outc21,data)
+        data_=indicator(w11,w12,w13,w14,w15,c11,c12,c13,c14,c15,outw11,outw12,outw13,outw14,outw15,outc11,outw21,outw22,outw23,outw24,outw25,outc21,data)
         net_profit+=pnl(data_)
     return -net_profit
-
+#%%
 # optimisation
-lb=[-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5]
+lb=[-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5,-5]
 ub=list(np.array(lb)+10)
-xopt,fopt=pso(lossfunc,lb,ub,maxiter=80,swarmsize=1000)
+xopt,fopt=pso(lossfunc,lb,ub,maxiter=50,swarmsize=1000)
 
 #%%
 #cross check plots
@@ -170,9 +171,9 @@ def lossfunc_test(x):
     net_profit=0
     # define data
     global test_data
-    w11,w12,w13,w14,c11,c12,c13,c14,outw11,outw12,outw13,outw14,outc11,outw21,outw22,outw23,outw24,outc21=x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16],x[17]
+    w11,w12,w13,w14,w15,c11,c12,c13,c14,c15,outw11,outw12,outw13,outw14,outw15,outc11,outw21,outw22,outw23,outw24,outw25,outc21=x[0],x[1],x[2],x[3],x[4],x[5],x[6],x[7],x[8],x[9],x[10],x[11],x[12],x[13],x[14],x[15],x[16],x[17],x[18],x[19],x[20],x[21]
     for data in test_data:
-        data_=indicator(w11,w12,w13,w14,c11,c12,c13,c14,outw11,outw12,outw13,outw14,outc11,outw21,outw22,outw23,outw24,outc21,data)
+        data_=indicator(w11,w12,w13,w14,w15,c11,c12,c13,c14,c15,outw11,outw12,outw13,outw14,outw15,outc11,outw21,outw22,outw23,outw24,outw25,outc21,data)
         net_profit+=pnl(data_)
     return -net_profit
 for item in xopt:
