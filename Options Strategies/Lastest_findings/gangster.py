@@ -349,8 +349,8 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
     if c_strike!=p_strike:
         ce_data=option_chain[option_chain['CPType']=='CE']
         pe_data=option_chain[option_chain['CPType']=='PE']
-        c_lastrate=int(ce_data[ce_data['StrikeRate']==c_strike]['LastRate'])
-        p_lastrate=int(pe_data[pe_data['StrikeRate']==p_strike]['LastRate'])
+        c_lastrate=float(ce_data[ce_data['StrikeRate']==c_strike]['LastRate'])
+        p_lastrate=float(pe_data[pe_data['StrikeRate']==p_strike]['LastRate'])
         at_strike=int(np.round((x)/100)*100)
         if c_lastrate/p_lastrate>2.13 and (2*at_strike-c_strike)>p_strike :
             while True:
