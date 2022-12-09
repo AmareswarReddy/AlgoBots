@@ -466,6 +466,8 @@ def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
             if len(to_optimise)>0:
                 indexer=np.argmin(to_optimise)
                 return np.array(to_check[0])[indexer],np.array(to_check[1])[indexer]
+            else:
+                return 0,0
         else:
             return 0,0
     ptron,ctron=optimisation()
