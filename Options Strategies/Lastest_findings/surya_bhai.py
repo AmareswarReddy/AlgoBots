@@ -417,13 +417,14 @@ client_name = input('enter the client name: ')
 prime_client=client_login(client=client_name)
 option_chain,x=data(week=0)
 start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
+from_json=input('to take positions from existing positions json file (y/n): ')
 if start==0:
     leg_tron=int(input('leg_tron'))
     c_leg_tron,p_leg_tron,c_strike_b,p_strike_b=initial_leg_trades(x,option_chain,leg_tron)
     tron=int(prime_client['login'].margin()[0]['AvailableMargin']/140000)
     strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x,tron)
     exclusive_strike=0
-elif start==1:
+elif start==1 and from_json=='n':
     c_leg_tron=int(input('enter number of existing lots on call side buy: '))
     p_leg_tron=int(input('enter number of existing lots on put side buy: '))
     c_strike_b=int(input('enter the call bought strike: '))
@@ -432,7 +433,20 @@ elif start==1:
     strangle_c_strike=int(input('enter strangle call strike: '))
     strangle_p_strike=int(input('enter strangle put strike: '))
     exclusive_strike=int((strangle_c_strike==strangle_p_strike)*strangle_p_strike)
+elif start==1 and from_json=='y':
+    positions_record=json.load(open(client_name+'_suryabhai_positions.json'))
+    c_leg_tron          =   positions_record['surya']['c_leg_tron']
+    p_leg_tron          =   positions_record['surya']['p_leg_tron']
+    c_strike_b          =   positions_record['surya']['c_strike_b']
+    p_strike_b          =   positions_record['surya']['p_strike_b']
+    strangle_tron       =   positions_record['strangle']['tron']
+    strangle_c_strike   =   positions_record['strangle']['c_strike']
+    strangle_p_strike   =   positions_record['strangle']['p_strike']
+    exclusive_strike    =   int((strangle_c_strike==strangle_p_strike)*strangle_p_strike)
+
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+while int(ind_time[11:13])*60+int(ind_time[14:16])<556 :
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
     option_chain,x=data(week=0)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
