@@ -192,6 +192,23 @@ def initial_strangle_trades(option_chain,x,tron):
     tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron)
     return tron,c_strike,p_strike
 
+def re_adjust_strangle(strangle_lastrate_sum,option_chain,x):
+    exclusive_strike=int(np.round((x)/100)*100)
+    f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
+    factor=float(1.3+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=int(np.round((factor)/100)*100)
+    c_strike=exclusive_strike+factor
+    p_strike=exclusive_strike-factor
+    ce_data=option_chain[option_chain['CPType']=='CE']
+    pe_data=option_chain[option_chain['CPType']=='PE']
+    c_lastrate=float(ce_data[ce_data['StrikeRate']==c_strike]['LastRate'])
+    p_lastrate=float(pe_data[pe_data['StrikeRate']==p_strike]['LastRate'])
+    cp_sum=c_lastrate+p_lastrate
+    if 2.13*strangle_lastrate_sum<cp_sum:
+        return True
+    else:
+        return False
+
 def rosetta(option_chain):
     ce_data=option_chain[option_chain['CPType']=='CE']
     pe_data=option_chain[option_chain['CPType']=='PE']
@@ -357,6 +374,16 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
         pe_data=option_chain[option_chain['CPType']=='PE']
         c_lastrate=float(ce_data[ce_data['StrikeRate']==c_strike]['LastRate'])
         p_lastrate=float(pe_data[pe_data['StrikeRate']==p_strike]['LastRate'])
+        if re_adjust_strangle(c_lastrate+p_lastrate,option_chain,x):
+            while True:
+                strike,yet_to_place=order_button(p_strike,'PE_B',tron)
+                if yet_to_place==0:
+                    break
+            while True:
+                strike,yet_to_place=order_button(c_strike,'CE_B',tron)
+                if yet_to_place==0:
+                    break
+            tron,c_strike,p_strike=initial_strangle_trades(option_chain,x,tron)
         at_strike=int(np.round((x)/100)*100)
         if c_lastrate/p_lastrate>2.13 and (2*at_strike-c_strike)>p_strike :
             while True:
