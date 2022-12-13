@@ -268,10 +268,10 @@ def exclusive_strike_change_trades(exclusive_strike,x,tron):
     tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron)
     return exclusive_strike,tron
 
-def margin_utilizer(exclusive_strike):
+def margin_utilizer(c_strike,p_strike):
     k=prime_client['login'].margin()[0]['AvailableMargin']
     tron=int(k/150000)
-    tron=finalise_tron(exclusive_strike,exclusive_strike,tron)
+    tron=finalise_tron(c_strike,p_strike,tron)
     return tron
 
 def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
@@ -284,7 +284,6 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)  
             chameleon_signal=1
-        tron=tron+margin_utilizer(exclusive_strike)
     return exclusive_strike,tron,chameleon_signal
 
 def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg,exit_signal2):
@@ -449,6 +448,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                         break
                 tron=finalise_tron(c_strike=at_strike,p_strike=at_strike,tron=tron)
                 exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
+        tron=tron+margin_utilizer(c_strike,p_strike)
     return exclusive_strike,c_strike,p_strike,tron
 
 def overnight_tron_decider(x,m,p_strike,c_strike,option_chain,tron,A):
