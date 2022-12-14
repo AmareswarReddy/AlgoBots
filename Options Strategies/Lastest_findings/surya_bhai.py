@@ -189,8 +189,9 @@ def data(week):
             pass
     return option_chain,x
 
-def initial_strangle_trades(option_chain,x,tron):
+def initial_strangle_trades(option_chain,x):
     exclusive_strike=int(np.round((x)/100)*100)
+    tron=int(prime_client['login'].margin()[0]['AvailableMargin']/170000)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
     factor=float(1.6+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
     factor=int(np.round((factor)/100)*100)
@@ -422,7 +423,7 @@ if start==0:
     leg_tron=int(input('leg_tron'))
     c_leg_tron,p_leg_tron,c_strike_b,p_strike_b=initial_leg_trades(x,option_chain,leg_tron)
     tron=int(prime_client['login'].margin()[0]['AvailableMargin']/140000)
-    strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x,tron)
+    strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x)
     exclusive_strike=0
 elif start==1 and from_json=='n':
     c_leg_tron=int(input('enter number of existing lots on call side buy: '))
@@ -455,7 +456,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
     c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
     if strangle_tron==0:
         exclusive_strike==0
-        strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x,tron)
+        strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x)
 positions_json={'strangle':{'c_strike':strangle_c_strike,'p_strike':strangle_p_strike,'tron':strangle_tron},
                 'surya':{'c_strike_b':c_strike_b,'p_strike_b':p_strike_b,'c_leg_tron':c_leg_tron,'p_leg_tron':p_leg_tron}}
 print(positions_json)
