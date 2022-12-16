@@ -13,7 +13,6 @@ import requests
 from pytz import timezone 
 from cred import *
 from py5paisa.order import Basket_order
-
 def client_login(client):
     import json
     f = open ('credentials.json', "r")
@@ -328,49 +327,85 @@ def initial_leg_trades(x,option_chain,tron):
     if final_tron!=tron:
         order_button(p_strike,'PE_S',tron-final_tron)
         order_button(c_strike,'CE_S',tron-final_tron)
-    return final_tron,final_tron,c_strike,p_strike
+    return final_tron,final_tron,c_strike,p_strike,exclusive_strike,exclusive_strike
 
 
 def surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron):
-    strangle_c_strike=(exclusive_strike==0)*strangle_c_strike+exclusive_strike
-    strangle_p_strike=(exclusive_strike==0)*strangle_p_strike+exclusive_strike
-    ce_data=option_chain[option_chain['CPType']=='CE']
-    pe_data=option_chain[option_chain['CPType']=='PE']
-    c_lastrate=float(ce_data[ce_data['StrikeRate']==c_strike_b]['LastRate'])
-    p_lastrate=float(pe_data[pe_data['StrikeRate']==p_strike_b]['LastRate'])
-    call_factor=max(100,int(np.floor((c_lastrate)/100)*100))
-    put_factor=max(100,int(np.floor((p_lastrate)/100)*100))
-    new_p_strike_b,new_c_strike_b=0,0
-    if x>c_strike_b and c_lastrate>100:
-        new_c_strike_b,y=order_button(c_strike_b+call_factor,'CE_B',2*c_leg_tron)
-        while y!=0:
-            order_button(strangle_c_strike,'CE_B',1)
-            order_button(strangle_p_strike,'PE_B',1)
-            strangle_tron-=1
+    if strangle_tron>0:
+        strangle_c_strike=(exclusive_strike==0)*strangle_c_strike+exclusive_strike
+        strangle_p_strike=(exclusive_strike==0)*strangle_p_strike+exclusive_strike
+        ce_data=option_chain[option_chain['CPType']=='CE']
+        pe_data=option_chain[option_chain['CPType']=='PE']
+        c_lastrate=float(ce_data[ce_data['StrikeRate']==c_strike_b]['LastRate'])
+        p_lastrate=float(pe_data[pe_data['StrikeRate']==p_strike_b]['LastRate'])
+        call_factor=max(100,int(np.floor((c_lastrate)/100)*100))
+        put_factor=max(100,int(np.floor((p_lastrate)/100)*100))
+        new_p_strike_b,new_c_strike_b=0,0
+        if x>c_strike_b and c_lastrate>100:
             new_c_strike_b,y=order_button(c_strike_b+call_factor,'CE_B',2*c_leg_tron)
-        o,y=order_button(c_strike_b,'CE_S',c_leg_tron*2)
-        while y!=0:
-            order_button(strangle_c_strike,'CE_B',1)
-            order_button(strangle_p_strike,'PE_B',1)
-            strangle_tron-=1
+            while y!=0:
+                if strangle_tron==0:
+                    break
+                order_button(strangle_c_strike,'CE_B',1)
+                order_button(strangle_p_strike,'PE_B',1)
+                strangle_tron-=1
+                new_c_strike_b,y=order_button(c_strike_b+call_factor,'CE_B',2*c_leg_tron)
+                
             o,y=order_button(c_strike_b,'CE_S',c_leg_tron*2)
-        c_leg_tron*=2
-    elif x<p_strike_b and p_lastrate>100:
-        new_p_strike_b,y=order_button(p_strike_b-put_factor,'PE_B',p_leg_tron*2)
-        while y!=0:
-            order_button(strangle_c_strike,'CE_B',1)
-            order_button(strangle_p_strike,'PE_B',1)
-            strangle_tron-=1
+            while y!=0:
+                if strangle_tron==0:
+                    break
+                order_button(strangle_c_strike,'CE_B',1)
+                order_button(strangle_p_strike,'PE_B',1)
+                strangle_tron-=1
+                o,y=order_button(c_strike_b,'CE_S',c_leg_tron*2)
+            c_leg_tron*=2
+        elif x<p_strike_b and p_lastrate>100:
             new_p_strike_b,y=order_button(p_strike_b-put_factor,'PE_B',p_leg_tron*2)
-        o,y=order_button(p_strike_b,'PE_S',p_leg_tron*2)
+            while y!=0:
+                if strangle_tron==0:
+                    break            
+                order_button(strangle_c_strike,'CE_B',1)
+                order_button(strangle_p_strike,'PE_B',1)
+                strangle_tron-=1
+                new_p_strike_b,y=order_button(p_strike_b-put_factor,'PE_B',p_leg_tron*2)
+            o,y=order_button(p_strike_b,'PE_S',p_leg_tron*2)
+            while y!=0:
+                if strangle_tron==0:
+                    break            
+                order_button(strangle_c_strike,'CE_B',1)
+                order_button(strangle_p_strike,'PE_B',1)
+                strangle_tron-=1
+                o,y=order_button(p_strike_b,'PE_S',p_leg_tron*2)
+            p_leg_tron*=2
+        new_c_strike_b,new_p_strike_b=c_strike_b*(new_c_strike_b==0)+new_c_strike_b,p_strike_b*(new_p_strike_b==0)+new_p_strike_b
+    return new_c_strike_b,new_p_strike_b,c_leg_tron,p_leg_tron,strangle_tron
+
+def intel_strike_mover(x,c_strike_intel,p_strike_intel,tron_intel,strangle_c_strike,strangle_p_strike,strangle_tron):
+    at_strike=int(np.round((x)/100)*100)
+    new_c_strike_intel=c_strike_intel
+    new_p_strike_intel=p_strike_intel
+    if c_strike_intel-x>47:
+        order_button(c_strike_intel,'CE_B',tron_intel)
+        new_c_strike_intel,y=order_button(at_strike,'CE_S',tron_intel)
         while y!=0:
+            if strangle_tron==0:
+                break            
             order_button(strangle_c_strike,'CE_B',1)
             order_button(strangle_p_strike,'PE_B',1)
             strangle_tron-=1
-            o,y=order_button(p_strike_b,'PE_S',p_leg_tron*2)
-        p_leg_tron*=2
-    new_c_strike_b,new_p_strike_b=c_strike_b*(new_c_strike_b==0)+new_c_strike_b,p_strike_b*(new_p_strike_b==0)+new_p_strike_b
-    return new_c_strike_b,new_p_strike_b,c_leg_tron,p_leg_tron,strangle_tron
+            o,y=order_button(at_strike,'CE_S',tron_intel)
+    if x-p_strike_intel>47:
+        order_button(p_strike_intel,'PE_B',tron_intel)
+        new_p_strike_intel,y=order_button(at_strike,'PE_S',tron_intel)
+        while y!=0:
+            if strangle_tron==0:
+                break            
+            order_button(strangle_c_strike,'CE_B',1)
+            order_button(strangle_p_strike,'PE_B',1)
+            strangle_tron-=1
+            o,y=order_button(at_strike,'PE_S',tron_intel)
+    return new_c_strike_intel,new_p_strike_intel
 
 def exclusive_strike_change_trades(exclusive_strike,x,tron):
     k,y1=order_button(exclusive_strike,'PE_B',tron)
@@ -421,7 +456,8 @@ start=int(input('enter 0 if starting the strategy for the first time, else 1 :  
 from_json=input('to take positions from existing positions json file (y/n): ')
 if start==0:
     leg_tron=int(input('leg_tron'))
-    c_leg_tron,p_leg_tron,c_strike_b,p_strike_b=initial_leg_trades(x,option_chain,leg_tron)
+    tron_intel=leg_tron
+    c_leg_tron,p_leg_tron,c_strike_b,p_strike_b,c_strike_intel,p_strike_intel=initial_leg_trades(x,option_chain,leg_tron)
     tron=int(prime_client['login'].margin()[0]['AvailableMargin']/140000)
     strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x)
     exclusive_strike=0
@@ -433,6 +469,9 @@ elif start==1 and from_json=='n':
     strangle_tron=int(input('strangle tron:  '))
     strangle_c_strike=int(input('enter strangle call strike: '))
     strangle_p_strike=int(input('enter strangle put strike: '))
+    tron_intel=int(input(' tron_intel:  '))
+    c_strike_intel=int(input('enter call_strike_intel: '))
+    p_strike_intel=int(input('enter put_strike_intel: '))
     exclusive_strike=int((strangle_c_strike==strangle_p_strike)*strangle_p_strike)
 elif start==1 and from_json=='y':
     positions_record=json.load(open(client_name+'_suryabhai_positions.json'))
@@ -443,6 +482,9 @@ elif start==1 and from_json=='y':
     strangle_tron       =   positions_record['strangle']['tron']
     strangle_c_strike   =   positions_record['strangle']['c_strike']
     strangle_p_strike   =   positions_record['strangle']['p_strike']
+    tron_intel          =   positions_record['intel']['tron_intel']
+    c_strike_intel      =   positions_record['intel']['c_strike_intel']
+    p_strike_intel      =   positions_record['intel']['p_strike_intel']
     exclusive_strike    =   int((strangle_c_strike==strangle_p_strike)*strangle_p_strike)
 
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -454,11 +496,14 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
     exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
     exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron)
     c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
+    c_strike_intel,p_strike_intel=intel_strike_mover(x,c_strike_intel,p_strike_intel,tron_intel,strangle_c_strike,strangle_p_strike,strangle_tron)
     if strangle_tron==0:
         exclusive_strike==0
         strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x)
 positions_json={'strangle':{'c_strike':strangle_c_strike,'p_strike':strangle_p_strike,'tron':strangle_tron},
-                'surya':{'c_strike_b':c_strike_b,'p_strike_b':p_strike_b,'c_leg_tron':c_leg_tron,'p_leg_tron':p_leg_tron}}
+                'surya':{'c_strike_b':c_strike_b,'p_strike_b':p_strike_b,'c_leg_tron':c_leg_tron,'p_leg_tron':p_leg_tron},
+                'intel':{'c_strike_intel':c_strike_intel,'p_strike_intel':p_strike_intel,'tron_intel':tron_intel}}
+
 print(positions_json)
 out_file = open(client_name+'_suryabhai_positions.json', "w")
 json.dump(positions_json, out_file, indent = 6)
