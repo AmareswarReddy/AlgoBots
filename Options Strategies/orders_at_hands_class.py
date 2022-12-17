@@ -26,7 +26,6 @@ class OrdersAtHands():
         user = creds[client]["user"]
         passw = creds[client]["passw"]
         dob = creds[client]["dob"]
-        client_list[client]['strategy']=strategies(user=user, passw=passw, dob=dob,cred=vinathi_cred)
         client_list[client]['login']=FivePaisaClient(email=user, passwd=passw, dob=dob,cred=vinathi_cred)
         client_list[client]['login'].login()
         #client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-200000)/180000)
@@ -34,6 +33,9 @@ class OrdersAtHands():
 
 
 #prime_client=client_login(client=client_name)
+
+    def get_user(self):
+        return self.client
 
     def order_button(self, exclusive_strike,type,lots):
         if exclusive_strike==0:
@@ -153,5 +155,17 @@ class OrdersAtHands():
     def getLivePositions2(self):
         positions = self.prime_client['login'].positions()
         return positions
+    
+    def get_data(self, exchange):
+        while True:
+            try :
+                expiry_timestamps=self.prime_client['login'].get_expiry("N",exchange).copy()
+                current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
+                option_chain=pd.DataFrame(self.prime_client['login'].get_option_chain("N",exchange,current_expiry_time_stamp_weekly)['Options'])
+                x=expiry_timestamps['lastrate'][0]['LTP']
+                break
+            except Exception :
+                pass
+        return option_chain,x
             
 # %%

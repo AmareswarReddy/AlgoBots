@@ -1,4 +1,5 @@
 from bokeh.plotting import figure
+from pnl_plot_class import get_pnl_plot
 import panel as pn
 pn.extension()
 from orders_at_hands_class import OrdersAtHands
@@ -55,9 +56,6 @@ def setPositionsInLayout(position):
                 </tr>
                 {rows}
                 </table>
-
-                <h1>{netpl}</h1>
-
     """.format(rows = rows)
     html_pane = pn.pane.HTML(("""
                 {str_table}
@@ -75,22 +73,44 @@ def update_ui():
             #Call Html Pane and replace with existing Pane
             positions = client.getLivePositions2()
             html_pane = setPositionsInLayout(positions)
+            #Following line for plot
+            Noption_chain,Nx=client.get_data('NIFTY')
+            Boption_chain,Bx=client.get_data('BANKNIFTY')
+            nifty_plot, banknifty_plot, total_profit = get_pnl_plot(Noption_chain,Nx,Boption_chain,Bx,client.getLivePositions2())
+            pnl_graph_row = pn.Row(pn.pane.Matplotlib(nifty_plot, tight=True), pn.pane.Matplotlib(banknifty_plot, tight=True))
+            #End of PNL plt
             inner_card[0] = html_pane
+            inner_card[1] = pnl_graph_row
+            
             i = i+1
 cb = pn.state.add_periodic_callback(update_ui, 30000) 
 
 def on_click_exit(event):
     print(event)
 
-for cred in creds:
-    client = OrdersAtHands(cred)
-    client_sessions.append(client)
-    #Elements specific to card
-    wtemp = pn.widgets.Button(name=str(cred), button_type='primary',  margin=(5, 10, 10, 10))
+#Caching clients so that we login only once 
+if 'client_sessions' in pn.state.cache:
+    client_sessions = pn.state.cache['client_sessions']
+else:
+    for cred in creds:
+        client = OrdersAtHands(cred)
+        client_sessions.append(client)
+    pn.state.cache['client_sessions'] = client_sessions
+
+for client in client_sessions:
+    #Elements specific to card``
+    user = client.get_user()
+    wtemp = pn.widgets.Button(name=str(user), button_type='primary',  margin=(5, 10, 10, 10))
     wtemp.on_click(on_click_exit)
     positions = client.getLivePositions()
     html_pane = setPositionsInLayout(positions)
-    card_temp = pn.Card(html_pane,wtemp, title=str(cred), sizing_mode='stretch_width')
+    #Following line for plot
+    Noption_chain,Nx=client.get_data('NIFTY')
+    Boption_chain,Bx=client.get_data('BANKNIFTY')
+    nifty_plot, banknifty_plot, total_profit = get_pnl_plot(Noption_chain,Nx,Boption_chain,Bx,client.getLivePositions2())
+    pnl_graph_row = pn.Row(pn.pane.Matplotlib(nifty_plot, tight=True), pn.pane.Matplotlib(banknifty_plot, tight=True))
+    #End of PNL plt 
+    card_temp = pn.Card(html_pane, pnl_graph_row, wtemp, title=str(user), sizing_mode='stretch_width')
     #end
     row.append(card_temp)
 
@@ -98,5 +118,11 @@ for cred in creds:
         row = pn.Row(background='WhiteSmoke')
         root_card.append(row)
     i = i+ 1
-print(root_card)
-root_card.show()
+
+pn.template.FastListTemplate(
+    site="Rich Club", 
+    title="Positions Monitor",
+    main=[
+       root_card
+    ]
+).servable()
