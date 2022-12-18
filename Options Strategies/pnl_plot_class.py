@@ -122,38 +122,30 @@ def get_pnl_plot(Noption_chain,Nx, Boption_chain,Bx, S):
         return np.array(k)
     break_even_N=get_break_evens(x1,y1)
     break_even_B=get_break_evens(x2,y2)
-    plt.plot(x1,y1,'g')
-    plt.plot(x1,np.array(y1)*0,'r')
-    l=[]
-    plt.plot([Nx,Nx],[max(y1),min(y1)],'b',linestyle='dashed')
-    l+=['lastrate: '+str(Nx)]
+    fig, (ax1, ax2) = plt.subplots(1,2)
+    ax1.plot(x1,y1,'g')
+    ax1.plot(x1,np.array(y1)*0,'r')
+    ax1.plot([Nx,Nx],[max(y1),min(y1)],'b',linestyle='dashed')
+    ax1.annotate(str(Nx), xy=(Nx, 0), xytext=(Nx+175, +5000), fontsize=8,
+    arrowprops=dict(facecolor='green', shrink=0.05))
     for i in break_even_N:
-        plt.plot([i,i],[max(y1),min(y1)],'y')
-        l+=['break_even: '+str(i)]
-    plt.legend(['pnl_at_expiry','zero_line']+l)
-    nifty_plot = plt.figure()
-  
+        ax1.plot([i,i],[max(y1),min(y1)],'y')
+        ax1.annotate(str(i), xy=(i, 0), xytext=(i+75, -5000), fontsize=8,
+        arrowprops=dict(facecolor='green', shrink=0.05))
 
-    plt.plot(x2,y2,'g')
-    plt.plot(x2,np.array(y2)*0,'r')
-    l=[]
-    plt.plot([Bx,Bx],[max(y2),min(y2)],'b',linestyle='dashed')
-    l+=['lastrate:'+str(Bx)]
+    ax2.plot(x2,y2,'g')
+    ax2.plot(x2,np.array(y2)*0,'r')
+    ax2.plot([Bx,Bx],[max(y2),min(y2)],'b',linestyle='dashed')
+    ax1.annotate(str(Bx), xy=(Bx, 0), xytext=(Bx+150, +5000), fontsize=8,
+    arrowprops=dict(facecolor='green', shrink=0.05))
     for i in break_even_B:
-        plt.plot([i,i],[max(y2),min(y2)],'y')
-        l+=['break_even: '+str(i)]
-    plt.legend(['pnl_at_expiry','zero_line']+l)
-    banknifty_plot = plt.figure()
- 
-
+        ax2.plot([i,i],[max(y2),min(y2)],'y')
+        ax1.annotate(str(i), xy=(i, 0), xytext=(i+250, -5000), fontsize=8,
+        arrowprops=dict(facecolor='green', shrink=0.05))
+    #banknifty_plot = plt.figure()
     #print(pd.DataFrame(prime_client['login'].positions()))
     total_profit = sum(S['MTOM'])+sum(S['BookedPL'])
-    return nifty_plot, banknifty_plot, total_profit
+    return  fig, total_profit
         #print(prime_client['login'].margin())
-# %%
-
-
-
-# %%
 
 # %%
