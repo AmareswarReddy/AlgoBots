@@ -30,115 +30,34 @@ def client_login(client):
     client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-200000)/180000)
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar ')
-def order_button(exclusive_strike,type,lots):
-    if exclusive_strike==0:
-        while True:
-            try :
-                expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
-                current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
-                option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
-                x=expiry_timestamps['lastrate'][0]['LTP']
-                break
-            except Exception :
-                pass
-        exclusive_strike=int(np.round(x/50)*50)
-    else:
-        while True:
-            try :
-                expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
-                current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
-                option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
-                x=expiry_timestamps['lastrate'][0]['LTP']
-                break
-            except Exception :
-                pass
+import sys
+def order_button(exclusive_strike,type,lots,option_chain):
     if type=='CE_B':
-        already_placed=0
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        temp2=lots
-        temp=int(temp2/56)
-        end=temp2-temp*56
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
-        while temp>0:
-            status=prime_client['login'].place_order(test_order)
-            temp=temp-1 
-            if status['Message']=='Success':
-                already_placed+=56
-            sleep(0.5)
-        if temp==0 and end!=0:
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
-            status=prime_client['login'].place_order(test_order)
-            if status['Message']=='Success':
-                already_placed+=end
-        yet_to_place=lots-already_placed 
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order) 
     if type=='PE_B':
-        already_placed=0
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        temp2=lots
-        temp=int(temp2/56)
-        end=temp2-temp*56
-        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
-        while temp>0:
-            status=prime_client['login'].place_order(test_order) 
-            temp=temp-1
-            if status['Message']=='Success':
-                already_placed+=56
-            sleep(0.5)
-        if temp==0 and end!=0:
-            test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
-            status=prime_client['login'].place_order(test_order) 
-            if status['Message']=='Success':
-                already_placed+=end
-        yet_to_place=lots-already_placed
+        test_order = Order(order_type='B',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order) 
     if type=='CE_S':
-        already_placed=0
         c_data=option_chain[option_chain['CPType']=='CE']
         c_scrip=int(c_data[c_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        temp2=lots
-        temp=int(temp2/56)
-        end=temp2-temp*56
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
-        while temp>0:
-            status=prime_client['login'].place_order(test_order) 
-            temp=temp-1
-            if status['Message']=='Success':
-                already_placed+=56
-            sleep(0.5)
-        if temp==0 and end!=0:
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
-            status=prime_client['login'].place_order(test_order) 
-            if status['Message']=='Success':
-                already_placed+=end
-        yet_to_place=lots-already_placed
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =c_scrip, quantity=25*lots, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order) 
     if type=='PE_S':
-        already_placed=0
         p_data=option_chain[option_chain['CPType']=='PE']
         p_scrip=int(p_data[p_data['StrikeRate']==exclusive_strike]['ScripCode'])
-        temp2=lots
-        temp=int(temp2/56)
-        end=temp2-temp*56
-        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*56, price=0 ,is_intraday=False,remote_order_id="tag")
-        while temp>0:
-            status=prime_client['login'].place_order(test_order) 
-            temp=temp-1
-            if status['Message']=='Success':
-                already_placed+=56
-            sleep(0.5)
-        if temp==0 and end!=0:
-            test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=50*end, price=0 ,is_intraday=False,remote_order_id="tag")
-            status=prime_client['login'].place_order(test_order) 
-            if status['Message']=='Success':
-                already_placed+=end
-        yet_to_place=lots-already_placed
-    return exclusive_strike,yet_to_place
+        test_order = Order(order_type='S',exchange='N',exchange_segment='D', scrip_code =p_scrip, quantity=25*lots, price=0 ,is_intraday=False,remote_order_id="tag")
+        prime_client['login'].place_order(test_order) 
+    return exclusive_strike
+
 def good_to_go(prev_x,x):
-    a=np.floor(prev_x/50)
-    b=np.floor(x/50)
-    if a>b:
+    if np.ceil(prev_x/50)-np.ceil(x/50)==1:
         return -1
-    elif a<b:
+    elif np.ceil(x/50)-np.ceil(prev_x/50)==1:
         return 1
     else:
         return 0
@@ -167,109 +86,75 @@ def daily_buy_sell_switch():
         k=1
     return -np.sign(k-1)
 
-def data(m):
+def data():
     while True:
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
-            x=expiry_timestamps['lastrate'][0]['LTP']-m
+            x=expiry_timestamps['lastrate'][0]['LTP']
             break
         except Exception :
             pass
     return option_chain,x
 
-def troner(tron,step):
-    tron2=np.floor(tron/step)
-    rest=tron-tron2*step
-    return tron2,rest
-def lots_drop(strike,side,yet_to_place):
-    k=yet_to_place
-    while yet_to_place>0:
-        yet_to_place-=1
-        xx,pending=order_button(strike,side,yet_to_place)
-        if pending==0:
-            break
-    return k-yet_to_place
-        
 
 #%%
 #variables to be initialised
-client_name = 'vinathi'
+client_name = 'bhaskar'
 tron=int(input('enter the number of lots for trading (Eg 3):'))
+if tron>36:
+    tron=36
 prime_client=client_login(client=client_name)
 expiry_timestamps=prime_client['login'].get_expiry("N","NIFTY").copy()
 current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
 option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N","NIFTY",current_expiry_time_stamp_weekly)['Options'])
 prev_x=expiry_timestamps['lastrate'][0]['LTP']
-m=int(input('enter a random no. from -10 to 10 for reference of starting position: '))
 start=0
-#%%
-#m=int(input('enter the lastrate at which you would like to enter trades Eg: 35,55,60,40'))
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16])<=555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
-    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-#%%
-daily_switch=daily_buy_sell_switch()
-if daily_switch<=0:
-    while True:
-        option_chain,x=data(m)
-        #x=int(input('-----'))
-        if start==0:
-            if good_to_go(x=x,prev_x=prev_x)>0:
-                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S',tron)
-                tron=tron-lots_drop(int(np.round(x/50)*50),'PE_S',yet_to_place)
-                start=1
-                side='PE_S'
-            if good_to_go(x=x,prev_x=prev_x)<0:
-                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'CE_S',tron)
-                tron=tron-lots_drop(int(np.round(x/50)*50),'CE_S',yet_to_place)
-                start=1
-                side='CE_S'
-        if start==1:
-            if change_of_strike(earlier_x=exclusive_strike,x=x)>1:
-                earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
-                order_button(exclusive_strike,'PE_B',tron)
-                while True:
-                    later_margin=prime_client['login'].margin()[0]['AvailableMargin']
-                    if later_margin>earlier_margin:
-                        break
-                tron=tron+1
-                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'PE_S',tron)
-                tron=tron-lots_drop(int(np.round(x/50)*50),'PE_S',yet_to_place)
-                side='PE_S'
-            if change_of_strike(earlier_x=exclusive_strike,x=x)<-1:
-                earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
-                order_button(exclusive_strike,'CE_B',tron)
-                while True:
-                    later_margin=prime_client['login'].margin()[0]['AvailableMargin']
-                    if later_margin>earlier_margin:
-                        break
-                tron=tron+1
-                exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),'CE_S',tron)
-                tron=tron-lots_drop(int(np.round(x/50)*50),'CE_S',yet_to_place)
-                side='CE_S'
-            side_=side_switch(earlier_x=exclusive_strike,x=x,side=side)
-            if side_!=side:
-                if side=='CE_S':
-                    earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
-                    order_button(exclusive_strike,'CE_B',tron)
-                    while True:
-                        later_margin=prime_client['login'].margin()[0]['AvailableMargin']
-                        if later_margin>earlier_margin:
-                            break
-                    tron+=1
-                    exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),side_,tron)
-                    tron=tron-lots_drop(int(np.round(x/50)*50),side_,yet_to_place)
-                if side=='PE_S':
-                    earlier_margin=prime_client['login'].margin()[0]['AvailableMargin']
-                    order_button(exclusive_strike,'PE_B',tron)
-                    while True:
-                        later_margin=prime_client['login'].margin()[0]['AvailableMargin']
-                        if later_margin>earlier_margin:
-                            break
-                    tron+=1
-                    exclusive_strike,yet_to_place=order_button(int(np.round(x/50)*50),side_,tron)
-                    tron=tron-lots_drop(int(np.round(x/50)*50),side_,yet_to_place)
-                side=side_
-        prev_x=x
+#while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
+#    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+
+# %%
+while True:
+    option_chain,x=data()
+    #x=int(input('-----'))
+    if start==0:
+        if good_to_go(x=x,prev_x=prev_x)>0:
+            exclusive_strike=order_button(int(np.round(x/50)*50),'CE_B',tron,option_chain)
+            u=(prev_x+x)/2
+            earlier_x=int(np.round(u/50)*50)
+            start=1
+            side='CE_B'
+        if good_to_go(x=x,prev_x=prev_x)<0:
+            exclusive_strike=order_button(int(np.round(x/50)*50),'PE_B',tron,option_chain)
+            u=(prev_x+x)/2
+            earlier_x=int(np.round(u/50)*50)
+            start=1
+            side='PE_B'
+    if start==1:
+        if change_of_strike(earlier_x=earlier_x,x=x)>1:
+            order_button(exclusive_strike,'CE_S',tron,option_chain)
+            exclusive_strike=order_button(int(np.round(x/50)*50),'CE_B',tron,option_chain)
+            u=(prev_x+x)/2
+            earlier_x=int(np.round(u/50)*50)
+            side='CE_B'
+        if change_of_strike(earlier_x=earlier_x,x=x)<-1:
+            order_button(exclusive_strike,'PE_S',tron,option_chain)
+            exclusive_strike=order_button(int(np.round(x/50)*50),'PE_B',tron,option_chain)
+            u=(prev_x+x)/2
+            earlier_x=int(np.round(u/50)*50)
+            side='PE_B'
+        side_=side_switch(earlier_x=earlier_x,x=x,side=side)
+        if side_!=side:
+            if side=='PE_B':
+                order_button(exclusive_strike,'PE_S',tron,option_chain)
+                exclusive_strike=order_button(int(np.round(x/50)*50),side_,tron,option_chain)
+            if side=='CE_B':
+                order_button(exclusive_strike,'CE_S',tron,option_chain)
+                exclusive_strike=order_button(int(np.round(x/50)*50),side_,tron,option_chain)
+            u=(prev_x+x)/2
+            earlier_x=int(np.round(u/50)*50)
+            side=side_
+    prev_x=x
+
 # %%
