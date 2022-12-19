@@ -152,10 +152,13 @@ def lots_drop(strike,side,yet_to_place):
     return k-yet_to_place
 
 def opening_average():
-    k=prime_client['login'].historical_data('N','C',999920005,'1d','2022-10-20','9999-06-16')
-    k=k[(k['Open']!=0)]
-    k=k[(k['Close']!=0)]
-    average_opening_movement=np.average(np.abs(np.array(k['Open'])[-5:]-np.array(k['Close'])[-6:-1]))
+    try:
+        k=prime_client['login'].historical_data('N','C',999920005,'1d','2022-10-20','9999-06-16')
+        k=k[(k['Open']!=0)]
+        k=k[(k['Close']!=0)]
+        average_opening_movement=np.average(np.abs(np.array(k['Open'])[-5:]-np.array(k['Close'])[-6:-1]))
+    except Exception:
+        average_opening_movement=100
     return average_opening_movement
 
 def finalise_tron(p_strike,c_strike,tron):
@@ -290,7 +293,7 @@ def exclusive_strike_change_trades(exclusive_strike,x,tron):
 def margin_utilizer(c_strike,p_strike):
     k=prime_client['login'].margin()[0]['AvailableMargin']
     tron=int(k/180000)
-    tron=finalise_tron(c_strike,p_strike,tron)
+    tron=finalise_tron(p_strike,c_strike,tron)
     return tron
 
 def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
