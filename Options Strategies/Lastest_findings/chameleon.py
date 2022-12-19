@@ -133,13 +133,13 @@ while True:
             side='PE_B'
     if start==1:
         if change_of_strike(earlier_x=earlier_x,x=x)>1:
-            order_button(exclusive_strike,'CE_S',tron)
+            order_button(exclusive_strike,'CE_S',tron,option_chain)
             exclusive_strike=order_button(int(np.round(x/100)*100),'CE_B',tron,option_chain)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/100)*100)
             side='CE_B'
         if change_of_strike(earlier_x=earlier_x,x=x)<-1:
-            order_button(exclusive_strike,'PE_S',tron)
+            order_button(exclusive_strike,'PE_S',tron,option_chain)
             exclusive_strike=order_button(int(np.round(x/100)*100),'PE_B',tron,option_chain)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/100)*100)
@@ -147,10 +147,10 @@ while True:
         side_=side_switch(earlier_x=earlier_x,x=x,side=side)
         if side_!=side:
             if side=='PE_B':
-                order_button(exclusive_strike,'PE_S',tron)
+                order_button(exclusive_strike,'PE_S',tron,option_chain)
                 exclusive_strike=order_button(int(np.round(x/100)*100),side_,tron,option_chain)
             if side=='CE_B':
-                order_button(exclusive_strike,'CE_S',tron)
+                order_button(exclusive_strike,'CE_S',tron,option_chain)
                 exclusive_strike=order_button(int(np.round(x/100)*100),side_,tron,option_chain)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/100)*100)
