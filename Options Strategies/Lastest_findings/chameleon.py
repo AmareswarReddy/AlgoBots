@@ -55,16 +55,9 @@ def order_button(exclusive_strike,type,lots,option_chain):
     return exclusive_strike
 
 def good_to_go(prev_x,x):
-    j=x%100
-    k=x%10
-    y=j-k
-    i=np.floor(prev_x/100)
-    j=prev_x%100
-    k=prev_x%10
-    y2=j-k
-    if y2==50 and y==40:
+    if np.ceil(prev_x/100)-np.ceil(x/100)==1:
         return -1
-    elif y==50 and y2==40:
+    elif np.ceil(x/100)-np.ceil(prev_x/100)==1:
         return 1
     else:
         return 0
@@ -107,7 +100,7 @@ def data():
 
 #%%
 #variables to be initialised
-client_name = 'vinathi'
+client_name = 'bhaskar'
 tron=int(input('enter the number of lots for trading (Eg 3):'))
 if tron>36:
     tron=36
@@ -127,13 +120,13 @@ while True:
     #x=int(input('-----'))
     if start==0:
         if good_to_go(x=x,prev_x=prev_x)>0:
-            exclusive_strike=order_button(int(np.round(x/100)*100),'CE_B',tron)
+            exclusive_strike=order_button(int(np.round(x/100)*100),'CE_B',tron,option_chain)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/100)*100)
             start=1
             side='CE_B'
         if good_to_go(x=x,prev_x=prev_x)<0:
-            exclusive_strike=order_button(int(np.round(x/100)*100),'PE_B',tron)
+            exclusive_strike=order_button(int(np.round(x/100)*100),'PE_B',tron,option_chain)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/100)*100)
             start=1
@@ -141,13 +134,13 @@ while True:
     if start==1:
         if change_of_strike(earlier_x=earlier_x,x=x)>1:
             order_button(exclusive_strike,'CE_S',tron)
-            exclusive_strike=order_button(int(np.round(x/100)*100),'CE_B',tron)
+            exclusive_strike=order_button(int(np.round(x/100)*100),'CE_B',tron,option_chain)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/100)*100)
             side='CE_B'
         if change_of_strike(earlier_x=earlier_x,x=x)<-1:
             order_button(exclusive_strike,'PE_S',tron)
-            exclusive_strike=order_button(int(np.round(x/100)*100),'PE_B',tron)
+            exclusive_strike=order_button(int(np.round(x/100)*100),'PE_B',tron,option_chain)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/100)*100)
             side='PE_B'
@@ -155,10 +148,10 @@ while True:
         if side_!=side:
             if side=='PE_B':
                 order_button(exclusive_strike,'PE_S',tron)
-                exclusive_strike=order_button(int(np.round(x/100)*100),side_,tron)
+                exclusive_strike=order_button(int(np.round(x/100)*100),side_,tron,option_chain)
             if side=='CE_B':
                 order_button(exclusive_strike,'CE_S',tron)
-                exclusive_strike=order_button(int(np.round(x/100)*100),side_,tron)
+                exclusive_strike=order_button(int(np.round(x/100)*100),side_,tron,option_chain)
             u=(prev_x+x)/2
             earlier_x=int(np.round(u/100)*100)
             side=side_
