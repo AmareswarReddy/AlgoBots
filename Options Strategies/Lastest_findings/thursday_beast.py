@@ -335,11 +335,11 @@ def initial_leg_trades(option_chain,x,tron):
 
 def Thursday_beast(x,c_strike,p_strike,c_strike_b,p_strike_b,tron):
     c_strike_new,p_strike_new=0,0
-    if x-c_strike_b>50:
+    if x-c_strike_b>66:
         c,a=order_button(c_strike_b+100,'CE_B',tron)
         o,a=order_button(c_strike_b,'CE_S',tron)
         c_strike_b=c
-    if x-c_strike_b>50:
+    if p_strike_b-x>66:
         p,a=order_button(p_strike_b-100,'PE_B',tron)
         o,a=order_button(p_strike_b,'PE_S',tron)
         p_strike_b=p
@@ -414,17 +414,30 @@ def clear_open_positions():
 client_name = input('enter the client name: ')
 prime_client=client_login(client=client_name)
 option_chain,x=data(week=0)
-
 #%%
 option_chain,x=data(week=0)
 exclusive_strike,c_strike,p_strike=0,0,0
-tron=int(input('enter the number of lots: '))
-
-ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>1085 :
+start=int(input('enter 0 if starting the strategy for the first time: '))
+if start==0:
+    tron=int(input('enter the number of lots: '))
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-clear_open_positions()
-tron,c_strike,p_strike=initial_leg_trades(option_chain,x,tron)
-while True:
+    while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>1085 :
+        ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    clear_open_positions()
+    tron,c_strike,p_strike=initial_leg_trades(option_chain,x,tron)
+
+if start==1:
+    tron=int(input('enter the number of lots: '))
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>1085 :
+        ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    clear_open_positions()
+    tron,c_strike,p_strike=initial_leg_trades(option_chain,x,tron)
+
+while int(ind_time[11:13])*60+int(ind_time[14:16])<930 :
     option_chain,x=data(week=0)
     c_strike,p_strike,c_strike_b,p_strike_b,tron=Thursday_beast(x,c_strike,p_strike,c_strike_b,p_strike_b,tron)
+positions_json={'c_strike':c_strike,'p_strike':p_strike,'c_strike_b':c_strike_b,'p_strike_b':p_strike_b,'tron':tron}
+out_file = open(client_name+'_beast.json', "w")
+json.dump(positions_json, out_file, indent = 6)
+out_file.close()
