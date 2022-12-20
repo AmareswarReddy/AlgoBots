@@ -233,7 +233,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<930:
     calloptions_vwap,putoptions_vwap=options_vwap_json(option_chain,calloptions_vwap,putoptions_vwap)
     call_move=sum(np.sign(np.array(ce_data['LastRate']-calloptions_vwap['LastRate'])))
     put_move= sum(np.sign(np.array(putoptions_vwap['LastRate']-pe_data['LastRate'])))
-    total=sum(np.abs(np.array(ce_data['LastRate']-calloptions_vwap['LastRate'])))+sum(np.abs(np.array(putoptions_vwap['LastRate']-pe_data['LastRate'])))
+    total=2*len(np.array(ce_data['LastRate']))
     indicator=indicator+[(call_move+put_move)/(total)]
     lastrate=lastrate+[x]
     new={'lastrate':lastrate,'indicator':indicator}
