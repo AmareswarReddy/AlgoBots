@@ -224,7 +224,11 @@ putoptions_vwap=pe_data[['StrikeRate','LastRate','Volume']].copy()
 indicator=[]
 lastrate=[]
 #%%
-while True:
+ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+while int(ind_time[11:13])*60+int(ind_time[14:16])<930:
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain,x=data(week=0)
     ce_data=option_chain[option_chain['CPType']=='CE']
     pe_data=option_chain[option_chain['CPType']=='PE']
