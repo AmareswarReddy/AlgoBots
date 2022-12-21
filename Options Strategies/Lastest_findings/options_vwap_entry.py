@@ -202,14 +202,16 @@ def options_vwap_json(option_chain,calloptions_vwap,putoptions_vwap):
     prev_p_volumes=     np.array(putoptions_vwap['Volume'])+0.01
     c_net=np.multiply(c_volumes-prev_c_volumes,c_lastrate)
     p_net=np.multiply(p_volumes-prev_p_volumes,p_lastrate)
+    c_volumes[c_volumes==0]=1
+    p_volumes[p_volumes==0]=1
     call_vwap=np.multiply((c_net+np.multiply(prev_c_lastrate,prev_c_volumes)),1/c_volumes)
     put_vwap=np.multiply((p_net+np.multiply(prev_p_lastrate,prev_p_volumes)),1/p_volumes)
     calloptions_vwap=ce_data[['StrikeRate','LastRate','Volume']].copy()
     putoptions_vwap=pe_data[['StrikeRate','LastRate','Volume']].copy()
     calloptions_vwap['LastRate']=call_vwap    
-    calloptions_vwap['Volume']=calloptions_vwap['Volume']+0.01
+    calloptions_vwap['Volume']=ce_data['Volume']
     putoptions_vwap['LastRate']=put_vwap    
-    putoptions_vwap['Volume']=putoptions_vwap['Volume']+0.01
+    putoptions_vwap['Volume']=pe_data['Volume']
     return calloptions_vwap,putoptions_vwap
 
 #%%
