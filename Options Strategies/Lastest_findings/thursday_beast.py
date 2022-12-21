@@ -335,11 +335,11 @@ def initial_leg_trades(option_chain,x,tron):
 
 def Thursday_beast(x,c_strike,p_strike,c_strike_b,p_strike_b,tron):
     c_strike_new,p_strike_new=0,0
-    if x-c_strike_b>66:
+    if x-c_strike_b>100:
         c,a=order_button(c_strike_b+100,'CE_B',tron)
         o,a=order_button(c_strike_b,'CE_S',tron)
         c_strike_b=c
-    if p_strike_b-x>66:
+    if p_strike_b-x>100:
         p,a=order_button(p_strike_b-100,'PE_B',tron)
         o,a=order_button(p_strike_b,'PE_S',tron)
         p_strike_b=p
