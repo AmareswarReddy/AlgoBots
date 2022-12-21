@@ -330,7 +330,7 @@ def initial_leg_trades(option_chain,x,tron):
     c_strike=exclusive_strike
     p_strike=exclusive_strike
     tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron)
-    return tron,c_strike,p_strike
+    return tron,c_strike,p_strike,c_strike_b,p_strike_b
 
 
 def Thursday_beast(x,c_strike,p_strike,c_strike_b,p_strike_b,tron):
@@ -424,15 +424,15 @@ if start==0:
     while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>1085 :
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     clear_open_positions()
-    tron,c_strike,p_strike=initial_leg_trades(option_chain,x,tron)
+    tron,c_strike,p_strike,c_strike_b,p_strike_b=initial_leg_trades(option_chain,x,tron)
 
 if start==1:
-    tron=int(input('enter the number of lots: '))
+    f = open (client_name+'_beast.json', "r")
+    positions_json = json.loads(f.read())
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     while int(ind_time[11:13])*60+int(ind_time[14:16])<556 or int(ind_time[11:13])*60+int(ind_time[14:16])>1085 :
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    clear_open_positions()
-    tron,c_strike,p_strike=initial_leg_trades(option_chain,x,tron)
+    tron,c_strike,p_strike,c_strike_b,p_strike_b=positions_json['tron'],positions_json['c_strike'],positions_json['p_strike'],positions_json['c_strike_b'],positions_json['p_strike_b']
 
 while int(ind_time[11:13])*60+int(ind_time[14:16])<930 :
     option_chain,x=data(week=0)
