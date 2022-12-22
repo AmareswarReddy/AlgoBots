@@ -367,7 +367,7 @@ def Thursday_beast(x,c_strike,p_strike,c_strike_b,p_strike_b,tron):
                 order_button(c_strike,'CE_B',y1)
     p_strike_new=p_strike*(p_strike_new==0)+p_strike_new
     c_strike_new=c_strike*(c_strike_new==0)+c_strike_new
-    return c_strike,p_strike,c_strike_b,p_strike_b,tron
+    return c_strike_new,p_strike_new,c_strike_b,p_strike_b,tron
 
 def get_strike_from_scrip(scripcode,exchange):
     if exchange=='BANKNIFTY':
@@ -380,6 +380,8 @@ def get_strike_from_scrip(scripcode,exchange):
 def clear_open_positions():
 
     S=pd.DataFrame(prime_client['login'].positions())
+    if len(S)==0:
+        return 0
     if len(S[S['NetQty']!=0])!=0:
         for i in range(0,len(S)):
             if ('NIFTY' in S['ScripName'].iloc[i]) and S['NetQty'].iloc[i]!=0 and ('BANKNIFTY' not in S['ScripName'].iloc[i]):
