@@ -209,7 +209,7 @@ def margin_utilizer(c_strike,p_strike):
 def re_adjust_strangle(strangle_lastrate_sum,option_chain,x):
     exclusive_strike=int(np.round((x)/100)*100)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
-    factor=float(1.3+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=float(1.9+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
     factor=int(np.round((factor)/100)*100)
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
@@ -341,7 +341,7 @@ def initial_leg_trades(x,option_chain,tron):
     pe_data=option_chain[option_chain['CPType']=='PE']
     c_lastrate=float(ce_data[ce_data['StrikeRate']==exclusive_strike]['LastRate'])
     p_lastrate=float(pe_data[pe_data['StrikeRate']==exclusive_strike]['LastRate'])
-    f=(p_lastrate+c_lastrate)/1.7
+    f=(p_lastrate+c_lastrate)
     factor=max(100,int(np.floor((f)/100)*100))
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
@@ -426,7 +426,7 @@ def intel_strike_mover(x,c_strike_intel,p_strike_intel,tron_intel,strangle_c_str
     at_strike=int(np.round((x)/100)*100)
     new_c_strike_intel=c_strike_intel
     new_p_strike_intel=p_strike_intel
-    if c_strike_intel-x>47:
+    if c_strike_intel-x>53:
         order_button(c_strike_intel,'CE_B',tron_intel)
         new_c_strike_intel,y=order_button(at_strike,'CE_S',tron_intel)
         while y!=0:
@@ -436,7 +436,7 @@ def intel_strike_mover(x,c_strike_intel,p_strike_intel,tron_intel,strangle_c_str
             order_button(strangle_p_strike,'PE_B',1)
             strangle_tron-=1
             o,y=order_button(at_strike,'CE_S',tron_intel)
-    if x-p_strike_intel>47:
+    if x-p_strike_intel>53:
         order_button(p_strike_intel,'PE_B',tron_intel)
         new_p_strike_intel,y=order_button(at_strike,'PE_S',tron_intel)
         while y!=0:
@@ -500,6 +500,9 @@ if start==0:
     tron_intel=leg_tron
     c_leg_tron,p_leg_tron,c_strike_b,p_strike_b,c_strike_intel,p_strike_intel=initial_leg_trades(x,option_chain,leg_tron)
     tron=int(prime_client['login'].margin()[0]['AvailableMargin']/140000)
+    ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    while int(ind_time[11:13])*60+int(ind_time[14:16])<556 :
+        ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x)
     exclusive_strike=0
 elif start==1 and from_json=='n':
