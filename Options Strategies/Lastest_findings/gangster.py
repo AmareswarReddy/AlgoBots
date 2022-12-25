@@ -25,7 +25,7 @@ def client_login(client):
     user = creds[client]["user"]
     passw = creds[client]["passw"]
     dob = creds[client]["dob"]
-    client_list[client]['strategy']=strategies(user=user, passw=passw, dob=dob,cred=vinathi_cred)
+    client_list[client]['strategy']=0
     client_list[client]['login']=FivePaisaClient(email=user, passwd=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login'].login()
     client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-200000)/180000)
