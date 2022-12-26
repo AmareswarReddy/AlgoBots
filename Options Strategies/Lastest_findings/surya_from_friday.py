@@ -420,6 +420,8 @@ def surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_s
                 o,y=order_button(p_strike_b,'PE_S',p_leg_tron+extra_lots)
             p_leg_tron+=extra_lots
         new_c_strike_b,new_p_strike_b=c_strike_b*(new_c_strike_b==0)+new_c_strike_b,p_strike_b*(new_p_strike_b==0)+new_p_strike_b
+    if strangle_tron==0:
+        new_c_strike_b,new_p_strike_b=c_strike_b,p_strike_b
     return new_c_strike_b,new_p_strike_b,c_leg_tron,p_leg_tron,strangle_tron
 
 def intel_strike_mover(x,c_strike_intel,p_strike_intel,tron_intel,strangle_c_strike,strangle_p_strike,strangle_tron):
