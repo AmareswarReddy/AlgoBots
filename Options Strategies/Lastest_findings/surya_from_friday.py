@@ -544,8 +544,10 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
     c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
     c_strike_intel,p_strike_intel=intel_strike_mover(x,c_strike_intel,p_strike_intel,tron_intel,strangle_c_strike,strangle_p_strike,strangle_tron)
     if strangle_tron==0:
-        exclusive_strike==0
-        strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x)
+        temp=np.sum(option_chain[option_chain['StrikeRate']==exclusive_strike]['LastRate'])
+        if temp>66:
+            exclusive_strike==0
+            strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x)
 positions_json={'strangle':{'c_strike':strangle_c_strike,'p_strike':strangle_p_strike,'tron':strangle_tron},
                 'surya':{'c_strike_b':c_strike_b,'p_strike_b':p_strike_b,'c_leg_tron':c_leg_tron,'p_leg_tron':p_leg_tron},
                 'intel':{'c_strike_intel':c_strike_intel,'p_strike_intel':p_strike_intel,'tron_intel':tron_intel}}
