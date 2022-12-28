@@ -188,17 +188,39 @@ def finalise_tron(p_strike,c_strike,tron):
 def initial_strangle_trades(option_chain,x,tron):
     exclusive_strike=int(np.round((x)/100)*100)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
-    factor=float(1.3+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=float(1.6+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
     factor=int(np.round((factor)/100)*100)
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
     tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron)
     return tron,c_strike,p_strike
 
+def new_strangle_adjustment_trades(option_chain,x,tron,sell_value):
+    def strangle_sum(c_strike,p_strike):
+        ce_data=option_chain[option_chain['CPType']=='CE']
+        pe_data=option_chain[option_chain['CPType']=='PE']
+        c_lastrate=float(ce_data[ce_data['StrikeRate']==c_strike]['LastRate'])
+        p_lastrate=float(pe_data[pe_data['StrikeRate']==p_strike]['LastRate'])
+        return c_lastrate+p_lastrate
+    exclusive_strike=int(np.round((x)/100)*100)
+    f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
+    factor=float(2+np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=int(np.round((factor)/100)*100)
+    while True:
+        factor-=100
+        c_strike=exclusive_strike+factor
+        p_strike=exclusive_strike-factor
+        new_sell_value=strangle_sum(c_strike,p_strike)
+        if new_sell_value>sell_value+5 or factor==0:
+            tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron)
+            break
+    return tron,c_strike,p_strike
+
+
 def re_adjust_strangle(strangle_lastrate_sum,option_chain,x):
     exclusive_strike=int(np.round((x)/100)*100)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
-    factor=float(1.3+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=float(1.6+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
     factor=int(np.round((factor)/100)*100)
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
@@ -207,7 +229,7 @@ def re_adjust_strangle(strangle_lastrate_sum,option_chain,x):
     c_lastrate=float(ce_data[ce_data['StrikeRate']==c_strike]['LastRate'])
     p_lastrate=float(pe_data[pe_data['StrikeRate']==p_strike]['LastRate'])
     cp_sum=c_lastrate+p_lastrate
-    if 2.13*strangle_lastrate_sum<cp_sum:
+    if 2*strangle_lastrate_sum<cp_sum:
         return True
     else:
         return False
@@ -388,42 +410,16 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     break
             tron,c_strike,p_strike=initial_strangle_trades(option_chain,x,tron)
         at_strike=int(np.round((x)/100)*100)
-        if c_lastrate/p_lastrate>2.13 and (2*at_strike-c_strike)>p_strike :
+        if (c_lastrate/p_lastrate>2.13 or p_lastrate/c_lastrate>2.13) :
             while True:
                 strike,yet_to_place=order_button(p_strike,'PE_B',tron)
                 if yet_to_place==0:
                     break
-            p_strike,yet_to_place=order_button(2*at_strike-c_strike,'PE_S',tron)
-            while True:
-                if yet_to_place!=0:
-                    tron=tron-1
-                    while True:
-                        strike,y=order_button(c_strike,'CE_B',1)
-                        if y==0:
-                            break
-                    sleep(1)
-                    p_strike,yet_to_place=order_button(2*at_strike-c_strike,'PE_S',tron)
-                if yet_to_place==0:
-                    break
-            exclusive_strike=(c_strike==p_strike)*c_strike
-        if p_lastrate/c_lastrate>2.13 and (2*at_strike-p_strike)<c_strike:
             while True:
                 strike,yet_to_place=order_button(c_strike,'CE_B',tron)
                 if yet_to_place==0:
                     break
-            at_strike=int(np.round((x)/100)*100)
-            c_strike,yet_to_place=order_button(2*at_strike-p_strike,'CE_S',tron)
-            while True:
-                if yet_to_place!=0:
-                    tron=tron-1
-                    while True:
-                        strike,y=order_button(p_strike,'PE_B',1)
-                        if y==0:
-                            break
-                    sleep(1)
-                    c_strike,yet_to_place=order_button(2*at_strike-p_strike,'CE_S',tron)
-                if yet_to_place==0:
-                    break
+            tron,c_strike,p_strike=new_strangle_adjustment_trades(option_chain,x,tron,c_lastrate+p_lastrate)
             exclusive_strike=(c_strike==p_strike)*c_strike
         if x>=c_strike or x<=p_strike:
             at_strike=int(np.round((x)/100)*100)
