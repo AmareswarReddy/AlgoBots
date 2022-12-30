@@ -410,7 +410,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     break
             tron,c_strike,p_strike=initial_strangle_trades(option_chain,x,tron)
         at_strike=int(np.round((x)/100)*100)
-        if (c_lastrate/p_lastrate>2.13 or p_lastrate/c_lastrate>2.13) :
+        if (c_lastrate/p_lastrate>2.4 or p_lastrate/c_lastrate>2.4) :
             while True:
                 strike,yet_to_place=order_button(p_strike,'PE_B',tron)
                 if yet_to_place==0:
@@ -734,3 +734,5 @@ print(positions_json)
 out_file = open(client_name+'_positions.json', "w")
 json.dump(positions_json, out_file, indent = 6)
 out_file.close()
+
+# %%
