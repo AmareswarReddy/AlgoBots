@@ -240,7 +240,7 @@ def new_strangle_adjustment_trades(option_chain,x,tron,sell_value,c_strike,p_str
 def re_adjust_strangle(strangle_lastrate_sum,option_chain,x):
     exclusive_strike=int(np.round((x)/100)*100)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
-    factor=float(2.1+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=float(1.9)*int(np.ceil(f/100)*100)
     factor=int(np.round((factor)/100)*100)
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
@@ -345,6 +345,7 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
             return abs(a)
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
+        tron=tron+margin_utilizer(exclusive_strike,exclusive_strike)
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)   
             chameleon_signal=1
@@ -357,6 +358,7 @@ def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg,exit_signa
             return abs(a)
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
+        tron=tron+margin_utilizer(exclusive_strike,exclusive_strike)
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)   
             exit_signal2=1
@@ -430,7 +432,8 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     break
             tron,c_strike,p_strike=initial_strangle_trades(option_chain,x,tron)
         at_strike=int(np.round((x)/100)*100)
-        if (c_lastrate/p_lastrate>2.13 or p_lastrate/c_lastrate>2.13) :
+        at_strike_premium_sum=float(ce_data[ce_data['StrikeRate']==at_strike]['LastRate'])+float(pe_data[pe_data['StrikeRate']==at_strike]['LastRate'])
+        if (c_lastrate/p_lastrate>(1+at_strike_premium_sum/(c_lastrate+p_lastrate)) or p_lastrate/c_lastrate>(1+at_strike_premium_sum/(c_lastrate+p_lastrate)) ) :
             tron,c_strike,p_strike=new_strangle_adjustment_trades(option_chain,x,tron,c_lastrate+p_lastrate,c_strike,p_strike)
             exclusive_strike=(c_strike==p_strike)*c_strike
         if x>=c_strike or x<=p_strike:
