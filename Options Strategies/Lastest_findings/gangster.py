@@ -333,10 +333,24 @@ def exclusive_strike_change_trades(exclusive_strike,x,tron):
     return exclusive_strike,tron
 
 def margin_utilizer(c_strike,p_strike):
-    k=prime_client['login'].margin()[0]['AvailableMargin']
-    tron=int(k/180000)
-    tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
-    return tron
+    try:
+        k=prime_client['login'].margin()[0]['AvailableMargin']
+        tron=int(k/180000)
+        tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
+        return tron
+    except Exception:
+        return 0
+
+def buying_strikes(tron):
+    exclusive_strike=int(np.round((x)/100)*100)
+    f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
+    factor=float(1+np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=int(np.round((factor)/100)*100)
+    c=exclusive_strike+factor
+    p=exclusive_strike-factor
+    order_button(p,'PE_B',tron)
+    order_button(c,'CE_B',tron)
+
 
 def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
     if exclusive_strike!=0 and chameleon_signal==0 and tron!=0:
@@ -345,6 +359,7 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
             return abs(a)
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
+            buying_strikes(1)
         tron=tron+margin_utilizer(exclusive_strike,exclusive_strike)
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)   
@@ -362,15 +377,15 @@ def leg_adjustments(exclusive_strike,c_strike_b,p_strike_b,x,tron,leg,exit_signa
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)   
             exit_signal2=1
-        if c_strike_b-x<50:
+        if c_strike_b-x<-105:
             at_strike=int(np.round((x)/100)*100)
-            k,j=order_button(2*at_strike-p_strike_b,'CE_B',tron)
+            k,j=order_button(c_strike_b+100,'CE_B',tron)
             if j==0:
                 order_button(c_strike_b,'CE_S',tron)
                 c_strike_b=k
-        if x-p_strike_b<50:
+        if x-p_strike_b<-105:
             at_strike=int(np.round((x)/100)*100)
-            k,j=order_button(2*at_strike-c_strike_b,'PE_B',tron)
+            k,j=order_button(p_strike_b-100,'PE_B',tron)
             if j==0:
                 order_button(p_strike_b,'PE_S',tron)
                 p_strike_b=2*at_strike-c_strike_b
