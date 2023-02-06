@@ -32,10 +32,6 @@ def client_login(client):
 
 def order_button(exclusive_strike,type,lots):
     sleep(0.5)
-    if "S" in type:
-        type=type[:-1]+"B"
-    elif "B" in type:
-        type=type[:-1]+"S"
     exchange='BANKNIFTY'
     lot_size=25
     max_lots_per_order=36
