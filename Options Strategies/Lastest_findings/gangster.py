@@ -289,10 +289,9 @@ def rosetta_oi_indicator(option_chain):
 def data(week):
     exchange='BANKNIFTY'
     while True:
-        expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
-        current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
+            current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N",exchange,current_expiry_time_stamp_weekly)['Options'])
             x=expiry_timestamps['lastrate'][0]['LTP']
             break
