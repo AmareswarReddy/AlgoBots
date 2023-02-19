@@ -398,7 +398,7 @@ def clear_open_positions():
 #%%
 client_name=input('enter the client name Eg: vinathi,bhaskar ')
 #client_name   = 'bhaskar'
-tron=int(input('enter the number of lots for buying (Eg:3):'))
+tron=int(input('enter the number of lots to trade (Eg:3):'))
 typical_tron=1
 prime_client=client_login(client=client_name)
 exclusive_strike=int(input('enter the strike to trade : '))
