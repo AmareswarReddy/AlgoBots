@@ -340,24 +340,28 @@ def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,day_of_week,t
     return exclusive_strike,tron,start,indicator
 
 
-def sell_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron):
+def sell_kickoff(x,start,indicator,earlier_indicator,exclusive_strike,d,tron):
     if abs(indicator-earlier_indicator)==2:
         indicator=0
     if start==0:
         s=indicator
         if s>0:
+            exclusive_strike=int(np.round(x/100)*100)-d
             exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
             tron-=lots_drop(exclusive_strike,'PE_S',yet_to_place)
             start=1
         elif s<0:
+            exclusive_strike=int(np.round(x/100)*100)+d
             exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
             tron-=lots_drop(exclusive_strike,'CE_S',yet_to_place)
             start=1
     elif start==1:
         if earlier_indicator==0 and indicator==1:
+            exclusive_strike=int(np.round(x/100)*100)-d
             exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
             tron-=lots_drop(exclusive_strike,'PE_S',yet_to_place)
         if earlier_indicator==0 and indicator==-1:
+            exclusive_strike=int(np.round(x/100)*100)+d
             exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
             tron-=lots_drop(exclusive_strike,'CE_S',yet_to_place)
         if earlier_indicator==-1 and indicator==0:
@@ -401,7 +405,8 @@ client_name=input('enter the client name Eg: vinathi,bhaskar ')
 tron=int(input('enter the number of lots to trade (Eg:3):'))
 typical_tron=1
 prime_client=client_login(client=client_name)
-exclusive_strike=int(input('enter the strike to trade : '))
+d=int(input('enter distance from at strike to trade : '))
+exclusive_strike=0
 type=''
 option_chain,x=data(week=0)
 ce_data=option_chain[option_chain['CPType']=='CE']
@@ -419,12 +424,12 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<561 or int(ind_time[11:13])*6
 start=0
 #day_of_week=200#100*(int(input("enter the day from expiry(Eg:enter 1 if it's Wednesday): "))+1)
 clear_open_positions()
-while int(ind_time[11:13])*60+int(ind_time[14:16])<935:
+while int(ind_time[11:13])*60+int(ind_time[14:16])<1135:
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain,x=data(week=0)
     B=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv)
     #exclusive_strike,tron,start,earlier_indicator=buy_kickoff(start,B,earlier_indicator,exclusive_strike,day_of_week,tron)
-    sell_kickoff(start,B,earlier_indicator,exclusive_strike,tron)
+    exclusive_strike,tron,start,indicator=sell_kickoff(x,start,B,earlier_indicator,exclusive_strike,d,tron)
     print(B)
 #clear_open_positions()
 # %%
