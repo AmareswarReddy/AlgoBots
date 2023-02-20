@@ -138,7 +138,7 @@ def order_button(exclusive_strike,type,lots):
         yet_to_place=lots-already_placed
     return exclusive_strike,yet_to_place
 
-def indicator(x,hightime,oi_ratio,rosetta_ratio,rosetta,time,volume_ind):
+def indicator_(x,rosetta,rosetta_ratio,oi_ratio,hightime,time,volume_ind):
     def node_out(input_,weights_bias):
         return np.tanh(weights_bias[0]*input_[0]+weights_bias[1]*input_[1]+weights_bias[2]*input_[2]+weights_bias[3]*input_[3]+weights_bias[4]*input_[4]+weights_bias[5]*input_[5]+weights_bias[6])
     input_=[hightime,oi_ratio,rosetta_ratio,rosetta,time/22440,volume_ind]
@@ -263,7 +263,7 @@ def options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv):
         3.33200382,  1.53006581,  1.12330552, -0.60412693,  4.99827415,
        -3.60876516, -2.95487617,  2.45500265,  0.59273201]
     time=int(ind_time[11:13])*60*60+int(ind_time[14:16])*60-33300
-    final=indicator(xopt,rosetta_indicator,rosetta_ratio_indicator,oi_ratio_indicator,hightime_indicator,time,v_ind)
+    final=indicator_(xopt,rosetta_indicator,rosetta_ratio_indicator,oi_ratio_indicator,hightime_indicator,time,v_ind)
     return  final
 
 def data(week):
@@ -429,7 +429,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<1135:
     option_chain,x=data(week=0)
     B=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv)
     #exclusive_strike,tron,start,earlier_indicator=buy_kickoff(start,B,earlier_indicator,exclusive_strike,day_of_week,tron)
-    exclusive_strike,tron,start,indicator=sell_kickoff(x,start,B,earlier_indicator,exclusive_strike,d,tron)
+    exclusive_strike,tron,start,earlier_indicator=sell_kickoff(x,start,B,earlier_indicator,exclusive_strike,d,tron)
     print(B)
 #clear_open_positions()
 # %%
