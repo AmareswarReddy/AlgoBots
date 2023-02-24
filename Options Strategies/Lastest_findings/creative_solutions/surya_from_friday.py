@@ -908,7 +908,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
     buying_exclusive_strike,tron_buyer,start_buy_kick_off,earlier_indicator=buy_kickoff(start_buy_kick_off,B,earlier_indicator,buying_exclusive_strike,tron_buyer)
     exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
     exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron)
-    c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
+    c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron,B)
     #c_strike_intel,p_strike_intel=intel_strike_mover(x,c_strike_intel,p_strike_intel,tron_intel,strangle_c_strike,strangle_p_strike,strangle_tron)
     if strangle_tron==0:
         if exclusive_strike!=0:
