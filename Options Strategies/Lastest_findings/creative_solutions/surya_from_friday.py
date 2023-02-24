@@ -179,9 +179,9 @@ def finalise_tron(p_strike,c_strike,tron):
 def data(week):
     exchange='BANKNIFTY'
     while True:
-        expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
-        current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
         try :
+            expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
+            current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
             expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N",exchange,current_expiry_time_stamp_weekly)['Options'])
             x=expiry_timestamps['lastrate'][0]['LTP']
@@ -242,7 +242,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     break
             tron,c_strike,p_strike=initial_strangle_trades(option_chain,x,tron)
         at_strike=int(np.round((x)/100)*100)
-        if c_lastrate/p_lastrate>2.13 and (2*at_strike-c_strike)>p_strike :
+        if c_lastrate/p_lastrate>3.57 and (2*at_strike-c_strike)>p_strike :
             while True:
                 strike,yet_to_place=order_button(p_strike,'PE_B',tron)
                 if yet_to_place==0:
@@ -260,7 +260,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                 if yet_to_place==0:
                     break
             exclusive_strike=(c_strike==p_strike)*c_strike
-        if p_lastrate/c_lastrate>2.13 and (2*at_strike-p_strike)<c_strike:
+        if p_lastrate/c_lastrate>3.57 and (2*at_strike-p_strike)<c_strike:
             while True:
                 strike,yet_to_place=order_button(c_strike,'CE_B',tron)
                 if yet_to_place==0:
@@ -365,7 +365,7 @@ def initial_leg_trades(x,option_chain,tron):
         order_button(c_strike,'CE_S',tron-final_tron)
     return final_tron,final_tron,c_strike,p_strike,exclusive_strike,exclusive_strike
 
-def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron):
+def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron,lots_to_be_added):
     if abs(indicator-earlier_indicator)==2:
         indicator=0
     if start==0:
@@ -380,18 +380,25 @@ def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron):
             start=1
     elif start==1:
         if earlier_indicator==0 and indicator==1:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',tron)
+            exclusive_strike,yet_to_place=order_button(0,'CE_B',tron)
             tron-=lots_drop(exclusive_strike,'CE_B',yet_to_place)
 
         if earlier_indicator==0 and indicator==-1:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',tron)
+            exclusive_strike,yet_to_place=order_button(0,'PE_B',tron)
             tron-=lots_drop(exclusive_strike,'PE_B',yet_to_place)
         if earlier_indicator==-1 and indicator==0:
             exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
         if earlier_indicator==1 and indicator==0:
             exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
-
-    return exclusive_strike,tron,start,indicator
+        
+        if lots_to_be_added!=0:
+            if indicator==1:
+                exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',lots_to_be_added)
+                lots_to_be_added=0
+            if indicator==-1:
+                exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',lots_to_be_added)
+                lots_to_be_added=0
+    return exclusive_strike,tron,start,indicator,lots_to_be_added
 
 def extra_lots_decider():
     a=datetime.today().weekday()
@@ -864,6 +871,7 @@ if start==0:
     buying_exclusive_strike=0
     tron_buyer=1
     start_buy_kick_off=0
+    lots_to_be_added=0
     earlier_indicator,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
 elif start==1 and from_json=='n':
     c_leg_tron=int(input('enter number of existing lots on call side buy: '))
@@ -878,6 +886,7 @@ elif start==1 and from_json=='n':
     p_strike_intel=int(input('enter put_strike_intel: '))
     exclusive_strike=int((strangle_c_strike==strangle_p_strike)*strangle_p_strike)
     start_buy_kick_off=1
+    lots_to_be_added=0
     buying_exclusive_strike=int(input('enter the exclusive_strike for buy_kick_off: '))
     tron_buyer=int(input('enter the number of lots for buying for buy_kick_off'))
     earlier_indicator=int(input('enter 1 if call is bought or 0 if put was bought'))
@@ -898,6 +907,7 @@ elif start==1 and from_json=='y':
     buying_exclusive_strike = positions_record['buy_kick_off']['exclusive_strike']
     tron_buyer          =   positions_record['buy_kick_off']['tron']
     earlier_indicator   =   positions_record['buy_kick_off']['earlier_indicator']
+    lots_to_be_added    =   positions_record['buy_kick_off']['lots_to_be_added']
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<556 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -905,10 +915,11 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
     option_chain,x=data(week=0)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
-    buying_exclusive_strike,tron_buyer,start_buy_kick_off,earlier_indicator=buy_kickoff(start_buy_kick_off,B,earlier_indicator,buying_exclusive_strike,tron_buyer)
     exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
     exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron)
     c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron,B)
+    lots_to_be_added=int(max(c_leg_tron,p_leg_tron))
+    buying_exclusive_strike,tron_buyer,start_buy_kick_off,earlier_indicator,lots_to_be_added=buy_kickoff(start_buy_kick_off,B,earlier_indicator,buying_exclusive_strike,tron_buyer,lots_to_be_added)
     #c_strike_intel,p_strike_intel=intel_strike_mover(x,c_strike_intel,p_strike_intel,tron_intel,strangle_c_strike,strangle_p_strike,strangle_tron)
     if strangle_tron==0:
         if exclusive_strike!=0:
@@ -921,14 +932,14 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
 positions_json={'strangle':{'c_strike':strangle_c_strike,'p_strike':strangle_p_strike,'tron':strangle_tron},
                 'surya':{'c_strike_b':c_strike_b,'p_strike_b':p_strike_b,'c_leg_tron':c_leg_tron,'p_leg_tron':p_leg_tron},
                 'intel':{'c_strike_intel':c_strike_intel,'p_strike_intel':p_strike_intel,'tron_intel':tron_intel},
-                'buy_kick_off':{'tron':tron_buyer,'exclusive_strike':buying_exclusive_strike,'earlier_indicator':B}}
+                'buy_kick_off':{'tron':tron_buyer,'exclusive_strike':buying_exclusive_strike,'earlier_indicator':B,'lots_to_be_added':lots_to_be_added}}
 
 print(positions_json)
 out_file = open(client_name+'_suryabhai_positions.json', "w")
-json.dump(positions_json, out_file, indent = 6)
+json.dump(positions_json, out_file, default= str)
 out_file.close()
 indicator_saver={'main_cv':main_cv,'main_pv':main_pv,'c_oi':c_oi,'p_oi':p_oi}
 out_file = open('indicator_variables.json', "w")
-json.dump(indicator_saver, out_file, indent = 6)
+json.dump(indicator_saver, out_file, default= str)
 out_file.close()
 # %%
