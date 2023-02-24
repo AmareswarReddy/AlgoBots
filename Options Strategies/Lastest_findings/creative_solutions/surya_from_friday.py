@@ -854,11 +854,11 @@ from_json=input('to take positions from existing positions json file (y/n): ')
 if start==0:
     leg_tron=int(input('leg_tron'))
     tron_intel=leg_tron
-    c_leg_tron,p_leg_tron,c_strike_b,p_strike_b,c_strike_intel,p_strike_intel=initial_leg_trades(x,option_chain,leg_tron)
     tron=int(prime_client['login'].margin()[0]['AvailableMargin']/140000)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     while int(ind_time[11:13])*60+int(ind_time[14:16])<556 :
         ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    c_leg_tron,p_leg_tron,c_strike_b,p_strike_b,c_strike_intel,p_strike_intel=initial_leg_trades(x,option_chain,leg_tron)
     strangle_tron,strangle_c_strike,strangle_p_strike=initial_strangle_trades(option_chain,x)
     exclusive_strike=0
     buying_exclusive_strike=0
