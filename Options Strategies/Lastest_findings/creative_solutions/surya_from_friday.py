@@ -225,6 +225,39 @@ def re_adjust_strangle(strangle_lastrate_sum,option_chain,x):
     else:
         return False
 
+def new_strangle_adjustment_trades(option_chain,x,tron,sell_value,c_strike,p_strike):
+    def strangle_sum(c_strike,p_strike):
+        ce_data=option_chain[option_chain['CPType']=='CE']
+        pe_data=option_chain[option_chain['CPType']=='PE']
+        c_lastrate=float(ce_data[ce_data['StrikeRate']==c_strike]['LastRate'])
+        p_lastrate=float(pe_data[pe_data['StrikeRate']==p_strike]['LastRate'])
+        return c_lastrate+p_lastrate
+    exclusive_strike=int(np.round((x)/100)*100)
+    f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
+    factor=float(2+np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=int(np.round((factor)/100)*100)
+    old_c_strike=c_strike
+    old_p_strike=p_strike
+    while True:
+        factor-=100
+        c_strike=exclusive_strike+factor
+        p_strike=exclusive_strike-factor
+        new_sell_value=strangle_sum(c_strike,p_strike)
+        if new_sell_value>sell_value or factor==0:
+            if c_strike==old_c_strike:
+                to_take_c_strike=0
+            elif c_strike!=old_c_strike:
+                order_button(old_c_strike,'CE_B',tron)
+                to_take_c_strike=1
+            if p_strike==old_p_strike:
+                to_take_p_strike=0
+            elif p_strike!=old_p_strike:
+                order_button(old_p_strike,'PE_B',tron)
+                to_take_p_strike=1
+            tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron,to_take_c_strike=to_take_c_strike,to_take_p_strike=to_take_p_strike)
+            break
+    return tron,c_strike,p_strike
+
 def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
     if c_strike!=p_strike:
         ce_data=option_chain[option_chain['CPType']=='CE']
@@ -242,42 +275,9 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                     break
             tron,c_strike,p_strike=initial_strangle_trades(option_chain,x,tron)
         at_strike=int(np.round((x)/100)*100)
-        if c_lastrate/p_lastrate>3.57 and (2*at_strike-c_strike)>p_strike :
-            while True:
-                strike,yet_to_place=order_button(p_strike,'PE_B',tron)
-                if yet_to_place==0:
-                    break
-            p_strike,yet_to_place=order_button(2*at_strike-c_strike,'PE_S',tron)
-            while True:
-                if yet_to_place!=0:
-                    tron=tron-1
-                    while True:
-                        strike,y=order_button(c_strike,'CE_B',1)
-                        if y==0:
-                            break
-                    sleep(1)
-                    p_strike,yet_to_place=order_button(2*at_strike-c_strike,'PE_S',tron)
-                if yet_to_place==0:
-                    break
-            exclusive_strike=(c_strike==p_strike)*c_strike
-        if p_lastrate/c_lastrate>3.57 and (2*at_strike-p_strike)<c_strike:
-            while True:
-                strike,yet_to_place=order_button(c_strike,'CE_B',tron)
-                if yet_to_place==0:
-                    break
-            at_strike=int(np.round((x)/100)*100)
-            c_strike,yet_to_place=order_button(2*at_strike-p_strike,'CE_S',tron)
-            while True:
-                if yet_to_place!=0:
-                    tron=tron-1
-                    while True:
-                        strike,y=order_button(p_strike,'PE_B',1)
-                        if y==0:
-                            break
-                    sleep(1)
-                    c_strike,yet_to_place=order_button(2*at_strike-p_strike,'CE_S',tron)
-                if yet_to_place==0:
-                    break
+        at_strike_premium_sum=float(ce_data[ce_data['StrikeRate']==at_strike]['LastRate'])+float(pe_data[pe_data['StrikeRate']==at_strike]['LastRate'])
+        if (c_lastrate/p_lastrate>(1+at_strike_premium_sum/(c_lastrate+p_lastrate)) or p_lastrate/c_lastrate>(1+at_strike_premium_sum/(c_lastrate+p_lastrate)) ) :
+            tron,c_strike,p_strike=new_strangle_adjustment_trades(option_chain,x,tron,c_lastrate+p_lastrate,c_strike,p_strike)
             exclusive_strike=(c_strike==p_strike)*c_strike
         if x>=c_strike or x<=p_strike:
             at_strike=int(np.round((x)/100)*100)
@@ -332,7 +332,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                         k,y1=order_button(p_strike,'CE_B',tron)
                     if y1==0:
                         break
-                tron=finalise_tron(c_strike=at_strike,p_strike=at_strike,tron=tron)
+                tron=finalise_tron(c_strike=at_strike,p_strike=at_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
                 exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
         tron=tron+margin_utilizer(c_strike,p_strike)
     return exclusive_strike,c_strike,p_strike,tron
@@ -394,9 +394,11 @@ def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron,lots_to_
         if lots_to_be_added!=0:
             if indicator==1:
                 exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',lots_to_be_added)
+                tron+=lots_to_be_added
                 lots_to_be_added=0
             if indicator==-1:
                 exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',lots_to_be_added)
+                tron+=lots_to_be_added
                 lots_to_be_added=0
     return exclusive_strike,tron,start,indicator,lots_to_be_added
 
@@ -909,16 +911,17 @@ elif start==1 and from_json=='y':
     earlier_indicator   =   positions_record['buy_kick_off']['earlier_indicator']
     lots_to_be_added    =   positions_record['buy_kick_off']['lots_to_be_added']
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16])<556 :
+while int(ind_time[11:13])*60+int(ind_time[14:16])<555 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
+    sleep(60)
     option_chain,x=data(week=0)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
     exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
     exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron)
     c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron,B)
-    lots_to_be_added=int(max(c_leg_tron,p_leg_tron))
+    lots_to_be_added=int(max(c_leg_tron,p_leg_tron))-tron_buyer
     buying_exclusive_strike,tron_buyer,start_buy_kick_off,earlier_indicator,lots_to_be_added=buy_kickoff(start_buy_kick_off,B,earlier_indicator,buying_exclusive_strike,tron_buyer,lots_to_be_added)
     #c_strike_intel,p_strike_intel=intel_strike_mover(x,c_strike_intel,p_strike_intel,tron_intel,strangle_c_strike,strangle_p_strike,strangle_tron)
     if strangle_tron==0:
@@ -932,7 +935,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
 positions_json={'strangle':{'c_strike':strangle_c_strike,'p_strike':strangle_p_strike,'tron':strangle_tron},
                 'surya':{'c_strike_b':c_strike_b,'p_strike_b':p_strike_b,'c_leg_tron':c_leg_tron,'p_leg_tron':p_leg_tron},
                 'intel':{'c_strike_intel':c_strike_intel,'p_strike_intel':p_strike_intel,'tron_intel':tron_intel},
-                'buy_kick_off':{'tron':tron_buyer,'exclusive_strike':buying_exclusive_strike,'earlier_indicator':B,'lots_to_be_added':lots_to_be_added}}
+                'buy_kick_off':{'tron':tron_buyer,'exclusive_strike':buying_exclusive_strike,'earlier_indicator':int(B),'lots_to_be_added':lots_to_be_added}}
 
 print(positions_json)
 out_file = open(client_name+'_suryabhai_positions.json', "w")
