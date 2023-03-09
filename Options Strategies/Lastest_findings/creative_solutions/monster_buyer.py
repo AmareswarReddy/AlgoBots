@@ -473,7 +473,7 @@ def lots_drop(strike,side,yet_to_place):
             break
     return k-yet_to_place
 
-def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,day_of_week,tron):
+def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron):
     if abs(indicator-earlier_indicator)==2:
         indicator=0
     if start==0:
@@ -602,20 +602,13 @@ start=0
 #day_of_week=200#100*(int(input("enter the day from expiry(Eg:enter 1 if it's Wednesday): "))+1)
 clear_open_positions()
 #%%
-total_change_in_sides=0
-while int(ind_time[11:13])*60+int(ind_time[14:16])<930:
-    sleep(60)
+while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain,x=data(week=0)
     B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
-    if B!=earlier_indicator:
-        total_change_in_sides+=1
-    #exclusive_strike,tron,start,earlier_indicator=buy_kickoff(start,B,earlier_indicator,exclusive_strike,day_of_week,tron)
-    exclusive_strike,tron,start,earlier_indicator=sell_kickoff(x,start,B,earlier_indicator,exclusive_strike,d,tron)
+    exclusive_strike,tron,start,earlier_indicator=buy_kickoff(start,B,earlier_indicator,exclusive_strike,tron)
+    #exclusive_strike,tron,start,earlier_indicator=sell_kickoff(x,start,B,earlier_indicator,exclusive_strike,d,tron)
     print(B)
-    if total_change_in_sides>8:
-        break
-clear_open_positions()
 indicator_saver={'main_cv':main_cv,'main_pv':main_pv,'c_oi':c_oi,'p_oi':p_oi}
 out_file = open('indicator_variables.json', "w")
 json.dump(indicator_saver, out_file, indent = 6)

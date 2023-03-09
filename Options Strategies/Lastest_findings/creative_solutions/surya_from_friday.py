@@ -151,9 +151,17 @@ def lots_drop(strike,side,yet_to_place):
             break
     return k-yet_to_place
 
-def finalise_tron(p_strike,c_strike,tron):
-    p_strike,p_yet_to_place=order_button(p_strike,'PE_S',tron)
-    c_strike,c_yet_to_place=order_button(c_strike,'CE_S',tron)
+def finalise_tron(p_strike,c_strike,tron,to_take_c_strike,to_take_p_strike):
+    if tron<0:
+        return 0
+    if to_take_p_strike==1:
+        p_strike,p_yet_to_place=order_button(p_strike,'PE_S',tron)
+    else:
+        p_yet_to_place=0
+    if to_take_c_strike==1:
+        c_strike,c_yet_to_place=order_button(c_strike,'CE_S',tron)
+    else:
+        c_yet_to_place=0
     if p_yet_to_place==0 and c_yet_to_place==0:
         return tron
     if p_yet_to_place!=0 and c_yet_to_place==0:
@@ -173,7 +181,7 @@ def finalise_tron(p_strike,c_strike,tron):
                 break
         return tron
     if p_yet_to_place!=0 and c_yet_to_place!=0:
-        return finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron-1)
+        return finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron-1,to_take_c_strike=to_take_c_strike,to_take_p_strike=to_take_p_strike)
 
 
 def data(week):
@@ -194,19 +202,22 @@ def initial_strangle_trades(option_chain,x):
     exclusive_strike=int(np.round((x)/100)*100)
     tron=int(prime_client['login'].margin()[0]['AvailableMargin']/170000)
     f=np.sum(option_chain[option_chain['StrikeRate']==int(np.round(x/100)*100)]['LastRate'])
-    factor=float(1.8+1.5*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor=float(1.9+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
     factor=int(np.round((factor)/100)*100)
     c_strike=exclusive_strike+factor
     p_strike=exclusive_strike-factor
-    tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron)
+    tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
     return tron,c_strike,p_strike
 
 
 def margin_utilizer(c_strike,p_strike):
-    k=prime_client['login'].margin()[0]['AvailableMargin']
-    tron=int(k/210000)
-    tron=finalise_tron(p_strike,c_strike,tron)
-    return tron
+    try:
+        k=prime_client['login'].margin()[0]['AvailableMargin']
+        tron=int(k/210000)
+        tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
+        return tron
+    except Exception:
+        return 0
 
 def re_adjust_strangle(strangle_lastrate_sum,option_chain,x):
     exclusive_strike=int(np.round((x)/100)*100)
@@ -273,7 +284,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                 strike,yet_to_place=order_button(c_strike,'CE_B',tron)
                 if yet_to_place==0:
                     break
-            tron,c_strike,p_strike=initial_strangle_trades(option_chain,x,tron)
+            tron,c_strike,p_strike=initial_strangle_trades(option_chain,x)
         at_strike=int(np.round((x)/100)*100)
         at_strike_premium_sum=float(ce_data[ce_data['StrikeRate']==at_strike]['LastRate'])+float(pe_data[pe_data['StrikeRate']==at_strike]['LastRate'])
         if (c_lastrate/p_lastrate>(1+at_strike_premium_sum/(c_lastrate+p_lastrate)) or p_lastrate/c_lastrate>(1+at_strike_premium_sum/(c_lastrate+p_lastrate)) ) :
@@ -359,7 +370,7 @@ def initial_leg_trades(x,option_chain,tron):
             k,y1=order_button(c_strike,'CE_B',tron)
         if y1==0:
             break
-    final_tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron)
+    final_tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
     if final_tron!=tron:
         order_button(p_strike,'PE_S',tron-final_tron)
         order_button(c_strike,'CE_S',tron-final_tron)
@@ -503,7 +514,7 @@ def exclusive_strike_change_trades(exclusive_strike,x,tron):
         if y1==0:
             break
     exclusive_strike=int(np.round((x)/100)*100)
-    tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron)
+    tron=finalise_tron(c_strike=exclusive_strike,p_strike=exclusive_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
     return exclusive_strike,tron
 
 def exit_signal(option_chain,exclusive_strike):
@@ -856,8 +867,6 @@ else:
     indicator_json=json.load(open('indicator_variables.json'))
     main_cv,main_pv,c_oi,p_oi=indicator_json['main_cv'],indicator_json['main_pv'],indicator_json['c_oi'],indicator_json['p_oi']
 
-
-
 start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
 from_json=input('to take positions from existing positions json file (y/n): ')
 if start==0:
@@ -913,11 +922,13 @@ elif start==1 and from_json=='y':
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
+while int(ind_time[11:13])*60+int(ind_time[14:16])<928:
     sleep(60)
     option_chain,x=data(week=0)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
+    #B=int(input('enter B'))
+    #x=int(input('enter x'))
     exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
     exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron)
     c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron,B)
