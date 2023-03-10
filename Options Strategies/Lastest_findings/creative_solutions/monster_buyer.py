@@ -603,6 +603,7 @@ start=0
 clear_open_positions()
 #%%
 while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
+    sleep(60)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain,x=data(week=0)
     B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
