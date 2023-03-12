@@ -598,17 +598,28 @@ ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
+
 start=0
 #day_of_week=200#100*(int(input("enter the day from expiry(Eg:enter 1 if it's Wednesday): "))+1)
-clear_open_positions()
+if start==0:
+    clear_open_positions()
+elif start==1:
+    exclusive_strike=int(input('enter the strike '))
+    earlier_indicator=int(input('enter "earlier Indicator"(Eg: -1 for put and 1 for call):'))
+
 #%%
+total_change_in_sides=0
 while int(ind_time[11:13])*60+int(ind_time[14:16])<931:
     sleep(60)
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain,x=data(week=0)
     B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
+    if B!=earlier_indicator:
+        total_change_in_sides+=1
     exclusive_strike,tron,start,earlier_indicator=buy_kickoff(start,B,earlier_indicator,exclusive_strike,tron)
     #exclusive_strike,tron,start,earlier_indicator=sell_kickoff(x,start,B,earlier_indicator,exclusive_strike,d,tron)
+    if total_change_in_sides>8:
+        break
     print(B)
 indicator_saver={'main_cv':main_cv,'main_pv':main_pv,'c_oi':c_oi,'p_oi':p_oi}
 out_file = open('indicator_variables.json', "w")
