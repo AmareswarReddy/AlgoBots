@@ -492,12 +492,12 @@ def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron):
             start=1
     elif start==1:
         if earlier_indicator==0 and indicator==1:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',tron)
+            exclusive_strike,yet_to_place=order_button(0,'CE_B',tron)
             tron-=lots_drop(exclusive_strike,'CE_B',yet_to_place)
             #exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',tron)
             #exclusive_strike,yet_to_place=order_button(exclusive_strike-day_of_week,'PE_S',tron)
         if earlier_indicator==0 and indicator==-1:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',tron)
+            exclusive_strike,yet_to_place=order_button(0,'PE_B',tron)
             tron-=lots_drop(exclusive_strike,'PE_B',yet_to_place)
             #exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',tron)
             #exclusive_strike,yet_to_place=order_button(exclusive_strike+day_of_week,'CE_S',tron)
@@ -592,20 +592,21 @@ else:
     indicator_json=json.load(open('indicator_variables.json'))
     main_cv,main_pv,c_oi,p_oi=indicator_json['main_cv'],indicator_json['main_pv'],indicator_json['c_oi'],indicator_json['p_oi']
 earlier_indicator,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
-start=0
+
+start=int(input('enter 0 if starting the strategy for the first time else 1: '))
+if start==1:
+    exclusive_strike=int(input('enter the strike '))
+    earlier_indicator=int(input('enter "earlier Indicator"(Eg: -1 for put and 1 for call):'))
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<555 or int(ind_time[11:13])*60+int(ind_time[14:16])>885 :
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 #%%
 
-start=0
+#start=0
 #day_of_week=200#100*(int(input("enter the day from expiry(Eg:enter 1 if it's Wednesday): "))+1)
 if start==0:
     clear_open_positions()
-elif start==1:
-    exclusive_strike=int(input('enter the strike '))
-    earlier_indicator=int(input('enter "earlier Indicator"(Eg: -1 for put and 1 for call):'))
 
 #%%
 total_change_in_sides=0
