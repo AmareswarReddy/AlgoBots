@@ -213,7 +213,7 @@ def initial_strangle_trades(option_chain,x):
 def margin_utilizer(c_strike,p_strike):
     try:
         k=prime_client['login'].margin()[0]['AvailableMargin']
-        tron=int(k/210000)
+        tron=int(k/180000)
         tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
         return tron
     except Exception:
@@ -529,16 +529,17 @@ def exit_trades(exclusive_strike,tron):
     order_button(exclusive_strike,'PE_B',tron)
     order_button(exclusive_strike,'CE_B',tron)   
 
-def straddle_special_adjustment(exclusive_strike,x,tron):
-    if exclusive_strike!=0 and tron!=0:
+def straddle_special_adjustment(exclusive_strike,x,tron,indicator):
+    if exclusive_strike!=0 and tron!=0 and np.sign(x-exclusive_strike)==indicator:
         def exclusive_strike_change_signal(earlier_x,x):
             a=(x-earlier_x)/66
             return abs(a)
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
-        if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
-            exit_trades(exclusive_strike,tron)  
-            tron=0 
+        #if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
+        #    exit_trades(exclusive_strike,tron) 
+        #    exclusive_strike=0 
+        #    tron=0 
     return exclusive_strike,tron
 
 def indicator_(x,market_ripper,day_volume_indicator,day_market_ripper,rosetta,rosetta_ratio,oi_ratio,hightime,time,volume_ind):
@@ -932,7 +933,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<929:
     #B=int(input('enter B'))
     #x=int(input('enter x'))
     exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
-    exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron)
+    exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron,B)
     c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron,B)
     lots_to_be_added=int(max(c_leg_tron,p_leg_tron))-tron_buyer
     buying_exclusive_strike,tron_buyer,start_buy_kick_off,earlier_indicator,lots_to_be_added=buy_kickoff(start_buy_kick_off,B,earlier_indicator,buying_exclusive_strike,tron_buyer,lots_to_be_added)
