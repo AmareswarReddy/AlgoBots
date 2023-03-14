@@ -597,7 +597,7 @@ def clear_open_positions():
 #%%
 client_name = input('enter the client name: ')
 tron=int(input('enter the number of lots at each strike'))
-betatron=tron*7
+betatron=tron*2
 prime_client=client_login(client=client_name)
 option_chain,x=data(week=0)
 primary_oi=option_chain
