@@ -529,12 +529,17 @@ def exit_trades(exclusive_strike,tron):
     order_button(exclusive_strike,'PE_B',tron)
     order_button(exclusive_strike,'CE_B',tron)   
 
-def straddle_special_adjustment(exclusive_strike,x,tron,indicator):
+def straddle_special_adjustment(exclusive_strike,x,tron,indicator,option_chain):
     if exclusive_strike!=0 and tron!=0 and np.sign(x-exclusive_strike)==indicator:
-        def exclusive_strike_change_signal(earlier_x,x):
-            a=(x-earlier_x)/66
+        def exclusive_strike_change_signal(earlier_x,x,option_chain):
+            ce_data=option_chain[option_chain['CPType']=='CE']
+            pe_data=option_chain[option_chain['CPType']=='PE']
+            c_lastrate=float(ce_data[ce_data['StrikeRate']==exclusive_strike]['LastRate'])
+            p_lastrate=float(pe_data[pe_data['StrikeRate']==exclusive_strike]['LastRate'])
+            premium_sum=c_lastrate+p_lastrate
+            a=2*(x-earlier_x)/premium_sum
             return abs(a)
-        if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
+        if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x,option_chain=option_chain)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
         #if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
         #    exit_trades(exclusive_strike,tron) 
@@ -933,7 +938,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<929:
     #B=int(input('enter B'))
     #x=int(input('enter x'))
     exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
-    exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron,B)
+    exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron,B,option_chain)
     c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron,B)
     lots_to_be_added=int(max(c_leg_tron,p_leg_tron))-tron_buyer
     buying_exclusive_strike,tron_buyer,start_buy_kick_off,earlier_indicator,lots_to_be_added=buy_kickoff(start_buy_kick_off,B,earlier_indicator,buying_exclusive_strike,tron_buyer,lots_to_be_added)
