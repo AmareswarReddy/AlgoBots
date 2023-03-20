@@ -33,7 +33,7 @@ def client_login(client):
     client_list[client]['strategy']=0
     client_list[client]['login']=FivePaisaClient(email=user, passwd=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login'].login()
-    client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-200000)/180000)
+    #client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-200000)/180000)
     return client_list[client]
 #client_name=input('enter the client name Eg: vinathi,bhaskar '
 
@@ -228,10 +228,10 @@ option_chain,x=data(week=0)
 
 
 # %%
-call_net_long=723239
-call_net_short=492944
-put_net_long=969561
-put_net_short=628940
+call_net_long=914718
+call_net_short=767050
+put_net_long=929426
+put_net_short=477527
 def call_side_positions(option_chain,call_net_long,call_net_short):
     call_net_long=int(call_net_long*50)
     call_net_short=int(call_net_short*50)
