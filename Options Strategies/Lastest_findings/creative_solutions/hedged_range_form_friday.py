@@ -491,7 +491,9 @@ def options_vwap_json(option_chain,calloptions_vwap,putoptions_vwap,primary_oi,x
     taken_c=np.multiply((np.array(ce_data['StrikeRate'])>x-50), (np.array(ce_data['StrikeRate'])<x+600))
     taken_p=np.multiply((np.array(pe_data['StrikeRate'])>x-600), (np.array(pe_data['StrikeRate'])<x+50))
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
+    a=datetime.today().weekday()
     t=(int(ind_time[11:13])*60+int(ind_time[14:16])-555)/15
+    t*=(a==4)+(a!=4)*(a+2)
     c_lastrate=np.array(ce_data['LastRate'])+t
     p_lastrate= np.array(pe_data['LastRate'])+t
     c_volumes=  np.array(ce_data['Volume'])
