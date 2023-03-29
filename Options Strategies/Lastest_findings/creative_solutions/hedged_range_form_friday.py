@@ -155,7 +155,7 @@ def lots_drop(strike,side,yet_to_place):
             break
     return k-yet_to_place
 
-def data(week):
+def data(week,primary_oi):
     exchange='BANKNIFTY'
     while True:
         expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
@@ -167,6 +167,14 @@ def data(week):
             break
         except Exception :
             pass
+    if len(primary_oi)!=0:
+        a=list(primary_oi['StrikeRate'])
+        b=list(option_chain['StrikeRate'])
+        to_add=0
+        for i in range(0,len(list(option_chain['StrikeRate']))):
+            if b[i] not in a:
+                to_add=b[i]
+        option_chain=option_chain[option_chain['StrikeRate']!=to_add].copy()
     return option_chain,x
 
 def indicator_(x,market_ripper,day_volume_indicator,day_market_ripper,rosetta,rosetta_ratio,oi_ratio,hightime,time,volume_ind):
@@ -483,7 +491,7 @@ def options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv
 
 
 def options_vwap_json(option_chain,calloptions_vwap,putoptions_vwap,primary_oi,x,prev_final_c_shape,prev_final_p_shape):
-    stoploss=19
+    stoploss=25
     ce_data=option_chain[option_chain['CPType']=='CE']
     pe_data=option_chain[option_chain['CPType']=='PE']
     ce_data_prime=primary_oi[primary_oi['CPType']=='CE']
@@ -493,7 +501,7 @@ def options_vwap_json(option_chain,calloptions_vwap,putoptions_vwap,primary_oi,x
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
     a=datetime.today().weekday()
     t=(int(ind_time[11:13])*60+int(ind_time[14:16])-555)/15
-    t*=(a==4)+(a!=4)*(a+2)
+    t+=(a==4)+(a!=4)*(a+2)*40
     c_lastrate=np.array(ce_data['LastRate'])+t
     p_lastrate= np.array(pe_data['LastRate'])+t
     c_volumes=  np.array(ce_data['Volume'])
@@ -506,8 +514,8 @@ def options_vwap_json(option_chain,calloptions_vwap,putoptions_vwap,primary_oi,x
     prev_p_volumes=     np.array(putoptions_vwap['Volume'])
     primary_c_oi=  np.array(ce_data_prime['OpenInterest'])
     primary_p_oi=  np.array(pe_data_prime['OpenInterest'])
-    c_shape=np.multiply((c_oi-primary_c_oi)>0,taken_c)
-    p_shape=np.multiply((p_oi-primary_p_oi)>0,taken_p)
+    c_shape=np.multiply((c_oi-primary_c_oi)>-1000000,taken_c)
+    p_shape=np.multiply((p_oi-primary_p_oi)>-1000000,taken_p)
     c_net=np.multiply(c_volumes-prev_c_volumes,c_lastrate)
     p_net=np.multiply(p_volumes-prev_p_volumes,p_lastrate)
     c_volumes[c_volumes==0]=1
@@ -524,9 +532,14 @@ def options_vwap_json(option_chain,calloptions_vwap,putoptions_vwap,primary_oi,x
     final_p_shape=np.multiply(np.sign(((p_lastrate-put_vwap)<-stoploss)*-1),p_shape)
     to_correct_c_shape=np.multiply(np.sign(((c_lastrate-call_vwap)<0)*-1),c_shape)
     to_correct_p_shape=np.multiply(np.sign(((p_lastrate-put_vwap)<0)*-1),p_shape)
-    if len(prev_final_p_shape)==0:
+    if len(prev_final_p_shape)!=len(final_p_shape):
         prev_final_c_shape=final_c_shape
         prev_final_p_shape=final_p_shape
+    try:
+        prev_final_c_shape = np.array(list(map(lambda x : int(x), prev_final_c_shape)))
+        prev_final_p_shape = np.array(list(map(lambda x : int(x), prev_final_p_shape)))
+    except Exception:
+        pass
     final_c_shape=final_c_shape-np.multiply(to_correct_c_shape-final_c_shape,prev_final_c_shape)
     final_p_shape=final_p_shape-np.multiply(to_correct_p_shape-final_p_shape,prev_final_p_shape)
     call_seller=ce_data[['StrikeRate']].copy()
@@ -543,7 +556,7 @@ def get_strike_from_scrip(scripcode,exchange):
 
 
 def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron):
-    if abs(indicator-earlier_indicator)==2:
+    if abs(indicator-earlier_indicator)==2 and start==0:
         indicator=0
     if start==0:
         s=indicator
@@ -556,17 +569,27 @@ def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron):
             tron-=lots_drop(exclusive_strike,'PE_S',yet_to_place)
             start=1
     elif start==1:
-        if earlier_indicator==0 and indicator==1:
+        #if earlier_indicator==0 and indicator==1:
+        #    exclusive_strike,yet_to_place=order_button(0,'CE_S',tron)
+        #    tron-=lots_drop(exclusive_strike,'CE_S',yet_to_place)
+        #if earlier_indicator==0 and indicator==-1:
+        #    exclusive_strike,yet_to_place=order_button(0,'PE_S',tron)
+        #    tron-=lots_drop(exclusive_strike,'PE_S',yet_to_place)
+        #if earlier_indicator==-1 and indicator==0:
+        #    exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',tron)
+        #if earlier_indicator==1 and indicator==0:
+        #    exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',tron)
+
+        if earlier_indicator==-1 and indicator==1:
+            exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',tron)
             exclusive_strike,yet_to_place=order_button(0,'CE_S',tron)
             tron-=lots_drop(exclusive_strike,'CE_S',yet_to_place)
 
-        if earlier_indicator==0 and indicator==-1:
+        if earlier_indicator==1 and indicator==-1:
+            exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',tron)
             exclusive_strike,yet_to_place=order_button(0,'PE_S',tron)
             tron-=lots_drop(exclusive_strike,'PE_S',yet_to_place)
-        if earlier_indicator==-1 and indicator==0:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',tron)
-        if earlier_indicator==1 and indicator==0:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',tron)
+
 
     return exclusive_strike,tron,start,indicator
 
@@ -599,9 +622,9 @@ def clear_open_positions():
 #%%
 client_name = input('enter the client name: ')
 tron=int(input('enter the number of lots at each strike'))
-betatron=tron*3
+betatron=tron*4
 prime_client=client_login(client=client_name)
-option_chain,x=data(week=0)
+option_chain,x=data(week=0,primary_oi=pd.DataFrame({}))
 primary_oi=option_chain
 ce_data=option_chain[option_chain['CPType']=='CE']
 pe_data=option_chain[option_chain['CPType']=='PE']
@@ -614,15 +637,27 @@ if a==4:
 else:
     indicator_json=json.load(open('indicator_variables.json'))
     main_cv,main_pv,c_oi,p_oi=indicator_json['main_cv'],indicator_json['main_pv'],indicator_json['c_oi'],indicator_json['p_oi']
-    total_green_json=pd.DataFrame(json.loads(open('total_green_json.json')))
+    total_green_json=pd.DataFrame(json.load(open('total_green_json.json')))
 
-
+def data2(week):
+    exchange='BANKNIFTY'
+    while True:
+        expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
+        current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
+        try :
+            expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
+            option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N",exchange,current_expiry_time_stamp_weekly)['Options'])
+            x=expiry_timestamps['lastrate'][0]['LTP']
+            break
+        except Exception :
+            pass
+    return option_chain,x
 #start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
 #%%
 ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16])<556:
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-option_chain,x=data(week=0)
+option_chain,x=data(week=0,primary_oi=primary_oi)
 calloptions_vwap,putoptions_vwap,put_seller,call_seller,prev_final_c_shape,prev_final_p_shape=options_vwap_json(option_chain,calloptions_vwap,putoptions_vwap,primary_oi,x,[],[])
 e_put_seller=np.array(put_seller['indicator']*0)
 e_call_seller=np.array(call_seller['indicator']*0)
@@ -640,18 +675,23 @@ if a!=4:
     total_green_json=json.load(open('total_green_json.json'))
     e_put_seller=total_green_json['e_put_seller']
     e_call_seller=total_green_json['e_call_seller']
+    e_call_seller = np.array(list(map(lambda x : int(x), e_call_seller)))
+    e_put_seller = np.array(list(map(lambda x : int(x), e_put_seller)))
     x_prime=total_green_json['x_prime']
     primary_oi=pd.DataFrame(json.loads(total_green_json['primary_oi']))
     prev_final_p_shape=np.array(total_green_json['prev_final_p_shape'])
     prev_final_c_shape=np.array(total_green_json['prev_final_c_shape'])
+    start=1
+    betatron=int(total_green_json['betatron'])
+    exclusive_strike=int(total_green_json['monster_buy_strike'])
     calloptions_vwap=pd.DataFrame(json.loads(total_green_json['calloptions_vwap']))
     putoptions_vwap=pd.DataFrame(json.loads(total_green_json['putoptions_vwap']))
 
-
 while int(ind_time[11:13])*60+int(ind_time[14:16])<921:
     ind_time = datetime.now(timezone("Asia/Kolkata")).strftime('%Y-%m-%d %H:%M:%S.%f')
-    option_chain,x=data(week=0)
-    B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
+    option_chain,x=data(week=0,primary_oi=primary_oi)
+    option_chain2,x2=data2(0)
+    B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain2,x2,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
     if iterations>10:
         exclusive_strike,betatron,start,earlier_indicator=buy_kickoff(start,B,earlier_indicator,exclusive_strike,betatron)
         iterations=0
@@ -700,7 +740,7 @@ out_file = open('indicator_variables.json', "w")
 json.dump(indicator_saver, out_file, indent = 6)
 out_file.close()
 
-total_green_json={'primary_oi':primary_oi.to_json(),'prev_final_p_shape':list(prev_final_p_shape),'prev_final_c_shape':list(prev_final_c_shape),'putoptions_vwap':putoptions_vwap.to_json(),'calloptions_vwap':calloptions_vwap.to_json(),'x_prime':x_prime,'e_put_seller':list(e_put_seller),'e_call_seller':list(e_call_seller)}
+total_green_json={'primary_oi':primary_oi.to_json(),'prev_final_p_shape':list(prev_final_p_shape),'prev_final_c_shape':list(prev_final_c_shape),'putoptions_vwap':putoptions_vwap.to_json(),'calloptions_vwap':calloptions_vwap.to_json(),'x_prime':x_prime,'e_put_seller':list(e_put_seller),'e_call_seller':list(e_call_seller),'monster_buy_strike':exclusive_strike,'betatron':betatron}
 out_file = open('total_green_json.json', "w")
 json.dump(total_green_json, out_file,default=str)
 out_file.close()
