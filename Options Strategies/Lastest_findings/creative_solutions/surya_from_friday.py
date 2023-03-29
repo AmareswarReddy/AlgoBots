@@ -210,10 +210,10 @@ def initial_strangle_trades(option_chain,x):
     return tron,c_strike,p_strike
 
 
-def margin_utilizer(c_strike,p_strike):
+def margin_utilizer(c_strike,p_strike,tron_towards_leg):
     try:
         k=prime_client['login'].margin()[0]['AvailableMargin']
-        tron=int(k/180000)
+        tron=int(k/(400000+tron_towards_leg*60000))
         tron=finalise_tron(p_strike=p_strike,c_strike=c_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
         return tron
     except Exception:
@@ -269,7 +269,7 @@ def new_strangle_adjustment_trades(option_chain,x,tron,sell_value,c_strike,p_str
             break
     return tron,c_strike,p_strike
 
-def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
+def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron,tron_towards_leg):
     if c_strike!=p_strike:
         ce_data=option_chain[option_chain['CPType']=='CE']
         pe_data=option_chain[option_chain['CPType']=='PE']
@@ -345,7 +345,7 @@ def strangle_adjustments(x,exclusive_strike,c_strike,p_strike,tron):
                         break
                 tron=finalise_tron(c_strike=at_strike,p_strike=at_strike,tron=tron,to_take_c_strike=1,to_take_p_strike=1)
                 exclusive_strike,c_strike,p_strike=at_strike,at_strike,at_strike
-        tron=tron+margin_utilizer(c_strike,p_strike)
+        tron=tron+margin_utilizer(c_strike,p_strike,tron_towards_leg)
     return exclusive_strike,c_strike,p_strike,tron
 
 def initial_leg_trades(x,option_chain,tron):
@@ -377,7 +377,7 @@ def initial_leg_trades(x,option_chain,tron):
     return final_tron,final_tron,c_strike,p_strike,exclusive_strike,exclusive_strike
 
 def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron,lots_to_be_added):
-    if abs(indicator-earlier_indicator)==2:
+    if abs(indicator-earlier_indicator)==2 and start==0:
         indicator=0
     if start==0:
         s=indicator
@@ -390,18 +390,29 @@ def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron,lots_to_
             tron-=lots_drop(exclusive_strike,'PE_B',yet_to_place)
             start=1
     elif start==1:
-        if earlier_indicator==0 and indicator==1:
+        #if earlier_indicator==0 and indicator==1:
+        #    exclusive_strike,yet_to_place=order_button(0,'CE_B',tron)
+        #    tron-=lots_drop(exclusive_strike,'CE_B',yet_to_place)
+        #if earlier_indicator==0 and indicator==-1:
+        #    exclusive_strike,yet_to_place=order_button(0,'PE_B',tron)
+        #    tron-=lots_drop(exclusive_strike,'PE_B',yet_to_place)
+        #if earlier_indicator==-1 and indicator==0:
+        #    exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
+        #if earlier_indicator==1 and indicator==0:
+        #    exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
+        
+
+        if earlier_indicator==-1 and indicator==1:
+            exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
             exclusive_strike,yet_to_place=order_button(0,'CE_B',tron)
             tron-=lots_drop(exclusive_strike,'CE_B',yet_to_place)
 
-        if earlier_indicator==0 and indicator==-1:
+        if earlier_indicator==1 and indicator==-1:
+            exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
             exclusive_strike,yet_to_place=order_button(0,'PE_B',tron)
             tron-=lots_drop(exclusive_strike,'PE_B',yet_to_place)
-        if earlier_indicator==-1 and indicator==0:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
-        if earlier_indicator==1 and indicator==0:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
-        
+
+
         if lots_to_be_added!=0:
             if indicator==1:
                 exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',lots_to_be_added)
@@ -937,7 +948,8 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<929:
     B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
     #B=int(input('enter B'))
     #x=int(input('enter x'))
-    exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron)
+    tron_towards_leg=max(c_leg_tron,p_leg_tron)
+    exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron=strangle_adjustments(x,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron,tron_towards_leg)
     exclusive_strike,strangle_tron=straddle_special_adjustment(exclusive_strike,x,strangle_tron,B,option_chain)
     c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,strangle_tron=surya(x,option_chain,c_strike_b,p_strike_b,c_leg_tron,p_leg_tron,exclusive_strike,strangle_c_strike,strangle_p_strike,strangle_tron,B)
     lots_to_be_added=int(max(c_leg_tron,p_leg_tron))-tron_buyer
