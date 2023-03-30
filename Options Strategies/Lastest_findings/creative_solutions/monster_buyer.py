@@ -474,7 +474,7 @@ def lots_drop(strike,side,yet_to_place):
     return k-yet_to_place
 
 def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron):
-    if abs(indicator-earlier_indicator)==2:
+    if abs(indicator-earlier_indicator)==2 and start==0:
         indicator=0
     if start==0:
         s=indicator
