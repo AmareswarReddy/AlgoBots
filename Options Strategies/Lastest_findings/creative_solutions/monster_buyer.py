@@ -491,24 +491,35 @@ def buy_kickoff(start,indicator,earlier_indicator,exclusive_strike,tron):
             #exclusive_strike,yet_to_place=order_button(exclusive_strike+day_of_week,'CE_S',tron)
             start=1
     elif start==1:
-        if earlier_indicator==0 and indicator==1:
+        #if earlier_indicator==0 and indicator==1:
+        #    exclusive_strike,yet_to_place=order_button(0,'CE_B',tron)
+        #    tron-=lots_drop(exclusive_strike,'CE_B',yet_to_place)
+        #    #exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',tron)
+        #    #exclusive_strike,yet_to_place=order_button(exclusive_strike-day_of_week,'PE_S',tron)
+        #if earlier_indicator==0 and indicator==-1:
+        #    exclusive_strike,yet_to_place=order_button(0,'PE_B',tron)
+        #    tron-=lots_drop(exclusive_strike,'PE_B',yet_to_place)
+        #    #exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',tron)
+        #    #exclusive_strike,yet_to_place=order_button(exclusive_strike+day_of_week,'CE_S',tron)
+        #if earlier_indicator==-1 and indicator==0:
+        #    exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
+        #    #exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
+        #    #exclusive_strike,yet_to_place=order_button(exclusive_strike+day_of_week,'CE_B',tron)
+        #if earlier_indicator==1 and indicator==0:
+        #    exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
+        #    #exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
+        #    #exclusive_strike,yet_to_place=order_button(exclusive_strike-day_of_week,'PE_B',tron)
+        if earlier_indicator==-1 and indicator==1:
+            exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
             exclusive_strike,yet_to_place=order_button(0,'CE_B',tron)
             tron-=lots_drop(exclusive_strike,'CE_B',yet_to_place)
-            #exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_B',tron)
-            #exclusive_strike,yet_to_place=order_button(exclusive_strike-day_of_week,'PE_S',tron)
-        if earlier_indicator==0 and indicator==-1:
+
+        if earlier_indicator==1 and indicator==-1:
+            exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
             exclusive_strike,yet_to_place=order_button(0,'PE_B',tron)
             tron-=lots_drop(exclusive_strike,'PE_B',yet_to_place)
-            #exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_B',tron)
-            #exclusive_strike,yet_to_place=order_button(exclusive_strike+day_of_week,'CE_S',tron)
-        if earlier_indicator==-1 and indicator==0:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
-            #exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
-            #exclusive_strike,yet_to_place=order_button(exclusive_strike+day_of_week,'CE_B',tron)
-        if earlier_indicator==1 and indicator==0:
-            exclusive_strike,yet_to_place=order_button(exclusive_strike,'CE_S',tron)
-            #exclusive_strike,yet_to_place=order_button(exclusive_strike,'PE_S',tron)
-            #exclusive_strike,yet_to_place=order_button(exclusive_strike-day_of_week,'PE_B',tron)
+
+
     return exclusive_strike,tron,start,indicator
 
 
