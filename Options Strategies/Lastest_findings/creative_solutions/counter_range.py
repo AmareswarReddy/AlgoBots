@@ -210,82 +210,6 @@ def blue_factor(option_chain, x):
     return (f_p(x)+f_c(x))/2
 
 
-def options_vwap_json(option_chain, calloptions_vwap, putoptions_vwap, primary_oi, x, prev_final_c_shape, prev_final_p_shape):
-    stoploss = 25
-    ce_data = option_chain[option_chain['CPType'] == 'CE']
-    pe_data = option_chain[option_chain['CPType'] == 'PE']
-    ce_data_prime = primary_oi[primary_oi['CPType'] == 'CE']
-    pe_data_prime = primary_oi[primary_oi['CPType'] == 'PE']
-    a = json.load(open('Volume_indicator.json'))['volume_indicator']
-    if a > 0:
-        taken_c = np.multiply(
-            (np.array(ce_data['StrikeRate']) > x-30), (np.array(ce_data['StrikeRate']) < x+400))
-        taken_p = np.multiply(
-            (np.array(pe_data['StrikeRate']) > x-100), (np.array(pe_data['StrikeRate']) < x+30))
-    elif a < 0:
-        taken_c = np.multiply(
-            (np.array(ce_data['StrikeRate']) > x-30), (np.array(ce_data['StrikeRate']) < x+100))
-        taken_p = np.multiply(
-            (np.array(pe_data['StrikeRate']) > x-400), (np.array(pe_data['StrikeRate']) < x+30))
-    elif a == 0:
-        taken_c = np.multiply(
-            (np.array(ce_data['StrikeRate']) > x-30), (np.array(ce_data['StrikeRate']) < x+200))
-        taken_p = np.multiply(
-            (np.array(pe_data['StrikeRate']) > x-200), (np.array(pe_data['StrikeRate']) < x+30))
-
-    ind_time = datetime.now(timezone("Asia/Kolkata")
-                            ).strftime('%Y-%m-%d %H:%M:%S.%f')
-    t = (int(ind_time[11:13])*60+int(ind_time[14:16])-555)/15
-    c_lastrate = np.array(ce_data['LastRate'])+t
-    p_lastrate = np.array(pe_data['LastRate'])+t
-    c_volumes = np.array(ce_data['Volume'])
-    p_volumes = np.array(pe_data['Volume'])
-    c_oi = np.array(ce_data['OpenInterest'])
-    p_oi = np.array(pe_data['OpenInterest'])
-    prev_c_lastrate = np.array(calloptions_vwap['LastRate'])
-    prev_p_lastrate = np.array(putoptions_vwap['LastRate'])
-    prev_c_volumes = np.array(calloptions_vwap['Volume'])
-    prev_p_volumes = np.array(putoptions_vwap['Volume'])
-    primary_c_oi = np.array(ce_data_prime['OpenInterest'])
-    primary_p_oi = np.array(pe_data_prime['OpenInterest'])
-    c_shape = np.multiply((c_oi-primary_c_oi) > 0, taken_c)
-    p_shape = np.multiply((p_oi-primary_p_oi) > 0, taken_p)
-    c_net = np.multiply(c_volumes-prev_c_volumes, c_lastrate)
-    p_net = np.multiply(p_volumes-prev_p_volumes, p_lastrate)
-    c_volumes[c_volumes == 0] = 1
-    p_volumes[p_volumes == 0] = 1
-    call_vwap = np.multiply(
-        (c_net+np.multiply(prev_c_lastrate, prev_c_volumes)), 1/c_volumes)
-    put_vwap = np.multiply(
-        (p_net+np.multiply(prev_p_lastrate, prev_p_volumes)), 1/p_volumes)
-    calloptions_vwap = ce_data[['StrikeRate', 'LastRate', 'Volume']].copy()
-    putoptions_vwap = pe_data[['StrikeRate', 'LastRate', 'Volume']].copy()
-    calloptions_vwap['LastRate'] = call_vwap
-    calloptions_vwap['Volume'] = ce_data['Volume']
-    putoptions_vwap['LastRate'] = put_vwap
-    putoptions_vwap['Volume'] = pe_data['Volume']
-    final_c_shape = np.multiply(
-        np.sign(((c_lastrate-call_vwap) < -stoploss)*-1), c_shape)
-    final_p_shape = np.multiply(
-        np.sign(((p_lastrate-put_vwap) < -stoploss)*-1), p_shape)
-    to_correct_c_shape = np.multiply(
-        np.sign(((c_lastrate-call_vwap) < 0)*-1), c_shape)
-    to_correct_p_shape = np.multiply(
-        np.sign(((p_lastrate-put_vwap) < 0)*-1), p_shape)
-    if len(prev_final_p_shape) == 0:
-        prev_final_c_shape = final_c_shape
-        prev_final_p_shape = final_p_shape
-    final_c_shape = final_c_shape - \
-        np.multiply(to_correct_c_shape-final_c_shape, prev_final_c_shape)
-    final_p_shape = final_p_shape - \
-        np.multiply(to_correct_p_shape-final_p_shape, prev_final_p_shape)
-    call_seller = ce_data[['StrikeRate']].copy()
-    call_seller['indicator'] = final_c_shape
-    put_seller = pe_data[['StrikeRate']].copy()
-    put_seller['indicator'] = final_p_shape
-    return calloptions_vwap, putoptions_vwap, put_seller, call_seller, final_c_shape, final_p_shape
-
-
 def get_strike_from_scrip(scripcode, exchange):
     if exchange == 'BANKNIFTY':
         option_chain, a1 = data(0)
@@ -326,53 +250,64 @@ def finalise_tron(p_strike, c_strike, tron, to_take_c_strike, to_take_p_strike):
         return finalise_tron(p_strike=p_strike, c_strike=c_strike, tron=tron-1, to_take_c_strike=to_take_c_strike, to_take_p_strike=to_take_p_strike)
 
 
-def initial_leg_trades(x, option_chain, tron):
-    exclusive_strike = int(np.round((x)/100)*100)
-    ce_data = option_chain[option_chain['CPType'] == 'CE']
-    pe_data = option_chain[option_chain['CPType'] == 'PE']
-    c_lastrate = float(ce_data[ce_data['StrikeRate']
-                       == exclusive_strike]['LastRate'])
-    p_lastrate = float(pe_data[pe_data['StrikeRate']
-                       == exclusive_strike]['LastRate'])
-    f = (p_lastrate+c_lastrate)
-    factor = max(100, int(np.floor((f)/100)*100))
-    c_strike = exclusive_strike+factor
-    p_strike = exclusive_strike-factor
-    k, y1 = order_button(exclusive_strike, 'PE_S', tron)
-    while True:
-        if y1 != 0:
-            k, y1 = order_button(exclusive_strike, 'PE_S', tron)
-        if y1 == 0:
-            break
-    k, y1 = order_button(exclusive_strike, 'CE_S', tron)
-    while True:
-        if y1 != 0:
-            k, y1 = order_button(exclusive_strike, 'CE_S', tron)
-        if y1 == 0:
-            break
-    final_tron = finalise_tron(c_strike=c_strike, p_strike=p_strike,
-                               tron=tron, to_take_c_strike=1, to_take_p_strike=1)
-    if final_tron != tron:
-        order_button(exclusive_strike, 'PE_B', tron-final_tron)
-        order_button(exclusive_strike, 'CE_B', tron-final_tron)
-    return final_tron, final_tron, c_strike, p_strike, exclusive_strike, exclusive_strike
+def initialisation(x, tron):
+    c_strike = int(np.round(x/100)*100)
+    p_strike = c_strike
+    order_button(p_strike, 'CE_S', tron)
+    order_button(p_strike, 'PE_S', tron)
+    return p_strike, c_strike
+
+
+def counter_range(c_strike, p_strike, tron, x, option_chain):
+    if x > p_strike+108 and tron != 0:
+        a1 = int(option_chain[(option_chain['StrikeRate'] == p_strike) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        a2 = int(option_chain[(option_chain['StrikeRate'] == p_strike+100)
+                 & (option_chain['CPType'] == 'PE')]['LastRate'])
+        new_tron = int(tron*a1/a2)
+        if new_tron != 0:
+            order_button(p_strike, 'PE_B', tron)
+            order_button(p_strike+100, 'PE_S', new_tron)
+            order_button(c_strike, 'CE_B', tron-new_tron)
+            p_strike += 100
+            tron = new_tron
+        if new_tron == 0:
+            order_button(p_strike, 'PE_B', tron)
+            # order_button(p_strike+100, 'PE_S', new_tron)
+            order_button(c_strike, 'CE_B', tron-new_tron)
+            p_strike += 100
+            tron = new_tron
+
+    if x < c_strike-108 and tron != 0:
+        a1 = int(option_chain[(option_chain['StrikeRate'] == c_strike) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        a2 = int(option_chain[(option_chain['StrikeRate'] == c_strike-100)
+                 & (option_chain['CPType'] == 'CE')]['LastRate'])
+        new_tron = int(tron*a1/a2)
+        if new_tron != 0:
+            order_button(c_strike, 'CE_B', tron)
+            order_button(c_strike-100, 'CE_S', new_tron)
+            order_button(p_strike, 'PE_B', tron-new_tron)
+            c_strike -= 100
+            tron = new_tron
+        if new_tron == 0:
+            order_button(c_strike, 'CE_B', tron)
+            # order_button(c_strike-100, 'CE_S', new_tron)
+            order_button(p_strike, 'PE_B', tron-new_tron)
+            c_strike -= 100
+            tron = new_tron
+            return c_strike, p_strike, tron
+
+
+def dismantle(c_strike, p_strike, tron):
+    order_button(c_strike, 'CE_B', tron)
+    order_button(p_strike, 'PE_B', tron)
 
 
 # %%
 client_name = input('enter the client name: ')
 tron = int(input('enter the number of lots at each strike'))
 prime_client = client_login(client=client_name)
-a = datetime.today().weekday()
-a = 2
-if a == 4:
-    main_cv, main_pv, c_oi, p_oi = 0, 0, 0, 0
-else:
-    indicator_json = json.load(open('indicator_variables.json'))
-    main_cv, main_pv, c_oi, p_oi = indicator_json['main_cv'], indicator_json[
-        'main_pv'], indicator_json['c_oi'], indicator_json['p_oi']
-
-
-# start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
 # %%
 ind_time = datetime.now(timezone("Asia/Kolkata")
                         ).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -380,111 +315,14 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
 option_chain, x = data(week=0)
-primary_oi = option_chain
-ce_data = option_chain[option_chain['CPType'] == 'CE']
-pe_data = option_chain[option_chain['CPType'] == 'PE']
-calloptions_vwap = ce_data[['StrikeRate', 'LastRate', 'Volume']].copy()
-putoptions_vwap = pe_data[['StrikeRate', 'LastRate', 'Volume']].copy()
-cv, pv, day_coi, day_poi = 0, 0, 0, 0
-calloptions_vwap, putoptions_vwap, put_seller, call_seller, prev_final_c_shape, prev_final_p_shape = options_vwap_json(
-    option_chain, calloptions_vwap, putoptions_vwap, primary_oi, x, [], [])
-e_put_seller = put_seller['indicator']*0
-e_call_seller = call_seller['indicator']*0
-x_prime = x
-ce_data = option_chain[option_chain['CPType'] == 'CE']
-pe_data = option_chain[option_chain['CPType'] == 'PE']
-earlier_pv = np.array(list(pe_data['Volume']))
-earlier_cv = np.array(list(ce_data['Volume']))
-cv, pv = 0, 0
-start = 0
-exclusive_strike = 0
-if a == 4:
-    initial_leg_trades(x, option_chain, tron*10)
-while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
+p_strike, c_strike = initialisation(x, tron)
+while int(ind_time[11:13])*60+int(ind_time[14:16]) < 916:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week=0)
-    # B,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi=options_indicator(option_chain,x,cv,pv,earlier_cv,earlier_pv,main_cv,main_pv,day_coi,day_poi,c_oi,p_oi)
-    # exclusive_strike,betatron,start,earlier_indicator=buy_kickoff(start,B,earlier_indicator,exclusive_strike,betatron)
-    calloptions_vwap, putoptions_vwap, put_seller, call_seller, prev_final_c_shape, prev_final_p_shape = options_vwap_json(
-        option_chain, calloptions_vwap, putoptions_vwap, primary_oi, x_prime, prev_final_c_shape, prev_final_p_shape)
-    final_put_seller = np.array(put_seller['indicator']-e_put_seller)
-    final_call_seller = np.array(call_seller['indicator']-e_call_seller)
-    shine_c_strike = np.array(call_seller['StrikeRate'])
-    shine_p_strike = np.array(put_seller['StrikeRate'])
-
-    for i in range(len(final_call_seller)):
-        if final_call_seller[i] < 0:
-            a, b = order_button(shine_c_strike[i], 'CE_S', tron)
-            c = 0
-            while b != 0:
-                c += 1
-                sleep(5)
-                a, b = order_button(shine_c_strike[i], 'CE_S', tron)
-                if c > 5:
-                    if b != 0:
-                        final_call_seller[i] = 0
-                    break
-        elif final_call_seller[i] > 0:
-            order_button(shine_c_strike[i], 'CE_B', tron)
-    for i in range(len(final_put_seller)):
-        if final_put_seller[i] < 0:
-            a, b = order_button(shine_p_strike[i], 'PE_S', tron)
-            c = 0
-            while b != 0:
-                c += 1
-                sleep(5)
-                a, b = order_button(shine_p_strike[i], 'PE_S', tron)
-                if c > 5:
-                    if b != 0:
-                        final_put_seller[i] = 0
-                    break
-        elif final_put_seller[i] > 0:
-            order_button(shine_p_strike[i], 'PE_B', tron)
-    e_put_seller = put_seller['indicator']
-    e_call_seller = call_seller['indicator']
-    if abs(x_prime-x) > 99:
-        x_prime = x
+    c_strike, p_strike, tron = counter_range(
+        c_strike, p_strike, tron, x, option_chain)
+dismantle(c_strike, p_strike, tron)
 
 
-calloptions_vwap, putoptions_vwap, put_seller, call_seller, prev_final_c_shape, prev_final_p_shape = options_vwap_json(
-    option_chain, calloptions_vwap, putoptions_vwap, primary_oi, x_prime, prev_final_c_shape, prev_final_p_shape)
-final_put_seller = np.array(-e_put_seller)
-final_call_seller = np.array(-e_call_seller)
-shine_c_strike = np.array(call_seller['StrikeRate'])
-shine_p_strike = np.array(put_seller['StrikeRate'])
-
-for i in range(len(final_call_seller)):
-    if final_call_seller[i] < 0:
-        a, b = order_button(shine_c_strike[i], 'CE_S', tron)
-        c = 0
-        while b != 0:
-            c += 1
-            sleep(5)
-            a, b = order_button(shine_c_strike[i], 'CE_S', tron)
-            if c > 5:
-                if b != 0:
-                    final_call_seller[i] = 0
-                break
-    elif final_call_seller[i] > 0:
-        order_button(shine_c_strike[i], 'CE_B', tron)
-for i in range(len(final_put_seller)):
-    if final_put_seller[i] < 0:
-        a, b = order_button(shine_p_strike[i], 'PE_S', tron)
-        c = 0
-        while b != 0:
-            c += 1
-            sleep(5)
-            a, b = order_button(shine_p_strike[i], 'PE_S', tron)
-            if c > 5:
-                if b != 0:
-                    final_put_seller[i] = 0
-                break
-    elif final_put_seller[i] > 0:
-        order_button(shine_p_strike[i], 'PE_B', tron)
-e_put_seller = put_seller['indicator']
-e_call_seller = call_seller['indicator']
-if abs(x_prime-x) > 99:
-    x_prime = x
-# clear_open_positions()
 # %%

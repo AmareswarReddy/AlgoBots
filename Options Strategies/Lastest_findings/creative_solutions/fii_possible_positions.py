@@ -225,13 +225,11 @@ option_chain,x=data(week=0)
 
 
 
-
-
 # %%
-call_net_long=914718
-call_net_short=767050
-put_net_long=929426
-put_net_short=477527
+call_net_long=603893
+call_net_short=355268
+put_net_long=750538
+put_net_short=407168
 def call_side_positions(option_chain,call_net_long,call_net_short):
     call_net_long=int(call_net_long*50)
     call_net_short=int(call_net_short*50)
