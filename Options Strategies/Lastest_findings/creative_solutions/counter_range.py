@@ -39,10 +39,6 @@ def client_login(client):
 
 def order_button(exclusive_strike, type, lots):
     sleep(0.5)
-    if "S" in type:
-        type = type[:-1]+"B"
-    elif "B" in type:
-        type = type[:-1]+"S"
     exchange = 'BANKNIFTY'
     lot_size = 25
     max_lots_per_order = 36
@@ -221,11 +217,11 @@ def finalise_tron(p_strike, c_strike, tron, to_take_c_strike, to_take_p_strike):
     if tron < 0:
         return 0
     if to_take_p_strike == 1:
-        p_strike, p_yet_to_place = order_button(p_strike, 'PE_B', tron)
+        p_strike, p_yet_to_place = order_button(p_strike, 'PE_S', tron)
     else:
         p_yet_to_place = 0
     if to_take_c_strike == 1:
-        c_strike, c_yet_to_place = order_button(c_strike, 'CE_B', tron)
+        c_strike, c_yet_to_place = order_button(c_strike, 'CE_S', tron)
     else:
         c_yet_to_place = 0
     if p_yet_to_place == 0 and c_yet_to_place == 0:
@@ -233,16 +229,16 @@ def finalise_tron(p_strike, c_strike, tron, to_take_c_strike, to_take_p_strike):
     if p_yet_to_place != 0 and c_yet_to_place == 0:
         while True:
             tron = tron-1
-            order_button(c_strike, 'CE_S', 1)
-            kkk, y_place = order_button(p_strike, 'PE_B', tron)
+            order_button(c_strike, 'CE_B', 1)
+            kkk, y_place = order_button(p_strike, 'PE_S', tron)
             if y_place == 0:
                 break
         return tron
     if p_yet_to_place == 0 and c_yet_to_place != 0:
         while True:
             tron = tron-1
-            order_button(p_strike, 'PE_S', 1)
-            kkk, y_place = order_button(c_strike, 'CE_B', tron)
+            order_button(p_strike, 'PE_B', 1)
+            kkk, y_place = order_button(c_strike, 'CE_S', tron)
             if y_place == 0:
                 break
         return tron
@@ -253,9 +249,115 @@ def finalise_tron(p_strike, c_strike, tron, to_take_c_strike, to_take_p_strike):
 def initialisation(x, tron):
     c_strike = int(np.round(x/100)*100)
     p_strike = c_strike
-    order_button(p_strike, 'CE_S', tron)
-    order_button(p_strike, 'PE_S', tron)
+    order_button(p_strike, 'CE_B', tron)
+    order_button(p_strike, 'PE_B', tron)
     return p_strike, c_strike
+
+
+def t_is(common_strike, current_strike, c_tron, p_tron, option_chain):
+    a1 = int(option_chain[(option_chain['StrikeRate'] == current_strike) & (
+        option_chain['CPType'] == 'PE')]['LastRate'])
+    a2 = int(option_chain[(option_chain['StrikeRate'] == current_strike) & (
+        option_chain['CPType'] == 'CE')]['LastRate'])
+    h1 = int(option_chain[(option_chain['StrikeRate'] == current_strike+100)
+             & (option_chain['CPType'] == 'PE')]['LastRate'])
+    h2 = int(option_chain[(option_chain['StrikeRate'] == current_strike+100)
+             & (option_chain['CPType'] == 'CE')]['LastRate'])
+    hh1 = int(option_chain[(option_chain['StrikeRate'] == current_strike-100)
+              & (option_chain['CPType'] == 'PE')]['LastRate'])
+    hh2 = int(option_chain[(option_chain['StrikeRate'] == current_strike-100)
+              & (option_chain['CPType'] == 'CE')]['LastRate'])
+
+    return common_strike
+
+
+def counter_range2(current_strike, common_strike, c_tron, p_tron, x, option_chain):
+    if x > current_strike+108 and c_tron != 0 and x > common_strike:
+        l2 = int(option_chain[(option_chain['StrikeRate'] == common_strike-100) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        a2 = int(option_chain[(option_chain['StrikeRate'] == common_strike) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        h2 = int(option_chain[(option_chain['StrikeRate'] == common_strike+100) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        a1 = int(option_chain[(option_chain['StrikeRate'] == common_strike) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        l1 = int(option_chain[(option_chain['StrikeRate'] == common_strike-100) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        h1 = int(option_chain[(option_chain['StrikeRate'] == common_strike+100) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        new_c_tron = int(p_tron*(((h1-a1)/(a2-h2))+((a1-l1)/(l2-a2)))/2)
+        if new_c_tron < c_tron:
+            order_button(common_strike, 'CE_S', c_tron-new_c_tron)
+        else:
+            print('error while exiting call')
+        current_strike += 100
+        return new_c_tron, p_tron, current_strike
+
+    if x < current_strike-108 and p_tron != 0 and x < common_strike:
+        l2 = int(option_chain[(option_chain['StrikeRate'] == common_strike-100) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        a2 = int(option_chain[(option_chain['StrikeRate'] == common_strike) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        h2 = int(option_chain[(option_chain['StrikeRate'] == common_strike+100) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        a1 = int(option_chain[(option_chain['StrikeRate'] == common_strike) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        l1 = int(option_chain[(option_chain['StrikeRate'] == common_strike-100) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        h1 = int(option_chain[(option_chain['StrikeRate'] == common_strike+100) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        new_p_tron = int(c_tron*(((a2-h2)/(h1-a1))+((l2-a2)/(a1-l1)))/2)
+        if new_p_tron < p_tron:
+            order_button(common_strike, 'PE_S', p_tron-new_p_tron)
+        else:
+            print('error while exiting put')
+        current_strike -= 100
+
+        return c_tron, new_p_tron, current_strike
+
+    if x > current_strike+108 and c_tron != 0 and x < common_strike:
+        l2 = int(option_chain[(option_chain['StrikeRate'] == common_strike-100) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        a2 = int(option_chain[(option_chain['StrikeRate'] == common_strike) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        h2 = int(option_chain[(option_chain['StrikeRate'] == common_strike+100) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        a1 = int(option_chain[(option_chain['StrikeRate'] == common_strike) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        l1 = int(option_chain[(option_chain['StrikeRate'] == common_strike-100) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        h1 = int(option_chain[(option_chain['StrikeRate'] == common_strike+100) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        new_p_tron = int(c_tron*(((a2-h2)/(h1-a1))+((l2-a2)/(a1-l1)))/2)
+        if p_tron < new_p_tron:
+            order_button(common_strike, 'PE_B', new_p_tron-p_tron)
+        else:
+            print('error while adding put')
+        current_strike += 100
+        return c_tron, new_p_tron, current_strike
+
+    if x < current_strike-108 and p_tron != 0 and x > common_strike:
+        l2 = int(option_chain[(option_chain['StrikeRate'] == common_strike-100) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        a2 = int(option_chain[(option_chain['StrikeRate'] == common_strike) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        h2 = int(option_chain[(option_chain['StrikeRate'] == common_strike+100) & (
+            option_chain['CPType'] == 'CE')]['LastRate'])
+        a1 = int(option_chain[(option_chain['StrikeRate'] == common_strike) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        l1 = int(option_chain[(option_chain['StrikeRate'] == common_strike-100) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        h1 = int(option_chain[(option_chain['StrikeRate'] == common_strike+100) & (
+            option_chain['CPType'] == 'PE')]['LastRate'])
+        new_c_tron = int(p_tron*(((h1-a1)/(a2-h2))+((a1-l1)/(l2-a2)))/2)
+        if c_tron < new_c_tron:
+            order_button(common_strike, 'CE_B', new_c_tron-c_tron)
+        else:
+            print('error while adding call')
+        current_strike -= 100
+        return new_c_tron, p_tron, current_strike
+    else:
+        return c_tron, p_tron, current_strike
 
 
 def counter_range(c_strike, p_strike, tron, x, option_chain):
@@ -266,15 +368,15 @@ def counter_range(c_strike, p_strike, tron, x, option_chain):
                  & (option_chain['CPType'] == 'PE')]['LastRate'])
         new_tron = int(tron*a1/a2)
         if new_tron != 0:
-            order_button(p_strike, 'PE_B', tron)
-            order_button(p_strike+100, 'PE_S', new_tron)
-            order_button(c_strike, 'CE_B', tron-new_tron)
+            order_button(p_strike, 'PE_S', tron)
+            order_button(p_strike+100, 'PE_B', new_tron)
+            order_button(c_strike, 'CE_S', tron-new_tron)
             p_strike += 100
             tron = new_tron
         if new_tron == 0:
-            order_button(p_strike, 'PE_B', tron)
+            order_button(p_strike, 'PE_S', tron)
             # order_button(p_strike+100, 'PE_S', new_tron)
-            order_button(c_strike, 'CE_B', tron-new_tron)
+            order_button(c_strike, 'CE_S', tron-new_tron)
             p_strike += 100
             tron = new_tron
 
@@ -285,23 +387,23 @@ def counter_range(c_strike, p_strike, tron, x, option_chain):
                  & (option_chain['CPType'] == 'CE')]['LastRate'])
         new_tron = int(tron*a1/a2)
         if new_tron != 0:
-            order_button(c_strike, 'CE_B', tron)
-            order_button(c_strike-100, 'CE_S', new_tron)
-            order_button(p_strike, 'PE_B', tron-new_tron)
+            order_button(c_strike, 'CE_S', tron)
+            order_button(c_strike-100, 'CE_B', new_tron)
+            order_button(p_strike, 'PE_S', tron-new_tron)
             c_strike -= 100
             tron = new_tron
         if new_tron == 0:
-            order_button(c_strike, 'CE_B', tron)
+            order_button(c_strike, 'CE_S', tron)
             # order_button(c_strike-100, 'CE_S', new_tron)
-            order_button(p_strike, 'PE_B', tron-new_tron)
+            order_button(p_strike, 'PE_S', tron-new_tron)
             c_strike -= 100
             tron = new_tron
-            return c_strike, p_strike, tron
+    return c_strike, p_strike, tron
 
 
-def dismantle(c_strike, p_strike, tron):
-    order_button(c_strike, 'CE_B', tron)
-    order_button(p_strike, 'PE_B', tron)
+def dismantle(common_strike, c_tron, p_tron):
+    order_button(common_strike, 'CE_S', c_tron)
+    order_button(common_strike, 'PE_S', p_tron)
 
 
 # %%
@@ -309,6 +411,25 @@ client_name = input('enter the client name: ')
 tron = int(input('enter the number of lots at each strike'))
 prime_client = client_login(client=client_name)
 # %%
+# for strategy1
+# ind_time = datetime.now(timezone("Asia/Kolkata")
+#                        ).strftime('%Y-%m-%d %H:%M:%S.%f')
+# while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556:
+#    ind_time = datetime.now(timezone("Asia/Kolkata")
+#                            ).strftime('%Y-%m-%d %H:%M:%S.%f')
+# option_chain, x = data(week=0)
+# p_strike, c_strike = initialisation(x, tron)
+# while int(ind_time[11:13])*60+int(ind_time[14:16]) < 916:
+#    ind_time = datetime.now(timezone("Asia/Kolkata")
+#                            ).strftime('%Y-%m-%d %H:%M:%S.%f')
+#    option_chain, x = data(week=0)
+#    c_strike, p_strike, tron = counter_range(
+#        c_strike, p_strike, tron, x, option_chain)
+# dismantle(c_strike, p_strike, tron)
+
+
+# %%
+# for strategy2
 ind_time = datetime.now(timezone("Asia/Kolkata")
                         ).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556:
@@ -316,13 +437,11 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556:
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
 option_chain, x = data(week=0)
 p_strike, c_strike = initialisation(x, tron)
+common_strike = p_strike
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 916:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week=0)
-    c_strike, p_strike, tron = counter_range(
-        c_strike, p_strike, tron, x, option_chain)
-dismantle(c_strike, p_strike, tron)
-
-
-# %%
+    c_tron, p_tron, current_strike = counter_range2(
+        current_strike, common_strike, c_tron, p_tron, x, option_chain)
+dismantle(common_strike, c_tron, p_tron)
