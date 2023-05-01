@@ -333,6 +333,14 @@ def buy_kickoff(start, indicator, earlier_indicator, exclusive_strike, tron):
             exclusive_strike, yet_to_place = order_button(0, 'PE_B', tron)
             tron -= lots_drop(exclusive_strike, 'PE_B', yet_to_place)
 
+        if indicator == 0:
+            if earlier_indicator == -1:
+                exclusive_strike, yet_to_place = order_button(
+                    exclusive_strike, 'PE_S', tron)
+            if earlier_indicator == 1:
+                exclusive_strike, yet_to_place = order_button(
+                    exclusive_strike, 'CE_S', tron)
+
     return exclusive_strike, tron, start, indicator
 
 
@@ -468,7 +476,7 @@ listv_ind_f = []
 listx = []
 earlier_indicator = 0
 dist = premium_sum(x)
-while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
+while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     sleep(59)
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -488,5 +496,5 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     json.dump(indicator_saver, out_file, indent=6)
     out_file.close()
 # clear_open_positions()
-
+buy_kickoff(start, 0, earlier_indicator, exclusive_strike, tron)
 # %%
