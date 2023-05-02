@@ -225,15 +225,15 @@ def options_indicator(option_chain, x, dist, cv, pv, cvn, pvn, cvf, pvf, earlier
         v_ind = ((2*cc*cc)/(1+cc*cc))-1
         earlier_pv = p_volume
         earlier_cv = c_volume
-        return v_ind, earlier_pv, earlier_cv
-    v_ind, earlier_pv, earlier_cv = rusteze(
+        return v_ind, pv, cv
+    v_ind, pv, cv = rusteze(
         option_chain, cv, pv, earlier_cv, earlier_pv)
-    v_ind_n, earlier_pvn, earlier_cvn = rusteze(
+    v_ind_n, pvn, cvn = rusteze(
         near_option_chain, cvn, pvn, earlier_cvn, earlier_pvn)
-    v_ind_f, earlier_pvf, earlier_cvf = rusteze(
+    v_ind_f, pvf, cvf = rusteze(
         far_option_chain, cvf, pvf, earlier_cvf, earlier_pvf)
 
-    return v_ind, earlier_pv, earlier_cv, v_ind_n, earlier_pvn, earlier_cvn, v_ind_f, earlier_pvf, earlier_cvf
+    return v_ind, pv, cv, v_ind_n, pvn, cvn, v_ind_f, pvf, cvf
 
 # %%
 
@@ -484,7 +484,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     option_chain, x = data(week=0)
     print('volume_check', np.sum(option_chain['Volume'])-volume_check)
     volume_check = np.sum(option_chain['Volume'])
-    v_ind, earlier_pv, earlier_cv, v_ind_n, earlier_pvn, earlier_cvn, v_ind_f, earlier_pvf, earlier_cvf = options_indicator(
+    v_ind, pv, cv, v_ind_n, pvn, cvn, v_ind_f, pvf, cvf = options_indicator(
         option_chain, x, dist, cv, pv, cvn, pvn, cvf, pvf, earlier_pv, earlier_cv, earlier_pvn, earlier_cvn, earlier_pvf, earlier_cvf)
     listv_ind += [v_ind]
     listv_ind_n += [v_ind_n]
