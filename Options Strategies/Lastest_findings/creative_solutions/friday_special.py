@@ -215,8 +215,8 @@ def options_indicator(option_chain, x, dist, cv, pv, cvn, pvn, cvf, pvf, earlier
         c_lastrate = np.array(list(ce_data['LastRate']))
         p_volume = np.array(list(pe_data['Volume']))
         c_volume = np.array(list(ce_data['Volume']))
-        p_volume_change = p_volume-earlier_pv
-        c_volume_change = c_volume-earlier_cv
+        p_volume_change = p_volume
+        c_volume_change = c_volume
         cv_temp = np.sum(np.multiply(c_volume_change, c_lastrate))
         pv_temp = np.sum(np.multiply(p_volume_change, p_lastrate))
         cv = cv+cv_temp
@@ -476,11 +476,14 @@ listv_ind_f = []
 listx = []
 earlier_indicator = 0
 dist = premium_sum(x)
+volume_check = 0
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
-    sleep(59)
+    sleep(61)
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week=0)
+    print('volume_check', np.sum(option_chain['Volume'])-volume_check)
+    volume_check = np.sum(option_chain['Volume'])
     v_ind, earlier_pv, earlier_cv, v_ind_n, earlier_pvn, earlier_cvn, v_ind_f, earlier_pvf, earlier_cvf = options_indicator(
         option_chain, x, dist, cv, pv, cvn, pvn, cvf, pvf, earlier_pv, earlier_cv, earlier_pvn, earlier_cvn, earlier_pvf, earlier_cvf)
     listv_ind += [v_ind]
