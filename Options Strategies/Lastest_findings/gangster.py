@@ -289,10 +289,9 @@ def rosetta_oi_indicator(option_chain):
 def data(week):
     exchange='BANKNIFTY'
     while True:
-        expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
-        current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
         try :
             expiry_timestamps=prime_client['login'].get_expiry("N",exchange).copy()
+            current_expiry_time_stamp_weekly=int(expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
             option_chain=pd.DataFrame(prime_client['login'].get_option_chain("N",exchange,current_expiry_time_stamp_weekly)['Options'])
             x=expiry_timestamps['lastrate'][0]['LTP']
             break
@@ -360,7 +359,20 @@ def straddle_special_adjustment(exclusive_strike,x,tron,chameleon_signal):
         if exclusive_strike_change_signal(earlier_x=exclusive_strike,x=x)>1:
             exclusive_strike,tron=exclusive_strike_change_trades(exclusive_strike,x,tron)
             buying_strikes(1)
-        tron=tron+margin_utilizer(exclusive_strike,exclusive_strike)
+            added_tron=margin_utilizer(exclusive_strike,exclusive_strike)
+            tron+=added_tron
+            while added_tron==0:
+                try:
+                    S=pd.DataFrame(prime_client['login'].positions())
+                    net_sum=np.sum(S['NetQty'])
+                    if  net_sum<=0 :
+                        buying_strikes(1)
+                        added_tron=margin_utilizer(exclusive_strike,exclusive_strike)
+                        tron=tron+added_tron
+                    else:
+                        break
+                except Exception:
+                    break
         if exit_signal(option_chain,exclusive_strike)==1 and exclusive_strike!=0:
             exit_trades(exclusive_strike,tron)   
             chameleon_signal=1
