@@ -172,15 +172,25 @@ def exclusive_strike_change_trades(exclusive_strike, x, tron):
     return exclusive_strike, tron
 
 
-def straddle_special_adjustment(exclusive_strike, x, tron):
+def straddle_special_adjustment(exclusive_strike, x, tron, option_chain, initial_premium_sum):
+    ce_data = option_chain[option_chain['CPType'] == 'CE']
+    pe_data = option_chain[option_chain['CPType'] == 'PE']
+    premium_sum = (float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) +
+                   float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate']))
+    total_decay = initial_premium_sum-(premium_sum)
+    if total_decay > 50:
+        order_button(exclusive_strike, 'PE_B', tron)
+        order_button(exclusive_strike, 'CE_B', tron)
+        tron *= 2
+        initial_premium_sum = premium_sum
     if exclusive_strike != 0 and tron != 0:
         def exclusive_strike_change_signal(earlier_x, x):
-            a = (x-earlier_x)/201
+            a = (x-earlier_x)/(premium_sum)
             return abs(a)
         if exclusive_strike_change_signal(earlier_x=exclusive_strike, x=x) > 1:
             exclusive_strike, tron = exclusive_strike_change_trades(
                 exclusive_strike, x, tron)
-    return exclusive_strike, tron
+    return exclusive_strike, tron, initial_premium_sum
 
 
 def data(week):
@@ -212,9 +222,9 @@ def dismantle(exclusive_strike, tron):
 
 # %%
 client_name = input('enter the client name: ')
-tron = input('enter the number of lots on each side: ')
+tron = int(input('enter the number of lots on each side: '))
 prime_client = client_login(client=client_name)
-week = input('enter the week ')
+week = int(input('enter the week '))
 option_chain, x = data(week)
 ind_time = datetime.now(timezone("Asia/Kolkata")
                         ).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -223,11 +233,15 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
 exclusive_strike = int(np.round(x/100)*100)
 initial_straddle_trades(exclusive_strike, tron)
+ce_data = option_chain[option_chain['CPType'] == 'CE']
+pe_data = option_chain[option_chain['CPType'] == 'PE']
+initial_premium_sum = (float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) +
+                       float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate']))
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week)
-    exclusive_strike, tron = straddle_special_adjustment(
-        exclusive_strike, x, tron)
+    exclusive_strike, tron, initial_premium_sum = straddle_special_adjustment(
+        exclusive_strike, x, tron, option_chain, initial_premium_sum)
 dismantle(exclusive_strike, tron)
 # %%
