@@ -193,18 +193,27 @@ def straddle_special_adjustment(exclusive_strike, x, tron, option_chain, initial
     return exclusive_strike, tron, initial_premium_sum
 
 
-def far_straddle(exclusive_strike, x, c_tron, p_tron, option_chain):
+def far_straddle(exclusive_strike, x, c_tron, p_tron, option_chain,initial_premium_sum):
     ce_data = option_chain[option_chain['CPType'] == 'CE']
     pe_data = option_chain[option_chain['CPType'] == 'PE']
     c_premium = float(ce_data[ce_data['StrikeRate']
                       == exclusive_strike]['LastRate'])
     p_premium = float(pe_data[ce_data['StrikeRate']
                       == exclusive_strike]['LastRate'])
+    total_decay = initial_premium_sum-(c_premium+p_premium)
+    
     if abs(exclusive_strike-x)/(c_premium+p_premium) < 1.25:
         order_button(exclusive_strike, 'CE_S', c_tron)
         order_button(exclusive_strike, 'PE_S', p_tron)
         c_tron, p_tron = 0, 0
 
+    if total_decay > 50:
+        order_button(exclusive_strike, 'PE_B', p_tron)
+        order_button(exclusive_strike, 'CE_B', c_tron)
+        p_tron *= 2
+        c_tron *= 2
+        initial_premium_sum = c_premium+p_premium
+    
     if (c_tron+1)*c_premium < p_tron*p_premium:
         order_button(exclusive_strike, 'CE_B', 1)
         c_tron += 1
@@ -213,7 +222,7 @@ def far_straddle(exclusive_strike, x, c_tron, p_tron, option_chain):
         order_button(exclusive_strike, 'PE_B', 1)
         p_tron += 1
 
-    return c_tron, p_tron,
+    return c_tron, p_tron,initial_premium_sum
 
 
 def data(week):
@@ -246,6 +255,8 @@ def dismantle(exclusive_strike, tron):
 # %%
 client_name = input('enter the client name: ')
 tron = int(input('enter the number of lots on each side: '))
+c_tron=tron
+p_tron=tron
 prime_client = client_login(client=client_name)
 week = int(input('enter the week '))
 option_chain, x = data(week)
@@ -264,6 +275,10 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week)
-    exclusive_strike, tron, initial_premium_sum = straddle_special_adjustment(
-        exclusive_strike, x, tron, option_chain, initial_premium_sum)
+    c_tron, p_tron,initial_premium_sum=far_straddle(exclusive_strike, x, c_tron, p_tron, option_chain,initial_premium_sum)
+    #exclusive_strike, tron, initial_premium_sum = straddle_special_adjustment(
+    #    exclusive_strike, x, tron, option_chain, initial_premium_sum)
+    
 dismantle(exclusive_strike, tron)
+
+# %%
