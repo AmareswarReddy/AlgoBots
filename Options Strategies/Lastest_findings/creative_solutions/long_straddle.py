@@ -193,6 +193,29 @@ def straddle_special_adjustment(exclusive_strike, x, tron, option_chain, initial
     return exclusive_strike, tron, initial_premium_sum
 
 
+def far_straddle(exclusive_strike, x, c_tron, p_tron, option_chain):
+    ce_data = option_chain[option_chain['CPType'] == 'CE']
+    pe_data = option_chain[option_chain['CPType'] == 'PE']
+    c_premium = float(ce_data[ce_data['StrikeRate']
+                      == exclusive_strike]['LastRate'])
+    p_premium = float(pe_data[ce_data['StrikeRate']
+                      == exclusive_strike]['LastRate'])
+    if abs(exclusive_strike-x)/(c_premium+p_premium) < 1.25:
+        order_button(exclusive_strike, 'CE_S', c_tron)
+        order_button(exclusive_strike, 'PE_S', p_tron)
+        c_tron, p_tron = 0, 0
+
+    if (c_tron+1)*c_premium < p_tron*p_premium:
+        order_button(exclusive_strike, 'CE_B', 1)
+        c_tron += 1
+
+    if (c_tron)*c_premium > (p_tron+1)*p_premium:
+        order_button(exclusive_strike, 'PE_B', 1)
+        p_tron += 1
+
+    return c_tron, p_tron,
+
+
 def data(week):
     exchange = 'BANKNIFTY'
     while True:
@@ -244,4 +267,3 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     exclusive_strike, tron, initial_premium_sum = straddle_special_adjustment(
         exclusive_strike, x, tron, option_chain, initial_premium_sum)
 dismantle(exclusive_strike, tron)
-# %%
