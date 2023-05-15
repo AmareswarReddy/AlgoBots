@@ -247,9 +247,9 @@ def initial_straddle_trades(exclusive_strike, tron):
     order_button(exclusive_strike, 'CE_B', tron)
 
 
-def dismantle(exclusive_strike, tron):
-    order_button(exclusive_strike, 'PE_S', tron)
-    order_button(exclusive_strike, 'CE_S', tron)
+def dismantle(exclusive_strike, c_tron,p_tron):
+    order_button(exclusive_strike, 'PE_S', p_tron)
+    order_button(exclusive_strike, 'CE_S', c_tron)
 
 
 # %%
@@ -279,6 +279,6 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     #exclusive_strike, tron, initial_premium_sum = straddle_special_adjustment(
     #    exclusive_strike, x, tron, option_chain, initial_premium_sum)
     
-dismantle(exclusive_strike, tron)
+dismantle(exclusive_strike, c_tron,p_tron)
 
 # %%
