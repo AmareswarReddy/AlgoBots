@@ -215,12 +215,14 @@ def far_straddle(exclusive_strike, x, c_tron, p_tron, option_chain, initial_prem
         initial_premium_sum = c_premium+p_premium
 
     if (c_tron+c_tron/2)*c_premium < p_tron*p_premium:
-        order_button(exclusive_strike, 'CE_B', np.floor(c_tron/2))
-        c_tron += np.floor(c_tron/2)
+        e_tron=max(int(np.floor(c_tron/2)),1)
+        order_button(exclusive_strike, 'CE_B', e_tron)
+        c_tron += e_tron
 
     if (c_tron)*c_premium > (p_tron+p_tron/2)*p_premium:
-        order_button(exclusive_strike, 'PE_B', np.floor(p_tron/2))
-        p_tron += np.floor(p_tron/2)
+        e_tron=max(int(np.floor(p_tron/2)),1)
+        order_button(exclusive_strike, 'PE_B',e_tron)
+        p_tron += e_tron
 
     return c_tron, p_tron, initial_premium_sum
 
