@@ -259,15 +259,22 @@ client_name = input('enter the client name: ')
 tron = int(input('enter the number of lots on each side: '))
 c_tron = tron
 p_tron = tron
-prime_client = client_login(client=client_name)
 week = int(input('enter the week '))
+prime_client = client_login(client=client_name)
 option_chain, x = data(week)
+exclusive_strike = int(np.round(x/100)*100)
+start=int(input('enter 0 if starting the strategy for the first time else 1: '))
+if start==1:
+    exclusive_strike=int(input('enter the exclusive strike: '))
+    c_tron=int(input('enter the c_tron: '))
+    p_tron=int(input('enter the p_tron: '))
+    
 ind_time = datetime.now(timezone("Asia/Kolkata")
                         ).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
-exclusive_strike = int(np.round(x/100)*100)
+
 initial_straddle_trades(exclusive_strike, tron)
 ce_data = option_chain[option_chain['CPType'] == 'CE']
 pe_data = option_chain[option_chain['CPType'] == 'PE']
