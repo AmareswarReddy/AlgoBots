@@ -538,7 +538,7 @@ def exit_signal(option_chain, exclusive_strike):
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     temp = np.sum(
         option_chain[option_chain['StrikeRate'] == exclusive_strike]['LastRate'])
-    if temp < 66 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 925:
+    if temp < 66 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 929:
         return 1
     else:
         return 0
@@ -634,7 +634,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
             temp = np.sum(
                 option_chain[option_chain['StrikeRate'] == exclusive_strike]['LastRate'])
             if temp > 66:
-                exclusive_strike == 0
+                exclusive_strike = 0
                 strangle_tron, strangle_c_strike, strangle_p_strike = initial_strangle_trades(
                     option_chain, x, 0)
         elif exclusive_strike == 0:
