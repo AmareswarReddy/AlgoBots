@@ -544,7 +544,7 @@ def exit_trades(exclusive_strike, tron):
 def straddle_special_adjustment(exclusive_strike, x, tron):
     if exclusive_strike != 0 and tron != 0:
         def exclusive_strike_change_signal(earlier_x, x):
-            a = (x-earlier_x)/66
+            a = (x-earlier_x)/133
             return abs(a)
         if exclusive_strike_change_signal(earlier_x=exclusive_strike, x=x) > 1:
             exclusive_strike, tron = exclusive_strike_change_trades(
