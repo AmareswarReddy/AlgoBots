@@ -383,19 +383,19 @@ def initial_leg_trades(x, option_chain, tron):
     p_lastrate = float(pe_data[pe_data['StrikeRate']
                        == exclusive_strike]['LastRate'])
     f = (p_lastrate+c_lastrate)/2
-    factor = max(100, int(np.floor((f)/100)*100))
+    factor = 100 #max(100, int(np.floor((f)/100)*100))
     c_strike = exclusive_strike+factor
     p_strike = exclusive_strike-factor
-    k, y1 = order_button(p_strike, 'PE_B', tron+1)
+    k, y1 = order_button(p_strike, 'PE_B', tron)
     while True:
         if y1 != 0:
-            k, y1 = order_button(p_strike, 'PE_B', tron+1)
+            k, y1 = order_button(p_strike, 'PE_B', tron)
         if y1 == 0:
             break
-    k, y1 = order_button(c_strike, 'CE_B', tron+1)
+    k, y1 = order_button(c_strike, 'CE_B', tron)
     while True:
         if y1 != 0:
-            k, y1 = order_button(c_strike, 'CE_B', tron+1)
+            k, y1 = order_button(c_strike, 'CE_B', tron)
         if y1 == 0:
             break
     final_tron = finalise_tron(
