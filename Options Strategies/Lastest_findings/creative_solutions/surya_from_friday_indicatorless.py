@@ -443,7 +443,7 @@ def surya(x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclu
         extra_lots = extra_lots_decider()
         if x > c_strike_b and c_lastrate > 100:
             new_c_strike_b, y = order_button(
-                c_strike_b+call_factor, 'CE_B', c_leg_tron+extra_lots)
+                c_strike_b+call_factor, 'CE_B', 2*c_leg_tron)
             while y != 0:
                 if strangle_tron == 0:
                     break
@@ -451,20 +451,19 @@ def surya(x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclu
                 order_button(strangle_p_strike, 'PE_B', 1)
                 strangle_tron -= 1
                 new_c_strike_b, y = order_button(
-                    c_strike_b+call_factor, 'CE_B', c_leg_tron+extra_lots)
-
-            o, y = order_button(c_strike_b, 'CE_S', c_leg_tron+extra_lots)
+                    c_strike_b+call_factor, 'CE_B', 2*c_leg_tron)
+            o, y = order_button(c_strike_b, 'CE_S', 2*c_leg_tron)
             while y != 0:
                 if strangle_tron == 0:
                     break
                 order_button(strangle_c_strike, 'CE_B', 1)
                 order_button(strangle_p_strike, 'PE_B', 1)
                 strangle_tron -= 1
-                o, y = order_button(c_strike_b, 'CE_S', c_leg_tron+extra_lots)
-            c_leg_tron += extra_lots
+                o, y = order_button(c_strike_b, 'CE_S', 2*c_leg_tron)
+            c_leg_tron *=2
         elif x < p_strike_b and p_lastrate > 100:
             new_p_strike_b, y = order_button(
-                p_strike_b-put_factor, 'PE_B', p_leg_tron+extra_lots)
+                p_strike_b-put_factor, 'PE_B', 2*p_leg_tron)
             while y != 0:
                 if strangle_tron == 0:
                     break
@@ -472,16 +471,16 @@ def surya(x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclu
                 order_button(strangle_p_strike, 'PE_B', 1)
                 strangle_tron -= 1
                 new_p_strike_b, y = order_button(
-                    p_strike_b-put_factor, 'PE_B', p_leg_tron+extra_lots)
-            o, y = order_button(p_strike_b, 'PE_S', p_leg_tron+extra_lots)
+                    p_strike_b-put_factor, 'PE_B', 2*p_leg_tron)
+            o, y = order_button(p_strike_b, 'PE_S', 2*p_leg_tron)
             while y != 0:
                 if strangle_tron == 0:
                     break
                 order_button(strangle_c_strike, 'CE_B', 1)
                 order_button(strangle_p_strike, 'PE_B', 1)
                 strangle_tron -= 1
-                o, y = order_button(p_strike_b, 'PE_S', p_leg_tron+extra_lots)
-            p_leg_tron += extra_lots
+                o, y = order_button(p_strike_b, 'PE_S', 2*p_leg_tron)
+            p_leg_tron *= 2
         new_c_strike_b, new_p_strike_b = c_strike_b * \
             (new_c_strike_b == 0)+new_c_strike_b, p_strike_b * \
             (new_p_strike_b == 0)+new_p_strike_b

@@ -202,7 +202,7 @@ def far_straddle(exclusive_strike, x, c_tron, p_tron, option_chain, initial_prem
                       == exclusive_strike]['LastRate'])
     total_decay = initial_premium_sum-(c_premium+p_premium)
 
-    if (c_premium+p_premium)/abs(exclusive_strike-x) < 1.25:
+    if (c_premium+p_premium)/(abs(exclusive_strike-x)+1) < 1.25:
         order_button(exclusive_strike, 'CE_S', c_tron)
         order_button(exclusive_strike, 'PE_S', p_tron)
         c_tron, p_tron = 0, 0
