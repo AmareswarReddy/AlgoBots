@@ -42,13 +42,14 @@ def order_button(exclusive_strike, type, lots):
     lot_size = 25
     max_lots_per_order = 36
     strike_difference = 100
+    global week
     if exclusive_strike == 0:
         while True:
             try:
                 expiry_timestamps = prime_client['login'].get_expiry(
                     "N", exchange).copy()
                 current_expiry_time_stamp_weekly = int(
-                    expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
+                    expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
                 option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
                     "N", exchange, current_expiry_time_stamp_weekly)['Options'])
                 x = expiry_timestamps['lastrate'][0]['LTP']
@@ -62,7 +63,7 @@ def order_button(exclusive_strike, type, lots):
                 expiry_timestamps = prime_client['login'].get_expiry(
                     "N", exchange).copy()
                 current_expiry_time_stamp_weekly = int(
-                    expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
+                    expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
                 option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
                     "N", exchange, current_expiry_time_stamp_weekly)['Options'])
                 x = expiry_timestamps['lastrate'][0]['LTP']
@@ -569,7 +570,8 @@ def straddle_special_adjustment(exclusive_strike, x, tron):
 # %%
 client_name = input('enter the client name: ')
 prime_client = client_login(client=client_name)
-option_chain, x = data(week=0)
+week=int(input('enter the week: '))
+option_chain, x = data(week)
 start = int(
     input('enter 0 if starting the strategy for the first time, else 1 :  '))
 from_json = input(
