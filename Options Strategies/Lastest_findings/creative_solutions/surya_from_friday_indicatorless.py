@@ -42,13 +42,14 @@ def order_button(exclusive_strike, type, lots):
     lot_size = 25
     max_lots_per_order = 36
     strike_difference = 100
+    global week
     if exclusive_strike == 0:
         while True:
             try:
                 expiry_timestamps = prime_client['login'].get_expiry(
                     "N", exchange).copy()
                 current_expiry_time_stamp_weekly = int(
-                    expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
+                    expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
                 option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
                     "N", exchange, current_expiry_time_stamp_weekly)['Options'])
                 x = expiry_timestamps['lastrate'][0]['LTP']
@@ -62,7 +63,7 @@ def order_button(exclusive_strike, type, lots):
                 expiry_timestamps = prime_client['login'].get_expiry(
                     "N", exchange).copy()
                 current_expiry_time_stamp_weekly = int(
-                    expiry_timestamps['Expiry'][0]['ExpiryDate'][6:19])
+                    expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
                 option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
                     "N", exchange, current_expiry_time_stamp_weekly)['Options'])
                 x = expiry_timestamps['lastrate'][0]['LTP']
@@ -244,7 +245,7 @@ def re_adjust_strangle(strangle_lastrate_sum, option_chain, x):
     exclusive_strike = int(np.round((x)/100)*100)
     f = np.sum(option_chain[option_chain['StrikeRate']
                == int(np.round(x/100)*100)]['LastRate'])
-    factor = float(1.9+1.1*np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor = float(1.9)*int(np.ceil(f/100)*100)
     factor = int(np.round((factor)/100)*100)
     c_strike = exclusive_strike+factor
     p_strike = exclusive_strike-factor
@@ -253,10 +254,48 @@ def re_adjust_strangle(strangle_lastrate_sum, option_chain, x):
     c_lastrate = float(ce_data[ce_data['StrikeRate'] == c_strike]['LastRate'])
     p_lastrate = float(pe_data[pe_data['StrikeRate'] == p_strike]['LastRate'])
     cp_sum = c_lastrate+p_lastrate
-    if 2.13*strangle_lastrate_sum < cp_sum:
+    if 2*strangle_lastrate_sum < cp_sum:
         return True
     else:
         return False
+
+
+def new_strangle_adjustment_trades(option_chain, x, tron, sell_value, c_strike, p_strike):
+    def strangle_sum(c_strike, p_strike):
+        ce_data = option_chain[option_chain['CPType'] == 'CE']
+        pe_data = option_chain[option_chain['CPType'] == 'PE']
+        c_lastrate = float(
+            ce_data[ce_data['StrikeRate'] == c_strike]['LastRate'])
+        p_lastrate = float(
+            pe_data[pe_data['StrikeRate'] == p_strike]['LastRate'])
+        return c_lastrate+p_lastrate
+    exclusive_strike = int(np.round((x)/100)*100)
+    f = np.sum(option_chain[option_chain['StrikeRate']
+               == int(np.round(x/100)*100)]['LastRate'])
+    factor = float(2+np.random.rand(1)/2)*int(np.ceil(f/100)*100)
+    factor = int(np.round((factor)/100)*100)
+    old_c_strike = c_strike
+    old_p_strike = p_strike
+    while True:
+        factor -= 100
+        c_strike = exclusive_strike+factor
+        p_strike = exclusive_strike-factor
+        new_sell_value = strangle_sum(c_strike, p_strike)
+        if new_sell_value > sell_value or factor == 0:
+            if c_strike == old_c_strike:
+                to_take_c_strike = 0
+            elif c_strike != old_c_strike:
+                order_button(old_c_strike, 'CE_B', tron)
+                to_take_c_strike = 1
+            if p_strike == old_p_strike:
+                to_take_p_strike = 0
+            elif p_strike != old_p_strike:
+                order_button(old_p_strike, 'PE_B', tron)
+                to_take_p_strike = 1
+            tron = finalise_tron(p_strike=p_strike, c_strike=c_strike, tron=tron,
+                                 to_take_c_strike=to_take_c_strike, to_take_p_strike=to_take_p_strike)
+            break
+    return tron, c_strike, p_strike
 
 
 def strangle_adjustments(x, exclusive_strike, c_strike, p_strike, tron):
@@ -279,46 +318,11 @@ def strangle_adjustments(x, exclusive_strike, c_strike, p_strike, tron):
             tron, c_strike, p_strike = initial_strangle_trades(
                 option_chain, x, tron)
         at_strike = int(np.round((x)/100)*100)
-        if c_lastrate/p_lastrate > 2.13 and (2*at_strike-c_strike) > p_strike:
-            while True:
-                strike, yet_to_place = order_button(p_strike, 'PE_B', tron)
-                if yet_to_place == 0:
-                    break
-            p_strike, yet_to_place = order_button(
-                2*at_strike-c_strike, 'PE_S', tron)
-            while True:
-                if yet_to_place != 0:
-                    tron = tron-1
-                    while True:
-                        strike, y = order_button(c_strike, 'CE_B', 1)
-                        if y == 0:
-                            break
-                    sleep(1)
-                    p_strike, yet_to_place = order_button(
-                        2*at_strike-c_strike, 'PE_S', tron)
-                if yet_to_place == 0:
-                    break
-            exclusive_strike = (c_strike == p_strike)*c_strike
-        if p_lastrate/c_lastrate > 2.13 and (2*at_strike-p_strike) < c_strike:
-            while True:
-                strike, yet_to_place = order_button(c_strike, 'CE_B', tron)
-                if yet_to_place == 0:
-                    break
-            at_strike = int(np.round((x)/100)*100)
-            c_strike, yet_to_place = order_button(
-                2*at_strike-p_strike, 'CE_S', tron)
-            while True:
-                if yet_to_place != 0:
-                    tron = tron-1
-                    while True:
-                        strike, y = order_button(p_strike, 'PE_B', 1)
-                        if y == 0:
-                            break
-                    sleep(1)
-                    c_strike, yet_to_place = order_button(
-                        2*at_strike-p_strike, 'CE_S', tron)
-                if yet_to_place == 0:
-                    break
+        at_strike_premium_sum = float(ce_data[ce_data['StrikeRate'] == at_strike]['LastRate'])+float(
+            pe_data[pe_data['StrikeRate'] == at_strike]['LastRate'])
+        if (c_lastrate/p_lastrate > (1+at_strike_premium_sum/(c_lastrate+p_lastrate)) or p_lastrate/c_lastrate > (1+at_strike_premium_sum/(c_lastrate+p_lastrate))):
+            tron, c_strike, p_strike = new_strangle_adjustment_trades(
+                option_chain, x, tron, c_lastrate+p_lastrate, c_strike, p_strike)
             exclusive_strike = (c_strike == p_strike)*c_strike
         if x >= c_strike or x <= p_strike:
             at_strike = int(np.round((x)/100)*100)
@@ -375,8 +379,8 @@ def strangle_adjustments(x, exclusive_strike, c_strike, p_strike, tron):
                         k, y1 = order_button(p_strike, 'CE_B', tron)
                     if y1 == 0:
                         break
-                tron = finalise_tron(c_strike=at_strike,
-                                     p_strike=at_strike, tron=tron)
+                tron = finalise_tron(c_strike=at_strike, p_strike=at_strike,
+                                     tron=tron, to_take_c_strike=1, to_take_p_strike=1)
                 exclusive_strike, c_strike, p_strike = at_strike, at_strike, at_strike
         # tron=tron+margin_utilizer(c_strike,p_strike)
     return exclusive_strike, c_strike, p_strike, tron
@@ -391,19 +395,19 @@ def initial_leg_trades(x, option_chain, tron):
     p_lastrate = float(pe_data[pe_data['StrikeRate']
                        == exclusive_strike]['LastRate'])
     f = (p_lastrate+c_lastrate)/2
-    factor = max(100, int(np.floor((f)/100)*100))
+    factor = 100  # max(100, int(np.floor((f)/100)*100))
     c_strike = exclusive_strike+factor
     p_strike = exclusive_strike-factor
-    k, y1 = order_button(p_strike, 'PE_B', tron+1)
+    k, y1 = order_button(p_strike, 'PE_B', tron)
     while True:
         if y1 != 0:
-            k, y1 = order_button(p_strike, 'PE_B', tron+1)
+            k, y1 = order_button(p_strike, 'PE_B', tron)
         if y1 == 0:
             break
-    k, y1 = order_button(c_strike, 'CE_B', tron+1)
+    k, y1 = order_button(c_strike, 'CE_B', tron)
     while True:
         if y1 != 0:
-            k, y1 = order_button(c_strike, 'CE_B', tron+1)
+            k, y1 = order_button(c_strike, 'CE_B', tron)
         if y1 == 0:
             break
     final_tron = finalise_tron(
@@ -417,12 +421,12 @@ def initial_leg_trades(x, option_chain, tron):
 def extra_lots_decider():
     a = datetime.today().weekday()
     if a == 4:
-        return 2
+        return 1
     if a != 4:
-        return a+2
+        return a+1
 
 
-def surya(x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclusive_strike, strangle_c_strike, strangle_p_strike, strangle_tron):
+def surya(x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclusive_strike, strangle_c_strike, strangle_p_strike, strangle_tron, initial_leg_tron):
     if strangle_tron > 0:
         strangle_c_strike = (exclusive_strike == 0) * \
             strangle_c_strike+exclusive_strike
@@ -437,7 +441,7 @@ def surya(x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclu
         call_factor = max(100, int(np.ceil((c_lastrate)/100)*100))
         put_factor = max(100, int(np.ceil((p_lastrate)/100)*100))
         new_p_strike_b, new_c_strike_b = 0, 0
-        extra_lots = extra_lots_decider()
+        extra_lots = extra_lots_decider()+initial_leg_tron
         if x > c_strike_b and c_lastrate > 100:
             new_c_strike_b, y = order_button(
                 c_strike_b+call_factor, 'CE_B', c_leg_tron+extra_lots)
@@ -538,7 +542,7 @@ def exit_signal(option_chain, exclusive_strike):
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     temp = np.sum(
         option_chain[option_chain['StrikeRate'] == exclusive_strike]['LastRate'])
-    if temp < 66 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 925:
+    if temp < 66 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 929:
         return 1
     else:
         return 0
@@ -552,7 +556,7 @@ def exit_trades(exclusive_strike, tron):
 def straddle_special_adjustment(exclusive_strike, x, tron):
     if exclusive_strike != 0 and tron != 0:
         def exclusive_strike_change_signal(earlier_x, x):
-            a = (x-earlier_x)/66
+            a = (x-earlier_x)/133
             return abs(a)
         if exclusive_strike_change_signal(earlier_x=exclusive_strike, x=x) > 1:
             exclusive_strike, tron = exclusive_strike_change_trades(
@@ -566,7 +570,8 @@ def straddle_special_adjustment(exclusive_strike, x, tron):
 # %%
 client_name = input('enter the client name: ')
 prime_client = client_login(client=client_name)
-option_chain, x = data(week=0)
+week=int(input('enter the week: '))
+option_chain, x = data(week)
 start = int(
     input('enter 0 if starting the strategy for the first time, else 1 :  '))
 from_json = input(
@@ -581,6 +586,7 @@ if start == 0:
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
     c_leg_tron, p_leg_tron, c_strike_b, p_strike_b, c_strike_intel, p_strike_intel = initial_leg_trades(
         x, option_chain, leg_tron)
+    initial_leg_tron = c_leg_tron
     tron = int(prime_client['login'].margin()[0]['AvailableMargin']/140000)
     strangle_tron, strangle_c_strike, strangle_p_strike = initial_strangle_trades(
         option_chain, x, 0)
@@ -596,6 +602,7 @@ elif start == 1 and from_json == 'n':
     tron_intel = int(input(' tron_intel:  '))
     c_strike_intel = int(input('enter call_strike_intel: '))
     p_strike_intel = int(input('enter put_strike_intel: '))
+    initial_leg_tron = int(input('enter initial leg_tron'))
     exclusive_strike = int(
         (strangle_c_strike == strangle_p_strike)*strangle_p_strike)
 elif start == 1 and from_json == 'y':
@@ -604,6 +611,7 @@ elif start == 1 and from_json == 'y':
     p_leg_tron = positions_record['surya']['p_leg_tron']
     c_strike_b = positions_record['surya']['c_strike_b']
     p_strike_b = positions_record['surya']['p_strike_b']
+    initial_leg_tron = positions_record['surya']['initial_leg_tron']
     strangle_tron = positions_record['strangle']['tron']
     strangle_c_strike = positions_record['strangle']['c_strike']
     strangle_p_strike = positions_record['strangle']['p_strike']
@@ -627,21 +635,21 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     exclusive_strike, strangle_tron = straddle_special_adjustment(
         exclusive_strike, x, strangle_tron)
     c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, strangle_tron = surya(
-        x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclusive_strike, strangle_c_strike, strangle_p_strike, strangle_tron)
+        x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclusive_strike, strangle_c_strike, strangle_p_strike, strangle_tron, initial_leg_tron)
     # c_strike_intel, p_strike_intel = intel_strike_mover(x, c_strike_intel, p_strike_intel, tron_intel, strangle_c_strike, strangle_p_strike, strangle_tron)
     if strangle_tron == 0:
         if exclusive_strike != 0:
             temp = np.sum(
                 option_chain[option_chain['StrikeRate'] == exclusive_strike]['LastRate'])
             if temp > 66:
-                exclusive_strike == 0
+                exclusive_strike = 0
                 strangle_tron, strangle_c_strike, strangle_p_strike = initial_strangle_trades(
                     option_chain, x, 0)
         elif exclusive_strike == 0:
             strangle_tron, strangle_c_strike, strangle_p_strike = initial_strangle_trades(
                 option_chain, x, 0)
 positions_json = {'strangle': {'c_strike': strangle_c_strike, 'p_strike': strangle_p_strike, 'tron': strangle_tron},
-                  'surya': {'c_strike_b': c_strike_b, 'p_strike_b': p_strike_b, 'c_leg_tron': c_leg_tron, 'p_leg_tron': p_leg_tron},
+                  'surya': {'c_strike_b': c_strike_b, 'p_strike_b': p_strike_b, 'c_leg_tron': c_leg_tron, 'p_leg_tron': p_leg_tron, 'initial_leg_tron': initial_leg_tron},
                   'intel': {'c_strike_intel': c_strike_intel, 'p_strike_intel': p_strike_intel, 'tron_intel': tron_intel}}
 
 print(positions_json)

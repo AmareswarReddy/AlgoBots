@@ -445,7 +445,8 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     e_call_seller = call_seller['indicator']
     if abs(x_prime-x) > 99:
         x_prime = x
-
+    if int(ind_time[11:13])*60+int(ind_time[14:16])>830 and sum(np.abs(e_put_seller))+sum(np.abs(e_call_seller))==0 :
+        break
 
 calloptions_vwap, putoptions_vwap, put_seller, call_seller, prev_final_c_shape, prev_final_p_shape = options_vwap_json(
     option_chain, calloptions_vwap, putoptions_vwap, primary_oi, x_prime, prev_final_c_shape, prev_final_p_shape)

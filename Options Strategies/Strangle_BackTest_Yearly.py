@@ -1,6 +1,7 @@
 #%%
 import json
 from os import error
+import os
 import numpy as np
 from datetime import datetime, timedelta
 #eg: optionchain=present_expiry[p_keys[0]]['optionchaindata']
@@ -86,6 +87,18 @@ def readJson(symbol, fromDate, toDate,expiry):
     f.close()
     return data
 
+def readJson(symbol, fromDate, toDate,expiry, fromTime, toTime):
+    fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+"_"+str(expiry)+'.json'
+    if  not os.path.isfile(fileName):
+        print("Downloading Data")
+        data = getOptionData(symbol, fromDate,fromTime, toDate,toTime, expiry)
+        jsonDump(symbol,  fromDate,toDate,expiry, data)
+    f = open(fileName)
+    # returns JSON object as
+    # a dictionary
+    data = json.load(f)
+    f.close()
+    return data
 
 def getexpires():
     headers = {
@@ -111,19 +124,10 @@ def putprice(optionchain,strikeprice):
     return price
 
 
-def readJson(symbol, fromDate, toDate,expiry):
-    fileName = symbol+"_"+str(fromDate)+"_"+str(toDate)+"_"+str(expiry)+'.json'
-    f = open(fileName)
-    # returns JSON object as
-    # a dictionary
-    data = json.load(f)
-    f.close()
-    return data
-
 df_writeData = pd.DataFrame(columns=['Expiry', 'Total Profit Booked'])
 
 for i in range(0, len(expires_list)):
-    if '2021' in expires_list[i]:
+    if '2022' in expires_list[i]:
         print(expires_list[i])
         enddate = datetime.strptime(expires_list[i], '%d%b%Y')
         print(enddate.date())
@@ -137,9 +141,9 @@ for i in range(0, len(expires_list)):
         expiry = expires_list[i]
 
         #dataJson = readJson(symbol, fromDate, toDate, expiry)
-        data = getOptionData(symbol, fromDate,fromTime, toDate,toTime, expiry)
-        jsonDump(symbol,  fromDate,toDate,expiry, data)
-        present_expiry = readJson(symbol, fromDate, toDate, expiry)
+        #data = getOptionData(symbol, fromDate,fromTime, toDate,toTime, expiry)
+        #jsonDump(symbol,  fromDate,toDate,expiry, data)
+        present_expiry = readJson(symbol, fromDate, toDate,expiry, fromTime, toTime)
         p_keys=list(present_expiry.keys())
         '''
         near_expiry = readJson(symbol, fromDate, toDate, expiry='18NOV2021')
@@ -249,7 +253,7 @@ for i in range(0, len(expires_list)):
                 ce_positions[p_keys[i]] = [req_list_CE_strikeprice[CE_index_strikeprice],call_price]
                 booked_profit = booked_profit+ce_positions[list(ce_positions.keys())[-2]][1]-call_ltp
         #
-            if Current_CE_strikeprice-Current_PE_strikeprice<=0 and abs(call_ltp-put_ltp)<call_ltp/20:
+            if Current_CE_strikeprice-Current_PE_strikeprice<=0 and abs(call_ltp-put_ltp)<call_ltp/5:
                 #square of all positions
                 ceequalspe=ceequalspe+1
                 print('ce=pe')
@@ -286,4 +290,4 @@ for i in range(0, len(expires_list)):
         df_writeData.loc[0 if pd.isnull(df_writeData.index.max()) else df_writeData.index.max() + 1] = [expiry, profit[-1]]
         df_writeData.to_excel('report.xlsx')
 
-# %%
+    # %%
