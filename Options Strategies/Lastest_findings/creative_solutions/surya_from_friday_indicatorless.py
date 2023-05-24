@@ -438,10 +438,10 @@ def surya(x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclu
             ce_data[ce_data['StrikeRate'] == c_strike_b]['LastRate'])
         p_lastrate = float(
             pe_data[pe_data['StrikeRate'] == p_strike_b]['LastRate'])
-        call_factor = max(100, int(np.ceil((c_lastrate)/100)*100))
-        put_factor = max(100, int(np.ceil((p_lastrate)/100)*100))
+        call_factor = 100  # max(100, int(np.ceil((c_lastrate)/100)*100))
+        put_factor = 100  # max(100, int(np.ceil((p_lastrate)/100)*100))
         new_p_strike_b, new_c_strike_b = 0, 0
-        extra_lots = extra_lots_decider()+initial_leg_tron
+        extra_lots = initial_leg_tron
         if x > c_strike_b and c_lastrate > 100:
             new_c_strike_b, y = order_button(
                 c_strike_b+call_factor, 'CE_B', c_leg_tron+extra_lots)
@@ -570,7 +570,7 @@ def straddle_special_adjustment(exclusive_strike, x, tron):
 # %%
 client_name = input('enter the client name: ')
 prime_client = client_login(client=client_name)
-week=int(input('enter the week: '))
+week = int(input('enter the week: '))
 option_chain, x = data(week)
 start = int(
     input('enter 0 if starting the strategy for the first time, else 1 :  '))
@@ -628,6 +628,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556:
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     option_chain, x = data(week=0)
+    sleep(10)
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     exclusive_strike, strangle_c_strike, strangle_p_strike, strangle_tron = strangle_adjustments(
