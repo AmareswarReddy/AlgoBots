@@ -7,10 +7,10 @@ import json
 import pandas as pd
 import glob
 import os
-expiry_date = datetime.date(2023,5,18)
-expiry_date_str = '2023-05-18'
-from_date='2023-05-12 09:15:00'
-to_date='2023-05-18 15:30:00'
+expiry_date = datetime.date(2023,5,25)
+expiry_date_str = '2023-05-25'
+from_date='2023-05-01 09:15:00'
+to_date='2023-05-25 15:30:00'
 bank_nifty_instrument_token = 260105
 index_ticker = 'BANKNIFTY'
 index_ticker_wk = 'BANKNIFTYWK'
@@ -18,8 +18,8 @@ ticker_name = 'BANKNIFTY'
 file_name_ticker = 'BNF'
 #%%
 #Initiate Kiteconnect
-auth = "enctoken S4eJeKEcQPS84FKT5GDYQfhidJzdH0lkHikDMiE0q2SkFYVy7qFZ58wkFeX8M/PgHYHBeMvrNhrqo2UOsKzX4vZJ+SAh8m4guW+aDL09WM9oRPDJV9aH1A=="
-cookie = "_ga=GA1.2.1756485577.1676098974; ajs_anonymous_id=6f73f217-70a3-448e-b12a-cf4ebf5a07bf; amplitude_id_d9d4ec74fab79cc7bb30a1737905372czerodha.com=eyJkZXZpY2VJZCI6ImIwODJjYzVkLTY0MmMtNGQ4Mi1hZjQ4LTg3OWNlNmQxMjZlZlIiLCJ1c2VySWQiOm51bGwsIm9wdE91dCI6ZmFsc2UsInNlc3Npb25JZCI6MTY3ODUzNTU5Mzk2OCwibGFzdEV2ZW50VGltZSI6MTY3ODUzNTU5NzUzNSwiZXZlbnRJZCI6MTAsImlkZW50aWZ5SWQiOjAsInNlcXVlbmNlTnVtYmVyIjoxMH0=; kf_session=d7fYnijQONO3wh6SiEr79SYuYdgJQTld; user_id=DA4038; public_token=N7bAGppyFoeAdSwrxKbA6IBCvNBK25RL; enctoken=S4eJeKEcQPS84FKT5GDYQfhidJzdH0lkHikDMiE0q2SkFYVy7qFZ58wkFeX8M/PgHYHBeMvrNhrqo2UOsKzX4vZJ+SAh8m4guW+aDL09WM9oRPDJV9aH1A==; _cfuvid=3wdQbaNx2_c5Bk7KtJP4Zzs9rRqYSMKQo.YB2xPbhDM-1684432851138-0-604800000"
+auth = "enctoken NaEyXjisPrAlGk0a5PqciQ7jmEaA29ZeFdN/d2XyinQgUV92E3T6DMVuUmjRCN8fR6y7qBuB0u6JuUDM0/SKV50KfxiuX02crpNwWmpLyhW7OBRRGh0onQ=="
+cookie = "kf_session=Z4yTMH8eX65QJEz7w6jJ1dUk4382OitM; user_id=UW1001; public_token=7T0IhvBMTtzFJwB7kpyrocH8oNRvgh0f; enctoken=NaEyXjisPrAlGk0a5PqciQ7jmEaA29ZeFdN/d2XyinQgUV92E3T6DMVuUmjRCN8fR6y7qBuB0u6JuUDM0/SKV50KfxiuX02crpNwWmpLyhW7OBRRGh0onQ==; _cfuvid=BGDX9ma2dYksUzcuQZbZAiSqwzsk4DNQZ.a6YUpPOI0-1685010216365-0-604800000"
 kite = KiteConnect(authorization_manual=auth, cookie_manual=cookie)
 #%%
 #Get all instrument tokens
