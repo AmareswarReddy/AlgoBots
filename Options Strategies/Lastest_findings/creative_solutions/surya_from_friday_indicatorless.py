@@ -292,8 +292,7 @@ def new_strangle_adjustment_trades(option_chain, x, tron, sell_value, c_strike, 
             elif p_strike != old_p_strike:
                 order_button(old_p_strike, 'PE_B', tron)
                 to_take_p_strike = 1
-            tron = finalise_tron(p_strike=p_strike, c_strike=c_strike, tron=tron,
-                                 to_take_c_strike=to_take_c_strike, to_take_p_strike=to_take_p_strike)
+            tron = finalise_tron(p_strike=p_strike, c_strike=c_strike, tron=tron)
             break
     return tron, c_strike, p_strike
 
