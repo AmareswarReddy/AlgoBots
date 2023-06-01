@@ -25,7 +25,7 @@ def client_login(client):
     user = creds[client]["user"]
     passw = creds[client]["passw"]
     dob = creds[client]["dob"]
-    client_list[client]['strategy']=strategies(user=user, passw=passw, dob=dob,cred=vinathi_cred)
+    #client_list[client]['strategy']=strategies(user=user, passw=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login']=FivePaisaClient(email=user, passwd=passw, dob=dob,cred=vinathi_cred)
     client_list[client]['login'].login()
     client_list[client]['lots']=round((client_list[client]['login'].margin()[0]['AvailableMargin']-200000)/180000)
@@ -68,3 +68,39 @@ prime_client['login'].connect(req_data)
 prime_client['login'].receive_data(on_message)
 
 # %%
+df=prime_client['login'].historical_data('N','D',37516,'1d','2022-08-30','2022-09-29')
+# %%
+import numpy as np
+import talib
+
+length = 130
+coef = 0.2
+vcoef = 2.5
+signalLength = 5
+smoothVFI = False
+
+def ma(x, y):
+    return talib.SMA(x, y) if smoothVFI else x
+
+typical = (high + low + close) / 3
+inter = np.log(typical) - np.log(typical.shift(1))
+vinter = np.std(inter, 30)
+cutoff = coef * vinter * close
+vave = talib.SMA(volume, length).shift(1)
+vmax = vave * vcoef
+vc = np.where(volume < vmax, volume, vmax)
+mf = typical - typical.shift(1)
+vcp = np.where(mf > cutoff, vc, np.where(mf < -cutoff, -vc, 0))
+
+vfi = ma(talib.SUM(vcp, length) / vave, 3)
+vfima = talib.EMA(vfi, signalLength)
+d = vfi - vfima
+
+plt.plot(np.zeros_like(close), color='gray', linestyle='--')
+showHisto = False
+if showHisto:
+    plt.plot(d, color='gray', linewidth=3, alpha=0.5)
+plt.plot(vfima, color='orange', label='EMA of VFI')
+plt.plot(vfi, color='green', linewidth=2, label='VFI')
+plt.legend()
+plt.show()
