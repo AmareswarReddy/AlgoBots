@@ -330,7 +330,7 @@ def initial_leg_trades(x, option_chain, tron):
                        == exclusive_strike]['LastRate'])
     p_lastrate = float(pe_data[pe_data['StrikeRate']
                        == exclusive_strike]['LastRate'])
-    f = (p_lastrate+c_lastrate)
+    f = (p_lastrate+c_lastrate)/2
     factor = max(100, int(np.floor((f)/100)*100))
     c_strike = exclusive_strike+factor
     p_strike = exclusive_strike-factor
@@ -347,7 +347,7 @@ def initial_leg_trades(x, option_chain, tron):
         if y1 == 0:
             break
     final_tron = finalise_tron(c_strike=c_strike, p_strike=p_strike,
-                               tron=tron, to_take_c_strike=1, to_take_p_strike=1)
+                               tron=int(tron/2), to_take_c_strike=1, to_take_p_strike=1)
     if final_tron != tron:
         order_button(exclusive_strike, 'PE_B', tron-final_tron)
         order_button(exclusive_strike, 'CE_B', tron-final_tron)
@@ -360,7 +360,7 @@ tron = int(input('enter the number of lots at each strike'))
 week=int(input('enter the week'))
 prime_client = client_login(client=client_name)
 a = datetime.today().weekday()
-a = 2
+a = int(input('enter 4 to hedge positions: '))
 if a == 4:
     main_cv, main_pv, c_oi, p_oi = 0, 0, 0, 0
 else:
@@ -396,7 +396,7 @@ cv, pv = 0, 0
 start = 0
 exclusive_strike = 0
 if a == 4:
-    initial_leg_trades(x, option_chain, tron*10)
+    initial_leg_trades(x, option_chain, tron*2)
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
