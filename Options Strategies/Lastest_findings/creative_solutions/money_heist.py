@@ -588,7 +588,7 @@ if start == 0:
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
     c_leg_tron, p_leg_tron, c_strike_b, p_strike_b, c_strike_intel, p_strike_intel = initial_leg_trades(
         x, option_chain, leg_tron)
-    initial_leg_tron = c_leg_tron
+    initial_leg_tron=int(input('enter initial increment tron: '))
     tron = int(prime_client['login'].margin()[0]['AvailableMargin']/140000)
     strangle_tron, strangle_c_strike, strangle_p_strike = initial_strangle_trades(
         option_chain, x, 2)
@@ -622,7 +622,7 @@ elif start == 1 and from_json == 'y':
     p_strike_intel = positions_record['intel']['p_strike_intel']
     exclusive_strike = int(
         (strangle_c_strike == strangle_p_strike)*strangle_p_strike)
-initial_leg_tron=int(input('enter initial increment tron: '))
+
 ind_time = datetime.now(timezone("Asia/Kolkata")
                         ).strftime('%Y-%m-%d %H:%M:%S.%f')
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556:
