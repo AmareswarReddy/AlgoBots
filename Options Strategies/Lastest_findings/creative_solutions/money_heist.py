@@ -30,8 +30,6 @@ def client_login(client):
     client_list[client]['login'] = FivePaisaClient(
         email=user, passwd=passw, dob=dob, cred=vinathi_cred)
     client_list[client]['login'].login()
-    client_list[client]['lots'] = round((client_list[client]['login'].margin()[
-                                        0]['AvailableMargin']-200000)/180000)
     return client_list[client]
 # client_name=input('enter the client name Eg: vinathi,bhaskar '
 
