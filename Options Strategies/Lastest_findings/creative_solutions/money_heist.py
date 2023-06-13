@@ -438,8 +438,8 @@ def surya(x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclu
         call_factor = 200  # max(100, int(np.ceil((c_lastrate)/100)*100))
         put_factor = 200  # max(100, int(np.ceil((p_lastrate)/100)*100))
         new_p_strike_b, new_c_strike_b = 0, 0
-        extra_lots = initial_leg_tron
         if x > c_strike_b and c_lastrate > 100:
+            extra_lots = max(int(c_leg_tron*(3/8)),1)
             new_c_strike_b, y = order_button(
                 c_strike_b+call_factor, 'CE_B', c_leg_tron+extra_lots)
             order_button(
@@ -464,6 +464,7 @@ def surya(x, option_chain, c_strike_b, p_strike_b, c_leg_tron, p_leg_tron, exclu
                 o, y = order_button(c_strike_b, 'CE_S', 2*c_leg_tron+extra_lots)
             c_leg_tron =c_leg_tron+ extra_lots
         elif x < p_strike_b and p_lastrate > 100:
+            extra_lots = max(int(p_leg_tron*(3/8)),1)
             new_p_strike_b, y = order_button(
                 p_strike_b-put_factor, 'PE_B', p_leg_tron+extra_lots)
             order_button(
