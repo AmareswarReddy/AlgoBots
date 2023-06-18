@@ -72,7 +72,7 @@ def order_button(exclusive_strike, type, lots):
         already_placed = 0
         c_data = option_chain[option_chain['CPType'] == 'CE']
         c_scrip = int(c_data[c_data['StrikeRate'] ==
-                      exclusive_strike]['ScripCode'])
+                      exclusive_strike]['ScripCode'].iloc[0])
         temp2 = lots
         temp = int(temp2/max_lots_per_order)
         end = temp2-temp*max_lots_per_order
@@ -95,7 +95,7 @@ def order_button(exclusive_strike, type, lots):
         already_placed = 0
         p_data = option_chain[option_chain['CPType'] == 'PE']
         p_scrip = int(p_data[p_data['StrikeRate'] ==
-                      exclusive_strike]['ScripCode'])
+                      exclusive_strike]['ScripCode'].iloc[0])
         temp2 = lots
         temp = int(temp2/max_lots_per_order)
         end = temp2-temp*max_lots_per_order
@@ -118,7 +118,7 @@ def order_button(exclusive_strike, type, lots):
         already_placed = 0
         c_data = option_chain[option_chain['CPType'] == 'CE']
         c_scrip = int(c_data[c_data['StrikeRate'] ==
-                      exclusive_strike]['ScripCode'])
+                      exclusive_strike]['ScripCode'].iloc[0])
         temp2 = lots
         temp = int(temp2/max_lots_per_order)
         end = temp2-temp*max_lots_per_order
@@ -141,7 +141,7 @@ def order_button(exclusive_strike, type, lots):
         already_placed = 0
         p_data = option_chain[option_chain['CPType'] == 'PE']
         p_scrip = int(p_data[p_data['StrikeRate'] ==
-                      exclusive_strike]['ScripCode'])
+                      exclusive_strike]['ScripCode'].iloc[0])
         temp2 = lots
         temp = int(temp2/max_lots_per_order)
         end = temp2-temp*max_lots_per_order
