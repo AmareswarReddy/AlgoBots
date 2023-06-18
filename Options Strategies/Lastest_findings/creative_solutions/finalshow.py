@@ -253,7 +253,7 @@ def strikes_decider(x,option_chain):
 def initial_leg_trades(c_strike_b,p_strike_b,c_strike_s,p_strike_s,capital_to_deploy):
     c_strike = c_strike_b
     p_strike = p_strike_b
-    tron=capital_to_deploy*27*2
+    tron=int(capital_to_deploy*27*2)
     k, y1 = order_button(p_strike, 'PE_B', int(tron*1.5))
     while True:
         if y1 != 0:
@@ -293,10 +293,11 @@ def the_show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_s
     new_c_strike_s,new_p_strike_s=0,0
     if x > c_strike_s+50 and c_sell_tron!=0 :
         new_lots = max(int(c_sell_tron*(c_lastrate/c_lastrate_N)),1)
+        diff=int(np.ceil((x)/100)*100)-c_strike_s
         order_button(
             c_strike_s, 'CE_B', c_sell_tron)
         order_button(
-            c_strike_b+100, 'CE_B', new_lots-c_sell_tron)
+            c_strike_b+diff, 'CE_B', new_lots-c_sell_tron)
         new_c_strike_s, y = order_button(
             int(np.ceil((x)/100)*100), 'CE_S', new_lots)
         if p_lastrate<p_lastrate_B+10 and y!=0:
@@ -312,15 +313,16 @@ def the_show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_s
             new_c_strike_s, y = order_button(
                 int(np.ceil((x)/100)*100), 'CE_S', new_lots)
         c_sell_tron =new_lots
-        c_strike_b+=100
+        c_strike_b+=diff
         
         
     elif x < p_strike_s-50 and p_sell_tron!=0:
         new_lots = max(int(p_sell_tron*(p_lastrate/p_lastrate_N)),1)
+        diff=int(np.floor((x)/100)*100)-p_strike_s
         order_button(
             p_strike_s, 'PE_B', p_sell_tron)
         order_button(
-            p_strike_b-100, 'PE_B', new_lots-p_sell_tron)
+            p_strike_b+diff, 'PE_B', new_lots-p_sell_tron)
         new_p_strike_s, y = order_button(
             int(np.floor((x)/100)*100), 'PE_S', new_lots)
         if c_lastrate<c_lastrate_B+10 and y!=0:
@@ -334,7 +336,7 @@ def the_show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_s
             new_p_strike_s, y = order_button(
                 int(np.floor((x)/100)*100), 'PE_S', new_lots)
         p_sell_tron =new_lots
-        p_strike_b-=100
+        p_strike_b+=diff
         
         
     new_c_strike_s, new_p_strike_s = c_strike_s * \
