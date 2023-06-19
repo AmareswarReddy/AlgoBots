@@ -211,7 +211,7 @@ def strikes_decider(x,option_chain):
     exclusive_strike=int(np.round((x)/100)*100)
     ce_data = option_chain[(option_chain['CPType'] == 'CE') & (option_chain['StrikeRate']>=exclusive_strike)]
     pe_data = option_chain[(option_chain['CPType'] == 'PE') & (option_chain['StrikeRate']<=exclusive_strike)]
-    if x%100>85 and x%100<15:
+    if x%100>85 or x%100<15:
         p_factor=(max(pe_data['LastRate'])+50)/max(pe_data['LastRate'])
         c_factor=(max(ce_data['LastRate'])+50)/max(ce_data['LastRate'])
         plastrate_sort=np.array(pe_data['LastRate'])
