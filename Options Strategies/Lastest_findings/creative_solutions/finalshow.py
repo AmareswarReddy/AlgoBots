@@ -292,7 +292,7 @@ def the_show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_s
         pe_data[pe_data['StrikeRate'] == p_strike_b]['LastRate'])
     new_c_strike_s,new_p_strike_s=0,0
     if x > c_strike_s+50 and c_sell_tron!=0 :
-        new_lots = max(int(c_sell_tron*(c_lastrate/c_lastrate_N)),1)
+        new_lots = max(int(c_sell_tron*(c_lastrate/c_lastrate_N))+1,1)
         diff=int(np.ceil((x)/100)*100)-c_strike_s
         order_button(
             c_strike_s, 'CE_B', c_sell_tron)
@@ -317,7 +317,7 @@ def the_show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_s
         
         
     elif x < p_strike_s-50 and p_sell_tron!=0:
-        new_lots = max(int(p_sell_tron*(p_lastrate/p_lastrate_N)),1)
+        new_lots = max(int(p_sell_tron*(p_lastrate/p_lastrate_N))+1,1)
         diff=int(np.floor((x)/100)*100)-p_strike_s
         order_button(
             p_strike_s, 'PE_B', p_sell_tron)
