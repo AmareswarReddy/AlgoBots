@@ -246,6 +246,37 @@ def strikes_decider(x,option_chain):
         return 0,0,0,0
         
     
+def strikes_in_strategy(option_chain,exclusive_strike):
+    ce_data = option_chain[(option_chain['CPType'] == 'CE') & (option_chain['StrikeRate']>exclusive_strike)]
+    pe_data = option_chain[(option_chain['CPType'] == 'PE') & (option_chain['StrikeRate']<exclusive_strike)]
+    p_factor=(max(pe_data['LastRate'])+50)/max(pe_data['LastRate'])
+    c_factor=(max(ce_data['LastRate'])+50)/max(ce_data['LastRate'])
+    plastrate_sort=np.array(pe_data['LastRate'])
+    clastrate_sort=np.array(ce_data['LastRate'])
+    pstrikes=np.array(pe_data['StrikeRate'])
+    cstrikes=np.array(ce_data['StrikeRate'])
+    if clastrate_sort[-1]>clastrate_sort[0]:
+        clastrate_sort=clastrate_sort[::-1]
+        cstrikes=cstrikes[::-1]
+    if plastrate_sort[-1]>plastrate_sort[0]:
+        plastrate_sort=plastrate_sort[::-1]
+        pstrikes=pstrikes[::-1]
+    final_p_strike_b=0
+    prev_fact=0
+    for i in range(0,20):
+        fact=(plastrate_sort[0]-plastrate_sort[i]*1.5)/(np.power(p_factor,i))
+        if fact>prev_fact:
+            final_p_strike_b=pstrikes[i]
+            prev_fact=fact
+    final_c_strike_b=0
+    prev_fact=0
+    for i in range(0,20):
+        fact=(clastrate_sort[0]-clastrate_sort[i]*1.5)/(np.power(c_factor,i))
+        if fact>prev_fact:
+            final_c_strike_b=cstrikes[i]
+            prev_fact=fact
+    return final_c_strike_b,final_p_strike_b,cstrikes[0],pstrikes[0]
+
 
 
 
@@ -253,7 +284,7 @@ def strikes_decider(x,option_chain):
 def initial_leg_trades(c_strike_b,p_strike_b,c_strike_s,p_strike_s,capital_to_deploy):
     c_strike = c_strike_b
     p_strike = p_strike_b
-    tron=int(capital_to_deploy*27*2)
+    tron=int(capital_to_deploy*27)
     k, y1 = order_button(p_strike, 'PE_B', int(tron*1.5))
     while True:
         if y1 != 0:
@@ -271,11 +302,10 @@ def initial_leg_trades(c_strike_b,p_strike_b,c_strike_s,p_strike_s,capital_to_de
     if final_tron != tron:
         order_button(p_strike, 'PE_S', tron-final_tron)
         order_button(c_strike, 'CE_S', tron-final_tron)
-    return final_tron, final_tron, c_strike, p_strike, c_strike_s, p_strike_s
+    return final_tron, int(tron*1.5), c_strike, p_strike, c_strike_s, p_strike_s
 
 
-
-def the_show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron):
+def show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron):
     ce_data = option_chain[option_chain['CPType'] == 'CE']
     pe_data = option_chain[option_chain['CPType'] == 'PE']
     c_lastrate = float(
@@ -290,60 +320,72 @@ def the_show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_s
         ce_data[ce_data['StrikeRate'] == c_strike_b]['LastRate'])
     p_lastrate_B = float(
         pe_data[pe_data['StrikeRate'] == p_strike_b]['LastRate'])
+    p_lastrate_BN = float(
+        pe_data[pe_data['StrikeRate'] == p_strike_b-100]['LastRate'])
     new_c_strike_s,new_p_strike_s=0,0
-    if x > c_strike_s+50 and c_sell_tron!=0 :
-        new_lots = max(int(c_sell_tron*(c_lastrate/c_lastrate_N))+1,1)
-        diff=int(np.ceil((x)/100)*100)-c_strike_s
+    
+    if x > c_strike_s+50 and c_sell_tron!=0  :
+        new_c_strike_b,temp,new_c_strike_s,temp2=strikes_in_strategy(option_chain,c_strike_s)
+        c_lastrate_BN = float(ce_data[ce_data['StrikeRate'] == new_c_strike_b]['LastRate'])
+        net_loss=(c_lastrate_BN-c_lastrate_B)*c_buy_tron+(c_lastrate-c_lastrate_N)*c_sell_tron
+        extra_lots=int(net_loss/(c_lastrate_N-c_lastrate_BN*1.5))+1
+        new_lots = c_sell_tron+extra_lots
         order_button(
             c_strike_s, 'CE_B', c_sell_tron)
         order_button(
-            c_strike_b+diff, 'CE_B', new_lots-c_sell_tron)
+            c_strike_b, 'CE_S', c_buy_tron)
+        order_button(
+            new_c_strike_b, 'CE_B', c_buy_tron+int(1.5*extra_lots)+1)
         new_c_strike_s, y = order_button(
-            int(np.ceil((x)/100)*100), 'CE_S', new_lots)
+            new_c_strike_s, 'CE_S', new_lots)
         if p_lastrate<p_lastrate_B+10 and y!=0:
             order_button(
                     p_strike_s, 'PE_B', p_sell_tron)
             new_c_strike_s, y = order_button(
-                int(np.ceil((x)/100)*100), 'CE_S', new_lots)
+                new_c_strike_s, 'CE_S', new_lots)
             p_sell_tron=0
-        
-        
         while y != 0:
             new_lots=new_lots-1
             new_c_strike_s, y = order_button(
-                int(np.ceil((x)/100)*100), 'CE_S', new_lots)
+                new_c_strike_s, 'CE_S', new_lots)
         c_sell_tron =new_lots
-        c_strike_b+=diff
-        
-        
-    elif x < p_strike_s-50 and p_sell_tron!=0:
-        new_lots = max(int(p_sell_tron*(p_lastrate/p_lastrate_N))+1,1)
-        diff=int(np.floor((x)/100)*100)-p_strike_s
+        c_strike_b=new_c_strike_b
+        c_buy_tron=c_buy_tron+int(1.5*extra_lots)+1
+
+    elif x < p_strike_s-50 and p_sell_tron!=0  :
+        temp,new_p_strike_b,temp2,new_p_strike_s=strikes_in_strategy(option_chain,c_strike_s)
+        p_lastrate_BN = float(pe_data[pe_data['StrikeRate'] == new_p_strike_b]['LastRate'])
+        net_loss=(p_lastrate_BN-p_lastrate_B)*p_buy_tron+(p_lastrate-p_lastrate_N)*p_sell_tron
+        extra_lots=int(net_loss/(p_lastrate_N-p_lastrate_BN*1.5))+1
+        new_lots = p_sell_tron+extra_lots
         order_button(
             p_strike_s, 'PE_B', p_sell_tron)
         order_button(
-            p_strike_b+diff, 'PE_B', new_lots-p_sell_tron)
+            p_strike_b, 'PE_S', p_buy_tron)
+        order_button(
+            new_p_strike_b, 'PE_B', p_buy_tron+int(1.5*extra_lots)+1)
         new_p_strike_s, y = order_button(
-            int(np.floor((x)/100)*100), 'PE_S', new_lots)
+            new_p_strike_s, 'PE_S', new_lots)
         if c_lastrate<c_lastrate_B+10 and y!=0:
             order_button(
                     c_strike_s, 'CE_B', c_sell_tron)
             new_p_strike_s, y = order_button(
-                    int(np.floor((x)/100)*100), 'PE_S', new_lots)
-            c_sell_tron=0
+                new_p_strike_s, 'PE_S', new_lots)
+            p_sell_tron=0
         while y != 0:
             new_lots=new_lots-1
-            new_p_strike_s, y = order_button(
-                int(np.floor((x)/100)*100), 'PE_S', new_lots)
+            new_c_strike_s, y = order_button(
+                new_p_strike_s, 'PE_S', new_lots)
         p_sell_tron =new_lots
-        p_strike_b+=diff
+        p_strike_b=new_p_strike_b
+        p_buy_tron=p_buy_tron+int(1.5*extra_lots)+1
         
-        
+    
     new_c_strike_s, new_p_strike_s = c_strike_s * \
         (new_c_strike_s == 0)+new_c_strike_s, p_strike_s * \
         (new_p_strike_s == 0)+new_p_strike_s
 
-    return new_c_strike_s, new_p_strike_s,c_strike_b,p_strike_b, c_sell_tron, p_sell_tron
+    return new_c_strike_s, new_p_strike_s,c_strike_b,p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron
 
 
 
@@ -367,8 +409,9 @@ if start == 0:
         option_chain, x = data(week)
         if strikes_decider(x,option_chain)[0]!=0:
             c_strike_b,p_strike_b,c_strike_s,p_strike_s,capital_to_deploy=strikes_decider(x,option_chain)
-            c_sell_tron, p_sell_tron, c_strike_b, p_strike_b, c_strike_s, p_strike_s = initial_leg_trades(
+            c_sell_tron, c_buy_tron, c_strike_b, p_strike_b, c_strike_s, p_strike_s = initial_leg_trades(
                 c_strike_b,p_strike_b,c_strike_s,p_strike_s,capital_to_deploy)
+            p_sell_tron,p_buy_tron=c_sell_tron, c_buy_tron
             break
     
 elif start == 1 and from_json == 'n':
@@ -399,8 +442,8 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     sleep(1)
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
-    c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron = the_show(
-        x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron)
+    c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron = show(
+        x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron)
     
 positions_json = {'show': {'c_strike_b': c_strike_b, 'p_strike_b': p_strike_b, 'c_sell_tron': c_sell_tron, 'p_sell_tron': p_sell_tron, 'c_strike_s': c_strike_s, 'p_strike_s': p_strike_s}}
 

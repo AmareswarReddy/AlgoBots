@@ -206,7 +206,7 @@ def blue_factor(option_chain, x):
 
 
 def options_vwap_json(option_chain, calloptions_vwap, putoptions_vwap, primary_oi, x, prev_final_c_shape, prev_final_p_shape):
-    stoploss = 20
+    stoploss = 40
     ce_data = option_chain[option_chain['CPType'] == 'CE']
     pe_data = option_chain[option_chain['CPType'] == 'PE']
     ce_data_prime = primary_oi[primary_oi['CPType'] == 'CE']
@@ -322,41 +322,35 @@ def finalise_tron(p_strike, c_strike, tron, to_take_c_strike, to_take_p_strike):
         return finalise_tron(p_strike=p_strike, c_strike=c_strike, tron=tron-1, to_take_c_strike=to_take_c_strike, to_take_p_strike=to_take_p_strike)
 
 
-def initial_leg_trades(x, option_chain, tron):
-    exclusive_strike = int(np.round((x)/100)*100)
-    ce_data = option_chain[option_chain['CPType'] == 'CE']
-    pe_data = option_chain[option_chain['CPType'] == 'PE']
-    c_lastrate = float(ce_data[ce_data['StrikeRate']
-                       == exclusive_strike]['LastRate'])
-    p_lastrate = float(pe_data[pe_data['StrikeRate']
-                       == exclusive_strike]['LastRate'])
-    f = (p_lastrate+c_lastrate)/2
-    factor = max(100, int(np.ceil((f)/100)*100))
-    c_strike = exclusive_strike+factor
-    p_strike = exclusive_strike-factor
-    k, y1 = order_button(exclusive_strike, 'PE_S', tron)
+
+def initial_leg_trades(x,tron):
+    exclusive_strike=int(np.round(x/100)*100)
+    c_strike = exclusive_strike+300
+    p_strike = exclusive_strike-300
+    k, y1 = order_button(p_strike, 'PE_B', int(tron*1.3))
     while True:
         if y1 != 0:
-            k, y1 = order_button(exclusive_strike, 'PE_S', tron)
+            k, y1 = order_button(p_strike, 'PE_B',int(tron*1.3))
         if y1 == 0:
             break
-    k, y1 = order_button(exclusive_strike, 'CE_S', tron)
+    k, y1 = order_button(c_strike, 'CE_B', int(tron*1.3))
     while True:
         if y1 != 0:
-            k, y1 = order_button(exclusive_strike, 'CE_S', tron)
+            k, y1 = order_button(c_strike, 'CE_B', int(tron*1.3))
         if y1 == 0:
             break
-    final_tron = finalise_tron(c_strike=c_strike, p_strike=p_strike,
-                               tron=int(tron/2), to_take_c_strike=1, to_take_p_strike=1)
+    final_tron = finalise_tron(
+        c_strike=exclusive_strike+200, p_strike=exclusive_strike-200, tron=tron)
     if final_tron != tron:
-        order_button(exclusive_strike, 'PE_B', tron-final_tron)
-        order_button(exclusive_strike, 'CE_B', tron-final_tron)
-    return final_tron, final_tron, c_strike, p_strike, exclusive_strike, exclusive_strike
+        order_button(p_strike, 'PE_S', tron-final_tron)
+        order_button(c_strike, 'CE_S', tron-final_tron)
+    return 0
 
 
 # %%
 client_name = input('enter the client name: ')
-tron = int(input('enter the number of lots at each strike'))
+hedge_tron=int(input('enter number of lots to hedge: '))
+tron=int(hedge_tron*0.25)
 week=int(input('enter the week'))
 prime_client = client_login(client=client_name)
 a = datetime.today().weekday()
@@ -396,7 +390,7 @@ cv, pv = 0, 0
 start = 0
 exclusive_strike = 0
 if a == 4:
-    initial_leg_trades(x, option_chain, tron*2)
+    initial_leg_trades(x, hedge_tron)
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -442,9 +436,9 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     e_call_seller = call_seller['indicator']
     if abs(x_prime-x) > 99:
         x_prime = x
-    if int(ind_time[11:13])*60+int(ind_time[14:16])>830 and sum(np.abs(e_put_seller))+sum(np.abs(e_call_seller))==0 :
+    """if int(ind_time[11:13])*60+int(ind_time[14:16])>830 and sum(np.abs(e_put_seller))+sum(np.abs(e_call_seller))==0 :
         break
-
+"""
 '''calloptions_vwap, putoptions_vwap, put_seller, call_seller, prev_final_c_shape, prev_final_p_shape = options_vwap_json(
     option_chain, calloptions_vwap, putoptions_vwap, primary_oi, x_prime, prev_final_c_shape, prev_final_p_shape)
 final_put_seller = np.array(-e_put_seller)
