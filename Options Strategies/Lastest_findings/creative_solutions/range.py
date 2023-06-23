@@ -289,58 +289,50 @@ def get_strike_from_scrip(scripcode, exchange):
     return int(k1['StrikeRate'])
 
 
-def finalise_tron(p_strike, c_strike, tron, to_take_c_strike, to_take_p_strike):
-    if tron < 0:
-        return 0
-    if to_take_p_strike == 1:
-        p_strike, p_yet_to_place = order_button(p_strike, 'PE_B', tron)
-    else:
-        p_yet_to_place = 0
-    if to_take_c_strike == 1:
-        c_strike, c_yet_to_place = order_button(c_strike, 'CE_B', tron)
-    else:
-        c_yet_to_place = 0
+def finalise_tron(p_strike, c_strike, tron):
+    p_strike, p_yet_to_place = order_button(p_strike, 'PE_S', tron)
+    c_strike, c_yet_to_place = order_button(c_strike, 'CE_S', tron)
     if p_yet_to_place == 0 and c_yet_to_place == 0:
         return tron
     if p_yet_to_place != 0 and c_yet_to_place == 0:
         while True:
             tron = tron-1
-            order_button(c_strike, 'CE_S', 1)
-            kkk, y_place = order_button(p_strike, 'PE_B', tron)
+            order_button(c_strike, 'CE_B', 1)
+            kkk, y_place = order_button(p_strike, 'PE_S', tron)
             if y_place == 0:
                 break
         return tron
     if p_yet_to_place == 0 and c_yet_to_place != 0:
         while True:
             tron = tron-1
-            order_button(p_strike, 'PE_S', 1)
-            kkk, y_place = order_button(c_strike, 'CE_B', tron)
+            order_button(p_strike, 'PE_B', 1)
+            kkk, y_place = order_button(c_strike, 'CE_S', tron)
             if y_place == 0:
                 break
         return tron
     if p_yet_to_place != 0 and c_yet_to_place != 0:
-        return finalise_tron(p_strike=p_strike, c_strike=c_strike, tron=tron-1, to_take_c_strike=to_take_c_strike, to_take_p_strike=to_take_p_strike)
-
+        return finalise_tron(p_strike=p_strike, c_strike=c_strike, tron=tron-1)
 
 
 def initial_leg_trades(x,tron):
     exclusive_strike=int(np.round(x/100)*100)
     c_strike = exclusive_strike+300
     p_strike = exclusive_strike-300
-    k, y1 = order_button(p_strike, 'PE_B', int(tron*1.3))
-    while True:
-        if y1 != 0:
-            k, y1 = order_button(p_strike, 'PE_B',int(tron*1.3))
-        if y1 == 0:
-            break
-    k, y1 = order_button(c_strike, 'CE_B', int(tron*1.3))
-    while True:
-        if y1 != 0:
-            k, y1 = order_button(c_strike, 'CE_B', int(tron*1.3))
-        if y1 == 0:
-            break
     final_tron = finalise_tron(
         c_strike=exclusive_strike+200, p_strike=exclusive_strike-200, tron=tron)
+    k, y1 = order_button(p_strike, 'PE_B', int(tron*1.1))
+    while True:
+        if y1 != 0:
+            k, y1 = order_button(p_strike, 'PE_B',int(tron*1.1))
+        if y1 == 0:
+            break
+    k, y1 = order_button(c_strike, 'CE_B', int(tron*1.1))
+    while True:
+        if y1 != 0:
+            k, y1 = order_button(c_strike, 'CE_B', int(tron*1.1))
+        if y1 == 0:
+            break
+    
     if final_tron != tron:
         order_button(p_strike, 'PE_S', tron-final_tron)
         order_button(c_strike, 'CE_S', tron-final_tron)
