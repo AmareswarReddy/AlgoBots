@@ -37,8 +37,8 @@ def client_login(client):
 def order_button(exclusive_strike, type, lots):
     sleep(0.5)
     exchange = 'BANKNIFTY'
-    lot_size = 25
-    max_lots_per_order = 36
+    lot_size = 15
+    max_lots_per_order = 60
     strike_difference = 100
     global week
     if exclusive_strike == 0:
@@ -284,7 +284,8 @@ def strikes_in_strategy(option_chain,exclusive_strike):
 def initial_leg_trades(c_strike_b,p_strike_b,c_strike_s,p_strike_s,capital_to_deploy):
     c_strike = c_strike_b
     p_strike = p_strike_b
-    tron=int(capital_to_deploy*27)
+    leftover_margin=20 # margin in the account
+    tron=int(capital_to_deploy*leftover_margin*0.5)
     k, y1 = order_button(p_strike, 'PE_B', int(tron*1.5))
     while True:
         if y1 != 0:
@@ -320,8 +321,6 @@ def show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_
         ce_data[ce_data['StrikeRate'] == c_strike_b]['LastRate'])
     p_lastrate_B = float(
         pe_data[pe_data['StrikeRate'] == p_strike_b]['LastRate'])
-    p_lastrate_BN = float(
-        pe_data[pe_data['StrikeRate'] == p_strike_b-100]['LastRate'])
     new_c_strike_s,new_p_strike_s=0,0
     
     if x > c_strike_s+50 and c_sell_tron!=0  :
@@ -448,8 +447,8 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
 positions_json = {'show': {'c_strike_b': c_strike_b, 'p_strike_b': p_strike_b, 'c_sell_tron': c_sell_tron, 'p_sell_tron': p_sell_tron, 'c_strike_s': c_strike_s, 'p_strike_s': p_strike_s}}
 
 print(positions_json)
-out_file = open(client_name+'_finalshow_positions.json', "w")
-json.dump(positions_json, out_file,cls=NumpyEncoder)
+out_file = open(client_name+'_ultimateshow_positions.json', "w")
+json.dump(positions_json, out_file)
 out_file.close()
 
 

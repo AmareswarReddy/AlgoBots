@@ -316,33 +316,14 @@ def finalise_tron(p_strike, c_strike, tron):
 
 def initial_leg_trades(x,tron):
     exclusive_strike=int(np.round(x/100)*100)
-    c_strike = exclusive_strike+300
-    p_strike = exclusive_strike-300
-    final_tron = finalise_tron(
-        c_strike=exclusive_strike+200, p_strike=exclusive_strike-200, tron=tron)
-    k, y1 = order_button(p_strike, 'PE_B', int(tron*1.1))
-    while True:
-        if y1 != 0:
-            k, y1 = order_button(p_strike, 'PE_B',int(tron*1.1))
-        if y1 == 0:
-            break
-    k, y1 = order_button(c_strike, 'CE_B', int(tron*1.1))
-    while True:
-        if y1 != 0:
-            k, y1 = order_button(c_strike, 'CE_B', int(tron*1.1))
-        if y1 == 0:
-            break
-    
-    if final_tron != tron:
-        order_button(p_strike, 'PE_S', tron-final_tron)
-        order_button(c_strike, 'CE_S', tron-final_tron)
-    return 0
+    finalise_tron(c_strike=exclusive_strike+300, p_strike=exclusive_strike-300, tron=tron)
+    return exclusive_strike+300,exclusive_strike-300
 
 
 # %%
 client_name = input('enter the client name: ')
 hedge_tron=int(input('enter number of lots to hedge: '))
-tron=int(hedge_tron*0.25)
+tron=int(hedge_tron*0.7)
 week=int(input('enter the week'))
 prime_client = client_login(client=client_name)
 a = datetime.today().weekday()
@@ -382,7 +363,7 @@ cv, pv = 0, 0
 start = 0
 exclusive_strike = 0
 if a == 4:
-    initial_leg_trades(x, hedge_tron)
+    initial_c_strike,initial_p_strike=initial_leg_trades(x, hedge_tron)
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -428,47 +409,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     e_call_seller = call_seller['indicator']
     if abs(x_prime-x) > 99:
         x_prime = x
-    """if int(ind_time[11:13])*60+int(ind_time[14:16])>830 and sum(np.abs(e_put_seller))+sum(np.abs(e_call_seller))==0 :
+    if int(ind_time[11:13])*60+int(ind_time[14:16])>900 and sum(np.abs(e_put_seller))+sum(np.abs(e_call_seller))==0 :
+        order_button(initial_c_strike,'CE_B',hedge_tron)
+        order_button(initial_p_strike,'PE_B',hedge_tron)
         break
-"""
-'''calloptions_vwap, putoptions_vwap, put_seller, call_seller, prev_final_c_shape, prev_final_p_shape = options_vwap_json(
-    option_chain, calloptions_vwap, putoptions_vwap, primary_oi, x_prime, prev_final_c_shape, prev_final_p_shape)
-final_put_seller = np.array(-e_put_seller)
-final_call_seller = np.array(-e_call_seller)
-shine_c_strike = np.array(call_seller['StrikeRate'])
-shine_p_strike = np.array(put_seller['StrikeRate'])
-
-for i in range(len(final_call_seller)):
-    if final_call_seller[i] < 0:
-        a, b = order_button(shine_c_strike[i], 'CE_S', tron)
-        c = 0
-        while b != 0:
-            c += 1
-            sleep(5)
-            a, b = order_button(shine_c_strike[i], 'CE_S', tron)
-            if c > 5:
-                if b != 0:
-                    final_call_seller[i] = 0
-                break
-    elif final_call_seller[i] > 0:
-        order_button(shine_c_strike[i], 'CE_B', tron)
-for i in range(len(final_put_seller)):
-    if final_put_seller[i] < 0:
-        a, b = order_button(shine_p_strike[i], 'PE_S', tron)
-        c = 0
-        while b != 0:
-            c += 1
-            sleep(5)
-            a, b = order_button(shine_p_strike[i], 'PE_S', tron)
-            if c > 5:
-                if b != 0:
-                    final_put_seller[i] = 0
-                break
-    elif final_put_seller[i] > 0:
-        order_button(shine_p_strike[i], 'PE_B', tron)
-e_put_seller = put_seller['indicator']
-e_call_seller = call_seller['indicator']
-if abs(x_prime-x) > 99:
-    x_prime = x'''
-# clear_open_positions()
-# %%
