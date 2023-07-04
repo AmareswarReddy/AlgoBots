@@ -364,6 +364,9 @@ start = 0
 exclusive_strike = 0
 if a == 4:
     initial_c_strike,initial_p_strike=initial_leg_trades(x, hedge_tron)
+    hedgetrades=1
+else:
+    hedgetrades=0
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -410,6 +413,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     if abs(x_prime-x) > 99:
         x_prime = x
     if int(ind_time[11:13])*60+int(ind_time[14:16])>900 and sum(np.abs(e_put_seller))+sum(np.abs(e_call_seller))==0 :
-        order_button(initial_c_strike,'CE_B',hedge_tron)
-        order_button(initial_p_strike,'PE_B',hedge_tron)
+        if hedgetrades==1:
+            order_button(initial_c_strike,'CE_B',hedge_tron)
+            order_button(initial_p_strike,'PE_B',hedge_tron)
         break
