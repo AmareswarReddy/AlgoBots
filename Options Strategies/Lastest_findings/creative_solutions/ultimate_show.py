@@ -285,7 +285,7 @@ def initial_leg_trades(c_strike_b,p_strike_b,c_strike_s,p_strike_s,capital_to_de
     c_strike = c_strike_b
     p_strike = p_strike_b
     leftover_margin=20 # margin in the account
-    tron=int(capital_to_deploy*leftover_margin*0.5)
+    tron=int(capital_to_deploy*leftover_margin*2)
     k, y1 = order_button(p_strike, 'PE_B', int(tron*1.5))
     while True:
         if y1 != 0:
@@ -386,6 +386,42 @@ def show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_
 
     return new_c_strike_s, new_p_strike_s,c_strike_b,p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron
 
+def ranger(c_strike_s,p_strike_s,x,lots_tracker,ceb_strike,peb_strike):
+    centre=(c_strike_s+p_strike_s)/2
+
+    if peb_strike==0:
+        if x>centre+100:
+            peb_strike=int(np.ceil(x/100)*100)
+            order_button(peb_strike,'PE_S',lots_tracker)
+
+    if ceb_strike==0:
+        if x<centre-100:
+            ceb_strike=int(np.floor(x/100)*100)
+            order_button(ceb_strike,'CE_S',lots_tracker)
+
+    if peb_strike!=0:
+        if x>centre and x>peb_strike+105:
+            order_button(peb_strike,'PE_S',lots_tracker)
+            order_button(peb_strike+100,'PE_B',lots_tracker+1)
+            lots_tracker+=1
+        
+        if x<centre:
+            order_button(peb_strike,'PE_S',lots_tracker)
+            lots_tracker=1
+
+    if ceb_strike!=0:
+        if x<centre and x<ceb_strike-105:
+            order_button(ceb_strike,'CE_S',lots_tracker)
+            order_button(ceb_strike-100,'CE_B',lots_tracker+1)
+            lots_tracker+=1
+        
+        if x>centre:
+            order_button(ceb_strike,'CE_S',lots_tracker)
+            lots_tracker=1
+    
+    return lots_tracker,ceb_strike,peb_strike
+
+
 
 
 # %%
@@ -410,7 +446,7 @@ if start == 0:
             c_strike_b,p_strike_b,c_strike_s,p_strike_s,capital_to_deploy=strikes_decider(x,option_chain)
             c_sell_tron, c_buy_tron, c_strike_b, p_strike_b, c_strike_s, p_strike_s = initial_leg_trades(
                 c_strike_b,p_strike_b,c_strike_s,p_strike_s,capital_to_deploy)
-            p_sell_tron,p_buy_tron=c_sell_tron, c_buy_tron
+            p_sell_tron,p_buy_tron,lots_tracker,ceb_strike,peb_strike=c_sell_tron, c_buy_tron,1,0,0
             break
     
 elif start == 1 and from_json == 'n':
@@ -420,6 +456,9 @@ elif start == 1 and from_json == 'n':
     p_strike_b = int(input('enter the put bought strike: '))
     c_strike_s = int(input('enter call_strike_sold: '))
     p_strike_s = int(input('enter put_strike_sold: '))
+    ceb_strike = int(input('enter ceb_strike: '))
+    peb_strike = int(input('enter peb_strike: '))
+    lots_tracker = int(input('enter lots_tracker: '))
 elif start == 1 and from_json == 'y':
     positions_record = json.load(open(client_name+'_finalshow_positions.json'))
     c_sell_tron = positions_record['show']['c_sell_tron']
@@ -428,7 +467,9 @@ elif start == 1 and from_json == 'y':
     p_strike_b = positions_record['show']['p_strike_b']
     c_strike_s = positions_record['show']['c_strike_s']
     p_strike_s = positions_record['show']['p_strike_s']
-    
+    ceb_strike = positions_record['ranger']['ceb_strike']
+    peb_strike = positions_record['ranger']['peb_strike']
+    lots_tracker=positions_record['ranger']['lots_tracker']
 
 ind_time = datetime.now(timezone("Asia/Kolkata")
                         ).strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -444,7 +485,8 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron = show(
         x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron)
     
-positions_json = {'show': {'c_strike_b': c_strike_b, 'p_strike_b': p_strike_b, 'c_sell_tron': c_sell_tron, 'p_sell_tron': p_sell_tron, 'c_strike_s': c_strike_s, 'p_strike_s': p_strike_s}}
+    lots_tracker,ceb_strike,peb_strike=ranger(c_strike_s,p_strike_s,x,lots_tracker,ceb_strike,peb_strike)
+positions_json = {'show': {'c_strike_b': c_strike_b, 'p_strike_b': p_strike_b, 'c_sell_tron': c_sell_tron, 'p_sell_tron': p_sell_tron, 'c_strike_s': c_strike_s, 'p_strike_s': p_strike_s},'ranger':{'ceb_strike':ceb_strike,'peb_strike':peb_strike,'lots_tracker':lots_tracker}}
 
 print(positions_json)
 out_file = open(client_name+'_ultimateshow_positions.json', "w")
