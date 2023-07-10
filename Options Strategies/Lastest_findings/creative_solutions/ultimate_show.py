@@ -392,12 +392,12 @@ def ranger(c_strike_s,p_strike_s,x,lots_tracker,ceb_strike,peb_strike):
     if peb_strike==0:
         if x>centre+100:
             peb_strike=int(np.ceil(x/100)*100)
-            order_button(peb_strike,'PE_S',lots_tracker)
+            order_button(peb_strike,'PE_B',lots_tracker)
 
     if ceb_strike==0:
         if x<centre-100:
             ceb_strike=int(np.floor(x/100)*100)
-            order_button(ceb_strike,'CE_S',lots_tracker)
+            order_button(ceb_strike,'CE_B',lots_tracker)
 
     if peb_strike!=0:
         if x>centre and x>peb_strike+105:
