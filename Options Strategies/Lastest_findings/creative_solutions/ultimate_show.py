@@ -352,7 +352,7 @@ def show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_
         c_buy_tron=c_buy_tron+int(1.5*extra_lots)+1
 
     elif x < p_strike_s-50 and p_sell_tron!=0  :
-        temp,new_p_strike_b,temp2,new_p_strike_s=strikes_in_strategy(option_chain,c_strike_s)
+        temp,new_p_strike_b,temp2,new_p_strike_s=strikes_in_strategy(option_chain,p_strike_s)
         p_lastrate_BN = float(pe_data[pe_data['StrikeRate'] == new_p_strike_b]['LastRate'])
         net_loss=(p_lastrate_BN-p_lastrate_B)*p_buy_tron+(p_lastrate-p_lastrate_N)*p_sell_tron
         extra_lots=int(net_loss/(p_lastrate_N-p_lastrate_BN*1.5))+1
@@ -404,20 +404,24 @@ def ranger(c_strike_s,p_strike_s,x,lots_tracker,ceb_strike,peb_strike):
             order_button(peb_strike,'PE_S',lots_tracker)
             order_button(peb_strike+100,'PE_B',lots_tracker+1)
             lots_tracker+=1
-        
+            peb_strike+=100
+
         if x<centre:
             order_button(peb_strike,'PE_S',lots_tracker)
             lots_tracker=1
+            peb_strike=0
 
     if ceb_strike!=0:
         if x<centre and x<ceb_strike-105:
             order_button(ceb_strike,'CE_S',lots_tracker)
             order_button(ceb_strike-100,'CE_B',lots_tracker+1)
             lots_tracker+=1
+            ceb_strike-=100
         
         if x>centre:
             order_button(ceb_strike,'CE_S',lots_tracker)
             lots_tracker=1
+            ceb_strike=0
     
     return lots_tracker,ceb_strike,peb_strike
 
