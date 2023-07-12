@@ -14,6 +14,15 @@ from pytz import timezone
 #from cred import *
 from py5paisa.order import Basket_order
 
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return super(NpEncoder, self).default(obj)
 
 def client_login(client):
     import json
@@ -463,14 +472,18 @@ elif start == 1 and from_json == 'n':
     ceb_strike = int(input('enter ceb_strike: '))
     peb_strike = int(input('enter peb_strike: '))
     lots_tracker = int(input('enter lots_tracker: '))
+    c_buy_tron  = int(input('enter call side leg buy tron'))
+    p_buy_tron  = int(input('enter put side leg buy tron'))
 elif start == 1 and from_json == 'y':
-    positions_record = json.load(open(client_name+'_finalshow_positions.json'))
+    positions_record = json.load(open(client_name+'_ultimateshow_positions.json'))
     c_sell_tron = positions_record['show']['c_sell_tron']
     p_sell_tron = positions_record['show']['p_sell_tron']
     c_strike_b = positions_record['show']['c_strike_b']
     p_strike_b = positions_record['show']['p_strike_b']
     c_strike_s = positions_record['show']['c_strike_s']
     p_strike_s = positions_record['show']['p_strike_s']
+    c_buy_tron = positions_record['show']['c_buy_tron']
+    p_buy_tron = positions_record['show']['p_buy_tron']
     ceb_strike = positions_record['ranger']['ceb_strike']
     peb_strike = positions_record['ranger']['peb_strike']
     lots_tracker=positions_record['ranger']['lots_tracker']
@@ -490,11 +503,11 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
         x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron)
     
     lots_tracker,ceb_strike,peb_strike=ranger(c_strike_s,p_strike_s,x,lots_tracker,ceb_strike,peb_strike)
-positions_json = {'show': {'c_strike_b': c_strike_b, 'p_strike_b': p_strike_b, 'c_sell_tron': c_sell_tron, 'p_sell_tron': p_sell_tron, 'c_strike_s': c_strike_s, 'p_strike_s': p_strike_s},'ranger':{'ceb_strike':ceb_strike,'peb_strike':peb_strike,'lots_tracker':lots_tracker}}
+positions_json = {'show': {'c_strike_b': c_strike_b, 'p_strike_b': p_strike_b, 'c_sell_tron': c_sell_tron, 'p_sell_tron': p_sell_tron, 'c_strike_s': c_strike_s, 'p_strike_s': p_strike_s,'c_buy_tron':c_buy_tron,'p_buy_tron':p_buy_tron},'ranger':{'ceb_strike':ceb_strike,'peb_strike':peb_strike,'lots_tracker':lots_tracker}}
 
 print(positions_json)
 out_file = open(client_name+'_ultimateshow_positions.json', "w")
-json.dump(positions_json, out_file)
+json.dump(positions_json, out_file,cls=NpEncoder)
 out_file.close()
 
 
