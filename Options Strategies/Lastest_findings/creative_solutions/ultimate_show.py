@@ -346,9 +346,12 @@ def show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_
             new_c_strike_b, 'CE_B', c_buy_tron+int(1.5*extra_lots)+1)
         new_c_strike_s, y = order_button(
             new_c_strike_s, 'CE_S', new_lots)
+        
         if p_lastrate<p_lastrate_B+10 and y!=0:
             order_button(
                     p_strike_s, 'PE_B', p_sell_tron)
+            order_button(
+                    p_strike_b, 'PE_S', p_buy_tron)
             new_c_strike_s, y = order_button(
                 new_c_strike_s, 'CE_S', new_lots)
             p_sell_tron=0
@@ -374,9 +377,12 @@ def show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_
             new_p_strike_b, 'PE_B', p_buy_tron+int(1.5*extra_lots)+1)
         new_p_strike_s, y = order_button(
             new_p_strike_s, 'PE_S', new_lots)
+        
         if c_lastrate<c_lastrate_B+10 and y!=0:
             order_button(
                     c_strike_s, 'CE_B', c_sell_tron)
+            order_button(
+                    c_strike_b, 'CE_S', c_buy_tron)
             new_p_strike_s, y = order_button(
                 new_p_strike_s, 'PE_S', new_lots)
             p_sell_tron=0
