@@ -46,8 +46,8 @@ def client_login(client):
 
 def order_button(exclusive_strike, type, lots):
     exchange = 'BANKNIFTY'
-    lot_size = 25
-    max_lots_per_order = 25
+    lot_size = 15
+    max_lots_per_order = 50
     strike_difference = 100
     global week
     if exclusive_strike == 0:
@@ -195,10 +195,9 @@ def finalise_tron(p_strike, c_strike, tron):
             if y_place == 0:
                 break
         return tron
-    if p_yet_to_place != 0 and c_yet_to_place != 0:
+    if p_yet_to_place == tron and c_yet_to_place == tron:
         return finalise_tron(p_strike=p_strike, c_strike=c_strike, tron=tron-1)
-
-
+    
 def data(week):
     exchange = 'BANKNIFTY'
     while True:
@@ -420,16 +419,16 @@ def bigshow(x, option_chain, c_strike_s, p_strike_s,c_buy_tron_json, p_buy_tron_
         pe_data[pe_data['StrikeRate'] == p_strike_s-100]['LastRate'])
     new_c_strike_s,new_p_strike_s=0,0
     
-    if x > c_strike_s+50 and c_sell_tron!=0  :
-        
+    if x > c_strike_s+115 and c_sell_tron!=0  :
         new_c_strike_b,temp,new_c_strike_s,temp2=strikes_in_strategy(option_chain,c_strike_s)
         c_lastrate_BN = float(ce_data[ce_data['StrikeRate'] == new_c_strike_b]['LastRate'])
-        new_lots = int(np.ceil((c_lastrate*c_sell_tron-1.5*c_sell_tron*c_lastrate_BN)/(c_lastrate_N-1.5*c_lastrate_BN)))
+        new_lots = int(np.ceil((c_lastrate*c_sell_tron-c_sell_tron*c_lastrate_BN)/(c_lastrate_N-c_lastrate_BN)))
         extra_lots=new_lots-c_sell_tron
+        extra_lots=(extra_lots>100)*100+(extra_lots<100)*extra_lots
         order_button(
             c_strike_s, 'CE_B', c_sell_tron)
         order_button(
-            new_c_strike_b, 'CE_B', int(1.5*extra_lots)+1)
+            new_c_strike_b, 'CE_B', int(extra_lots)+1)
         new_c_strike_s, y = order_button(
             new_c_strike_s, 'CE_S', new_lots)
         
@@ -445,7 +444,7 @@ def bigshow(x, option_chain, c_strike_s, p_strike_s,c_buy_tron_json, p_buy_tron_
 
         c_sell_tron =new_lots
         c_strike_b=new_c_strike_b
-        c_buy_tron=int(1.5*extra_lots)+1
+        c_buy_tron=int(extra_lots)+1
         if c_strike_b in list(c_buy_tron_json.keys()):
             c_buy_tron_json[c_strike_b]+=c_buy_tron
         else:
@@ -453,15 +452,16 @@ def bigshow(x, option_chain, c_strike_s, p_strike_s,c_buy_tron_json, p_buy_tron_
         
         
 
-    elif x < p_strike_s-50 and p_sell_tron!=0  :
+    elif x < p_strike_s-115 and p_sell_tron!=0  :
         temp,new_p_strike_b,temp2,new_p_strike_s=strikes_in_strategy(option_chain,p_strike_s)
         p_lastrate_BN = float(pe_data[pe_data['StrikeRate'] == new_p_strike_b]['LastRate'])
-        new_lots = int(np.ceil((p_lastrate*p_sell_tron-1.5*p_sell_tron*p_lastrate_BN)/(p_lastrate_N-1.5*p_lastrate_BN)))
+        new_lots = int(np.ceil((p_lastrate*p_sell_tron-p_sell_tron*p_lastrate_BN)/(p_lastrate_N-p_lastrate_BN)))
         extra_lots=new_lots-p_sell_tron
+        extra_lots=(extra_lots>100)*100+(extra_lots<100)*extra_lots
         order_button(
             p_strike_s, 'PE_B', p_sell_tron)
         order_button(
-            new_p_strike_b, 'PE_B', int(1.5*extra_lots)+1)
+            new_p_strike_b, 'PE_B', int(extra_lots)+1)
         new_p_strike_s, y = order_button(
             new_p_strike_s, 'PE_S', new_lots)
         
@@ -476,7 +476,7 @@ def bigshow(x, option_chain, c_strike_s, p_strike_s,c_buy_tron_json, p_buy_tron_
 
         p_sell_tron =new_lots
         p_strike_b=new_p_strike_b
-        p_buy_tron=int(1.5*extra_lots)+1
+        p_buy_tron=int(extra_lots)+1
         if p_strike_b in list(p_buy_tron_json.keys()):
             p_buy_tron_json[p_strike_b]+=p_buy_tron
         else:
