@@ -46,8 +46,8 @@ def client_login(client):
 
 def order_button(exclusive_strike, type, lots):
     exchange = 'BANKNIFTY'
-    lot_size = 15
-    max_lots_per_order = 50
+    lot_size = 25
+    max_lots_per_order = 25
     strike_difference = 100
     global week
     if exclusive_strike == 0:
@@ -180,16 +180,18 @@ def finalise_tron(p_strike, c_strike, tron):
     if p_yet_to_place != 0 and c_yet_to_place == 0:
         while True:
             tron = tron-1
+            p_yet_to_place-=1
             order_button(c_strike, 'CE_B', 1)
-            kkk, y_place = order_button(p_strike, 'PE_S', tron)
+            kkk, y_place = order_button(p_strike, 'PE_S', p_yet_to_place)
             if y_place == 0:
                 break
         return tron
     if p_yet_to_place == 0 and c_yet_to_place != 0:
         while True:
             tron = tron-1
+            c_yet_to_place-=1
             order_button(p_strike, 'PE_B', 1)
-            kkk, y_place = order_button(c_strike, 'CE_S', tron)
+            kkk, y_place = order_button(c_strike, 'CE_S', c_yet_to_place)
             if y_place == 0:
                 break
         return tron
@@ -359,8 +361,9 @@ def show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_
             p_sell_tron=0
         while y != 0:
             new_lots=new_lots-1
+            y-=1
             new_c_strike_s, y = order_button(
-                new_c_strike_s, 'CE_S', new_lots)
+                new_c_strike_s, 'CE_S', y)
         c_sell_tron =new_lots
         c_strike_b=new_c_strike_b
         c_buy_tron=c_buy_tron+int(1.5*extra_lots)+1
@@ -390,8 +393,9 @@ def show(x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_
             p_sell_tron=0
         while y != 0:
             new_lots=new_lots-1
+            y-=1
             new_c_strike_s, y = order_button(
-                new_p_strike_s, 'PE_S', new_lots)
+                new_p_strike_s, 'PE_S', y)
         p_sell_tron =new_lots
         p_strike_b=new_p_strike_b
         p_buy_tron=p_buy_tron+int(1.5*extra_lots)+1
@@ -432,8 +436,9 @@ def bigshow(x, option_chain, c_strike_s, p_strike_s,c_buy_tron_json, p_buy_tron_
 
         while y != 0:
             new_lots=new_lots-1
+            y-=1
             new_c_strike_s, y = order_button(
-                new_c_strike_s, 'CE_S', new_lots)
+                new_c_strike_s, 'CE_S', y)
             
         if new_c_strike_s in list(c_buy_tron_json.keys()):
             new_lots-=c_buy_tron_json[new_c_strike_s]
@@ -441,7 +446,10 @@ def bigshow(x, option_chain, c_strike_s, p_strike_s,c_buy_tron_json, p_buy_tron_
         c_sell_tron =new_lots
         c_strike_b=new_c_strike_b
         c_buy_tron=int(1.5*extra_lots)+1
-        c_buy_tron_json[c_strike_b]=c_buy_tron
+        if c_strike_b in list(c_buy_tron_json.keys()):
+            c_buy_tron_json[c_strike_b]+=c_buy_tron
+        else:
+            c_buy_tron_json[c_strike_b]=c_buy_tron
         
         
 
@@ -459,8 +467,9 @@ def bigshow(x, option_chain, c_strike_s, p_strike_s,c_buy_tron_json, p_buy_tron_
         
         while y != 0:
             new_lots=new_lots-1
+            y-=1
             new_c_strike_s, y = order_button(
-                new_p_strike_s, 'PE_S', new_lots)
+                new_p_strike_s, 'PE_S', y)
         
         if new_p_strike_s in list(p_buy_tron_json.keys()):
             new_lots-=p_buy_tron_json[new_p_strike_s]
@@ -468,7 +477,10 @@ def bigshow(x, option_chain, c_strike_s, p_strike_s,c_buy_tron_json, p_buy_tron_
         p_sell_tron =new_lots
         p_strike_b=new_p_strike_b
         p_buy_tron=int(1.5*extra_lots)+1
-        p_buy_tron_json[p_strike_b]=p_buy_tron
+        if p_strike_b in list(p_buy_tron_json.keys()):
+            p_buy_tron_json[p_strike_b]+=p_buy_tron
+        else:
+            p_buy_tron_json[p_strike_b]=p_buy_tron
     
     new_c_strike_s, new_p_strike_s = c_strike_s * \
         (new_c_strike_s == 0)+new_c_strike_s, p_strike_s * \
