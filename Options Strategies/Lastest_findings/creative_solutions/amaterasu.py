@@ -362,16 +362,17 @@ def initial_straddle_trades(exclusive_strike, tron):
 
 
 def dismantle(exclusive_strike, tron):
-    order_button(exclusive_strike, 'PE_S', tron)
-    order_button(exclusive_strike, 'CE_S', tron)
+    order_button(exclusive_strike, 'PE_B', tron)
+    order_button(exclusive_strike, 'CE_B', tron)
 
 
 # %%
 client_name = input('enter the client name: ')
-hedge_tron = 1
-tron = 1
-btron = 2
 week = int(input('enter the week'))
+hedge_tron = 0
+tron = int(input('enter the range tron : '))
+btron = int(tron*3)
+
 
 initial_tron = 2
 
@@ -399,7 +400,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 568:
 
 option_chain, x = data(week)
 exclusive_strike = int(np.round(x/100)*100)
-initial_straddle_trades(exclusive_strike, tron)
+initial_straddle_trades(exclusive_strike, btron)
 ce_data = option_chain[option_chain['CPType'] == 'CE']
 pe_data = option_chain[option_chain['CPType'] == 'PE']
 initial_premium_sum = (float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) +
@@ -422,7 +423,6 @@ earlier_pv = np.array(list(pe_data['Volume']))
 earlier_cv = np.array(list(ce_data['Volume']))
 cv, pv = 0, 0
 start = 0
-exclusive_strike = 0
 if a == 4:
     initial_c_strike, initial_p_strike = initial_leg_trades(x, hedge_tron)
     hedgetrades = 1
@@ -473,11 +473,6 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     e_call_seller = call_seller['indicator']
     if abs(x_prime-x) > 99:
         x_prime = x
-    if int(ind_time[11:13])*60+int(ind_time[14:16]) > 900 and sum(np.abs(e_put_seller))+sum(np.abs(e_call_seller)) == 0:
-        if hedgetrades == 1:
-            order_button(initial_c_strike, 'CE_B', hedge_tron)
-            order_button(initial_p_strike, 'PE_B', hedge_tron)
-        break
     exclusive_strike, btron, initial_premium_sum, total_decay = straddle_special_adjustment(
         exclusive_strike, x, btron, initial_tron, option_chain, initial_premium_sum)
     if int(ind_time[11:13])*60+int(ind_time[14:16]) > 900 and total_decay < 0:
