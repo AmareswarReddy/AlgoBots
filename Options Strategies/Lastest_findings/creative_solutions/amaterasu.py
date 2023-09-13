@@ -371,7 +371,7 @@ client_name = input('enter the client name: ')
 week = int(input('enter the week'))
 hedge_tron = 0
 tron = int(input('enter the range tron : '))
-btron = int(tron*3)
+btron = int(tron*4)
 
 
 initial_tron = btron
