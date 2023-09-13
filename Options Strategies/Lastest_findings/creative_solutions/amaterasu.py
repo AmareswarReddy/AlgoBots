@@ -374,7 +374,7 @@ tron = int(input('enter the range tron : '))
 btron = int(tron*3)
 
 
-initial_tron = 2
+initial_tron = btron
 
 prime_client = client_login(client=client_name)
 a = 0
