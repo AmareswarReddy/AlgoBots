@@ -265,6 +265,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 928:
                    float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate']))
     if premium_sum > initial_premium_sum and int(ind_time[11:13])*60+int(ind_time[14:16]) > 595:
         break
+exclusive_strike = int(np.round(x/100)*100)
 initial_straddle_trades(exclusive_strike, tron)
 ce_data = option_chain[option_chain['CPType'] == 'CE']
 pe_data = option_chain[option_chain['CPType'] == 'PE']
