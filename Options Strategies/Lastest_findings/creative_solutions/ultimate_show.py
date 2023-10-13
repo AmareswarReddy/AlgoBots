@@ -47,7 +47,7 @@ def order_button(exclusive_strike, type, lots):
     sleep(0.5)
     exchange = 'BANKNIFTY'
     lot_size = 15
-    max_lots_per_order = 60
+    max_lots_per_order = 50
     strike_difference = 100
     global week
     if exclusive_strike == 0:
@@ -509,8 +509,9 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     sleep(1)
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
-    c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron = show(
-        x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron)
+    if int(ind_time[11:13])*60+int(ind_time[14:16]) > 920 or int(ind_time[11:13])*60+int(ind_time[14:16]) < 600:
+        c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron = show(
+            x, option_chain, c_strike_s, p_strike_s,c_strike_b, p_strike_b, c_sell_tron, p_sell_tron,c_buy_tron,p_buy_tron)
     
     lots_tracker,ceb_strike,peb_strike=ranger(c_strike_s,p_strike_s,x,lots_tracker,ceb_strike,peb_strike)
 positions_json = {'show': {'c_strike_b': c_strike_b, 'p_strike_b': p_strike_b, 'c_sell_tron': c_sell_tron, 'p_sell_tron': p_sell_tron, 'c_strike_s': c_strike_s, 'p_strike_s': p_strike_s,'c_buy_tron':c_buy_tron,'p_buy_tron':p_buy_tron},'ranger':{'ceb_strike':ceb_strike,'peb_strike':peb_strike,'lots_tracker':lots_tracker,'lots_diff':lots_diff}}

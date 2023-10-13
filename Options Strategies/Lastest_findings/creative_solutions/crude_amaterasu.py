@@ -42,8 +42,8 @@ def order_button(exclusive_strike, type, lots):
         type = type[:-1]+"B"
     elif "B" in type:
         type = type[:-1]+"S"
-    exchange = 'BANKNIFTY'
-    lot_size = 15
+    exchange = 'CRUDEOIL'
+    lot_size = 1
     max_lots_per_order = 50
     strike_difference = 100
     global week
@@ -51,12 +51,11 @@ def order_button(exclusive_strike, type, lots):
         while True:
             try:
                 expiry_timestamps = prime_client['login'].get_expiry(
-                    "N", exchange).copy()
+                    "M", exchange).copy()
                 current_expiry_time_stamp_weekly = int(
                     expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
                 option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
-                    "N", exchange, current_expiry_time_stamp_weekly)['Options'])
-                x = expiry_timestamps['lastrate'][0]['LTP']
+                    "M", exchange, current_expiry_time_stamp_weekly)['Options'])
                 break
             except Exception:
                 pass
@@ -65,12 +64,11 @@ def order_button(exclusive_strike, type, lots):
         while True:
             try:
                 expiry_timestamps = prime_client['login'].get_expiry(
-                    "N", exchange).copy()
+                    "M", exchange).copy()
                 current_expiry_time_stamp_weekly = int(
                     expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
                 option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
-                    "N", exchange, current_expiry_time_stamp_weekly)['Options'])
-                x = expiry_timestamps['lastrate'][0]['LTP']
+                    "M", exchange, current_expiry_time_stamp_weekly)['Options'])
                 break
             except Exception:
                 pass
@@ -82,7 +80,7 @@ def order_button(exclusive_strike, type, lots):
         temp2 = lots
         temp = int(temp2/max_lots_per_order)
         end = temp2-temp*max_lots_per_order
-        test_order = Order(order_type='B', exchange='N', exchange_segment='D', scrip_code=c_scrip,
+        test_order = Order(order_type='B', exchange='M', exchange_segment='D', scrip_code=c_scrip,
                            quantity=lot_size*max_lots_per_order, price=0, is_intraday=False, remote_order_id="tag")
         while temp > 0:
             status = prime_client['login'].place_order(test_order)
@@ -90,7 +88,7 @@ def order_button(exclusive_strike, type, lots):
             if status['Message'] == 'Success':
                 already_placed += max_lots_per_order
         if temp == 0 and end != 0:
-            test_order = Order(order_type='B', exchange='N', exchange_segment='D', scrip_code=c_scrip,
+            test_order = Order(order_type='B', exchange='M', exchange_segment='D', scrip_code=c_scrip,
                                quantity=lot_size*end, price=0, is_intraday=False, remote_order_id="tag")
             status = prime_client['login'].place_order(test_order)
             if status['Message'] == 'Success':
@@ -104,7 +102,7 @@ def order_button(exclusive_strike, type, lots):
         temp2 = lots
         temp = int(temp2/max_lots_per_order)
         end = temp2-temp*max_lots_per_order
-        test_order = Order(order_type='B', exchange='N', exchange_segment='D', scrip_code=p_scrip,
+        test_order = Order(order_type='B', exchange='M', exchange_segment='D', scrip_code=p_scrip,
                            quantity=lot_size*max_lots_per_order, price=0, is_intraday=False, remote_order_id="tag")
         while temp > 0:
             status = prime_client['login'].place_order(test_order)
@@ -112,7 +110,7 @@ def order_button(exclusive_strike, type, lots):
             if status['Message'] == 'Success':
                 already_placed += max_lots_per_order
         if temp == 0 and end != 0:
-            test_order = Order(order_type='B', exchange='N', exchange_segment='D', scrip_code=p_scrip,
+            test_order = Order(order_type='B', exchange='M', exchange_segment='D', scrip_code=p_scrip,
                                quantity=lot_size*end, price=0, is_intraday=False, remote_order_id="tag")
             status = prime_client['login'].place_order(test_order)
             if status['Message'] == 'Success':
@@ -126,7 +124,7 @@ def order_button(exclusive_strike, type, lots):
         temp2 = lots
         temp = int(temp2/max_lots_per_order)
         end = temp2-temp*max_lots_per_order
-        test_order = Order(order_type='S', exchange='N', exchange_segment='D', scrip_code=c_scrip,
+        test_order = Order(order_type='S', exchange='M', exchange_segment='D', scrip_code=c_scrip,
                            quantity=lot_size*max_lots_per_order, price=0, is_intraday=False, remote_order_id="tag")
         while temp > 0:
             status = prime_client['login'].place_order(test_order)
@@ -134,7 +132,7 @@ def order_button(exclusive_strike, type, lots):
             if status['Message'] == 'Success':
                 already_placed += max_lots_per_order
         if temp == 0 and end != 0:
-            test_order = Order(order_type='S', exchange='N', exchange_segment='D', scrip_code=c_scrip,
+            test_order = Order(order_type='S', exchange='M', exchange_segment='D', scrip_code=c_scrip,
                                quantity=lot_size*end, price=0, is_intraday=False, remote_order_id="tag")
             status = prime_client['login'].place_order(test_order)
             if status['Message'] == 'Success':
@@ -148,7 +146,7 @@ def order_button(exclusive_strike, type, lots):
         temp2 = lots
         temp = int(temp2/max_lots_per_order)
         end = temp2-temp*max_lots_per_order
-        test_order = Order(order_type='S', exchange='N', exchange_segment='D', scrip_code=p_scrip,
+        test_order = Order(order_type='S', exchange='M', exchange_segment='D', scrip_code=p_scrip,
                            quantity=lot_size*max_lots_per_order, price=0, is_intraday=False, remote_order_id="tag")
         while temp > 0:
             status = prime_client['login'].place_order(test_order)
@@ -156,7 +154,7 @@ def order_button(exclusive_strike, type, lots):
             if status['Message'] == 'Success':
                 already_placed += max_lots_per_order
         if temp == 0 and end != 0:
-            test_order = Order(order_type='S', exchange='N', exchange_segment='D', scrip_code=p_scrip,
+            test_order = Order(order_type='S', exchange='M', exchange_segment='D', scrip_code=p_scrip,
                                quantity=lot_size*end, price=0, is_intraday=False, remote_order_id="tag")
             status = prime_client['login'].place_order(test_order)
             if status['Message'] == 'Success':
@@ -176,37 +174,35 @@ def lots_drop(strike, side, yet_to_place):
 
 
 def data(week):
-    exchange = 'BANKNIFTY'
+    exchange = 'CRUDEOIL'
     while True:
         try:
             expiry_timestamps = prime_client['login'].get_expiry(
-                "N", exchange).copy()
+                "M", exchange).copy()
             current_expiry_time_stamp_weekly = int(
                 expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
             option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
-                "N", exchange, current_expiry_time_stamp_weekly)['Options'])
-            x = expiry_timestamps['lastrate'][0]['LTP']
+                "M", exchange, current_expiry_time_stamp_weekly)['Options'])
+            option_chain = option_chain[option_chain.StrikeRate % 100 == 0]
+            ce_data = option_chain[option_chain['CPType'] == 'CE']
+            pe_data = option_chain[option_chain['CPType'] == 'PE']
+            a = 100
+            strike = 0
+            for i in ce_data['StrikeRate']:
+
+                if abs(float(ce_data[ce_data['StrikeRate'] == i]['LastRate'])-float(pe_data[pe_data['StrikeRate'] == i]['LastRate'])) < a and float(ce_data[ce_data['StrikeRate'] == i]['LastRate']) > 5 and float(pe_data[pe_data['StrikeRate'] == i]['LastRate']) > 5:
+                    a = float(ce_data[ce_data['StrikeRate'] == i]['LastRate']) - \
+                        float(pe_data[pe_data['StrikeRate'] == i]['LastRate'])
+                    strike = i
+            x = strike+a
             break
         except Exception:
             pass
     return option_chain, x
 
 
-def blue_factor(option_chain, x):
-    final_chain = option_chain[(
-        option_chain['StrikeRate'] > x-1000) & (option_chain['StrikeRate'] < x+1000)]
-    p = final_chain[final_chain['CPType'] == 'PE']
-    c = final_chain[final_chain['CPType'] == 'CE']
-    strikes = p['StrikeRate']
-    p_lastrates = p['LastRate']
-    c_lastrates = c['LastRate']
-    f_p = interpolate.interp1d(strikes, p_lastrates, kind='quadratic')
-    f_c = interpolate.interp1d(strikes, c_lastrates, kind='quadratic')
-    return (f_p(x)+f_c(x))/2
-
-
 def options_vwap_json(option_chain, calloptions_vwap, putoptions_vwap, primary_oi, x, prev_final_c_shape, prev_final_p_shape):
-    stoploss = 30
+    stoploss = 15
     ce_data = option_chain[option_chain['CPType'] == 'CE']
     pe_data = option_chain[option_chain['CPType'] == 'PE']
     ce_data_prime = primary_oi[primary_oi['CPType'] == 'CE']
@@ -281,14 +277,6 @@ def options_vwap_json(option_chain, calloptions_vwap, putoptions_vwap, primary_o
     return calloptions_vwap, putoptions_vwap, put_seller, call_seller, final_c_shape, final_p_shape
 
 
-def get_strike_from_scrip(scripcode, exchange):
-    global week
-    if exchange == 'BANKNIFTY':
-        option_chain, a1 = data(week)
-    k1 = option_chain[option_chain['ScripCode'] == scripcode]
-    return int(k1['StrikeRate'])
-
-
 def finalise_tron(p_strike, c_strike, tron):
     p_strike, p_yet_to_place = order_button(p_strike, 'PE_S', tron)
     c_strike, c_yet_to_place = order_button(c_strike, 'CE_S', tron)
@@ -314,26 +302,83 @@ def finalise_tron(p_strike, c_strike, tron):
         return finalise_tron(p_strike=p_strike, c_strike=c_strike, tron=tron-1)
 
 
-def initial_leg_trades(x,tron):
-    exclusive_strike=int(np.round(x/100)*100)
-    finalise_tron(c_strike=exclusive_strike+200, p_strike=exclusive_strike-200, tron=tron)
-    return exclusive_strike+200,exclusive_strike-200
+def initial_leg_trades(x, tron):
+    exclusive_strike = int(np.round(x/100)*100)
+    finalise_tron(c_strike=exclusive_strike+200,
+                  p_strike=exclusive_strike-200, tron=tron)
+    return exclusive_strike+200, exclusive_strike-200
+
+
+def exclusive_strike_change_trades(exclusive_strike, x, tron, initial_tron):
+    order_button(exclusive_strike, 'PE_S', tron)
+    order_button(exclusive_strike, 'CE_S', tron)
+    exclusive_strike = int(np.round((x)/100)*100)
+    order_button(exclusive_strike, 'PE_B', initial_tron)
+    order_button(exclusive_strike, 'CE_B', initial_tron)
+    return exclusive_strike, initial_tron
+
+
+def straddle_special_adjustment(exclusive_strike, x, tron, initial_tron, option_chain, initial_premium_sum):
+    ce_data = option_chain[option_chain['CPType'] == 'CE']
+    pe_data = option_chain[option_chain['CPType'] == 'PE']
+    atcl = float(ce_data[ce_data['StrikeRate'] ==
+                 exclusive_strike]['LastRate'])
+    atpl = float(pe_data[pe_data['StrikeRate'] ==
+                 exclusive_strike]['LastRate'])
+    premium_sum = atpl+atcl
+    total_decay = initial_premium_sum-(premium_sum)
+    if total_decay > 13 and abs(atcl-atpl) < 10:
+        order_button(exclusive_strike, 'PE_S', tron)
+        order_button(exclusive_strike, 'CE_S', tron)
+        tron *= 2
+        initial_premium_sum = (initial_premium_sum + premium_sum)/2
+    if exclusive_strike != 0 and tron != 0:
+        def exclusive_strike_change_signal(earlier_x, x):
+            a = (x-earlier_x)/(initial_premium_sum)
+            return abs(a)
+        if exclusive_strike_change_signal(earlier_x=exclusive_strike, x=x) > 2 and premium_sum > initial_premium_sum+400:
+            exclusive_strike, tron = exclusive_strike_change_trades(
+                exclusive_strike, x, tron, initial_tron)
+            initial_premium_sum = (float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) +
+                                   float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate']))
+    return exclusive_strike, tron, initial_premium_sum, total_decay
+
+
+def initial_straddle_trades(exclusive_strike, tron):
+    order_button(exclusive_strike, 'PE_S', tron)
+    order_button(exclusive_strike, 'CE_S', tron)
+
+
+def dismantle(exclusive_strike, tron):
+    order_button(exclusive_strike, 'PE_B', tron)
+    order_button(exclusive_strike, 'CE_B', tron)
 
 
 # %%
 client_name = input('enter the client name: ')
-hedge_tron=int(input('enter number of lots to hedge: '))
-tron=int(hedge_tron*0.7)
-week=int(input('enter the week'))
+week = int(input('enter the week'))
+hedge_tron = 0
+tron = int(input('enter the range tron : '))
+btron = int(tron*4)
+
+
+initial_tron = btron
+
 prime_client = client_login(client=client_name)
-a = datetime.today().weekday()
-a = int(input('enter 4 to hedge positions: '))
+a = 0
+option_chain, x = data(week)
+exclusive_strike = int(np.round(x/100)*100)
+
+
 if a == 4:
     main_cv, main_pv, c_oi, p_oi = 0, 0, 0, 0
 else:
-    indicator_json = json.load(open('indicator_variables.json'))
-    main_cv, main_pv, c_oi, p_oi = indicator_json['main_cv'], indicator_json[
-        'main_pv'], indicator_json['c_oi'], indicator_json['p_oi']
+    try:
+        indicator_json = json.load(open('indicator_variables.json'))
+        main_cv, main_pv, c_oi, p_oi = indicator_json['main_cv'], indicator_json[
+            'main_pv'], indicator_json['c_oi'], indicator_json['p_oi']
+    except Exception:
+        main_cv, main_pv, c_oi, p_oi = 0, 0, 0, 0
 
 
 # start=int(input('enter 0 if starting the strategy for the first time, else 1 :  '))
@@ -343,7 +388,15 @@ ind_time = datetime.now(timezone("Asia/Kolkata")
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 568:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
+
 option_chain, x = data(week)
+exclusive_strike = int(np.round(x/100)*100)
+initial_straddle_trades(exclusive_strike, btron)
+ce_data = option_chain[option_chain['CPType'] == 'CE']
+pe_data = option_chain[option_chain['CPType'] == 'PE']
+initial_premium_sum = (float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) +
+                       float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate']))
+
 primary_oi = option_chain
 ce_data = option_chain[option_chain['CPType'] == 'CE']
 pe_data = option_chain[option_chain['CPType'] == 'PE']
@@ -361,13 +414,12 @@ earlier_pv = np.array(list(pe_data['Volume']))
 earlier_cv = np.array(list(ce_data['Volume']))
 cv, pv = 0, 0
 start = 0
-exclusive_strike = 0
 if a == 4:
-    initial_c_strike,initial_p_strike=initial_leg_trades(x, hedge_tron)
-    hedgetrades=1
+    initial_c_strike, initial_p_strike = initial_leg_trades(x, hedge_tron)
+    hedgetrades = 1
 else:
-    hedgetrades=0
-while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
+    hedgetrades = 0
+while int(ind_time[11:13])*60+int(ind_time[14:16]) < 1382:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week)
@@ -412,8 +464,10 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 922:
     e_call_seller = call_seller['indicator']
     if abs(x_prime-x) > 99:
         x_prime = x
-    if int(ind_time[11:13])*60+int(ind_time[14:16])>900 and sum(np.abs(e_put_seller))+sum(np.abs(e_call_seller))==0 :
-        if hedgetrades==1:
-            order_button(initial_c_strike,'CE_B',hedge_tron)
-            order_button(initial_p_strike,'PE_B',hedge_tron)
+    exclusive_strike, btron, initial_premium_sum, total_decay = straddle_special_adjustment(
+        exclusive_strike, x, btron, initial_tron, option_chain, initial_premium_sum)
+    if int(ind_time[11:13])*60+int(ind_time[14:16]) > 1362 and total_decay < 0:
         break
+dismantle(exclusive_strike, btron)
+
+# %%
