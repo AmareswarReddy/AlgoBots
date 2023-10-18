@@ -828,7 +828,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<928 :
     #day_end_tron,day_end_exclusive_strike,day_end_c_strike_b,day_end_p_strike_b,is_t_special,strangle_list=day_end_leg_trades(exclusive_strike,c_strike,p_strike,x-m,tron)
 
 
-positions_json={'strangle':{'call_strike':c_strike,'put_strike':p_strike,'tron':tron},
+positions_json={'strangle':{'call_strike':cstrike,'put_strike':pstrike,'tron':tron},
                 'overnight_safety':{'exclusive_strike':overnight_exclusive_strike,'put_tron':ptron,'call_tron':ctron},
                 'leg':{'exclusive_strike':0,'call_strike':0,'put_strike':0,'tron':0},
                 'day_end_leg':{'exclusive_strike':0,'call_strike':0,'put_strike':0,'tron':0},
