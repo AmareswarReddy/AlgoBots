@@ -473,7 +473,7 @@ def long_2n_adjustment(pstrike, cstrike, tron, option_chain, initial_premium_sum
                  pstrike]['LastRate'])
     premium_sum = atpl+atcl
     total_decay = initial_premium_sum-(premium_sum)
-    if total_decay > 30 and total_decay>initial_premium_sum/3.5 and abs(atcl-atpl) < 10 and 2*tron*initial_premium_sum <400000:
+    if total_decay > 30 and total_decay>initial_premium_sum/3.5 and abs(atcl-atpl) < 10 and 2*tron*initial_premium_sum <100000:
         order_button(pstrike, 'PE_S', tron)
         order_button(cstrike, 'CE_S', tron)
         tron *= 2
