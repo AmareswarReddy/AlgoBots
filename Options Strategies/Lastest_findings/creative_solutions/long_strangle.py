@@ -816,8 +816,8 @@ while int(ind_time[11:13])*60+int(ind_time[14:16])<928 :
     elif et!=exclusive_strike:
         ce_data = option_chain[option_chain['CPType'] == 'CE']
         pe_data = option_chain[option_chain['CPType'] == 'PE']
-        initial_premium_sum = (float(ce_data[ce_data['StrikeRate'] == c_strike]['LastRate']) +
-                           float(pe_data[pe_data['StrikeRate'] == p_strike]['LastRate']))
+        initial_premium_sum = (float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) +
+                           float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate']))
     pstrike=p_strike*(exclusive_strike==0)+exclusive_strike*(exclusive_strike!=0)
     cstrike=c_strike*(exclusive_strike==0)+exclusive_strike*(exclusive_strike!=0)
     tron, initial_premium_sum=long_2n_adjustment(pstrike, cstrike, tron, option_chain, initial_premium_sum)
