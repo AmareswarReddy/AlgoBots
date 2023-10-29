@@ -190,30 +190,30 @@ def strategy(x, orders_tracker, max_lots, lots_per_strike, week):
     if length==0:
         if x>exclusive_strike+100:
             order_button(exclusive_strike+100, 'CE_S', lots_per_strike, week)
-            orders_tracker['sold_strikes']+=[new_strike]
+            orders_tracker['sold_strikes']+=[exclusive_strike+100]
         elif x<exclusive_strike-100:
             order_button(exclusive_strike-100, 'PE_S', lots_per_strike, week)
-            orders_tracker['sold_strikes']+=[new_strike]
+            orders_tracker['sold_strikes']+=[exclusive_strike-100]
     else:
-        if x > max(orders_tracker['sold_strikes'])+100 and x>exclusive_strike and len(orders_tracker['sold_strikes'])*(lots_per_strike+1)<=max_lots :
+        if x > max(orders_tracker['sold_strikes'])+100 and x>exclusive_strike  :
             for i in range(0,length):
                 if orders_tracker['sold_strikes'][i]<exclusive_strike:
                     order_button(orders_tracker['sold_strikes'][i], 'PE_B', lots_per_strike, week)
                     orders_tracker['sold_strikes'].remove(orders_tracker['sold_strikes'][i])
+            if (1+len(orders_tracker['sold_strikes']))*lots_per_strike<=max_lots:
+                new_strike=max(orders_tracker['sold_strikes'])+100
+                order_button(new_strike, 'CE_S', lots_per_strike, week)
+                orders_tracker['sold_strikes']+=[new_strike]
 
-            new_strike=max(orders_tracker['sold_strikes'])+100
-            order_button(new_strike, 'CE_S', lots_per_strike, week)
-            orders_tracker['sold_strikes']+=[new_strike]
-
-        if x < min(orders_tracker['sold_strikes'])-100 and x<exclusive_strike and len(orders_tracker['sold_strikes'])*(lots_per_strike+1)<=max_lots :
+        if x < min(orders_tracker['sold_strikes'])-100 and x<exclusive_strike and (1+len(orders_tracker['sold_strikes']))*lots_per_strike<=max_lots :
             for i in range(0,length):
                 if orders_tracker['sold_strikes'][i]>exclusive_strike:
                     order_button(orders_tracker['sold_strikes'][i], 'CE_B', lots_per_strike, week)
                     orders_tracker['sold_strikes'].remove(orders_tracker['sold_strikes'][i])
-
-            new_strike=min(orders_tracker['sold_strikes'])-100
-            order_button(new_strike, 'PE_S', lots_per_strike, week)
-            orders_tracker['sold_strikes']+=[new_strike]
+            if (1+len(orders_tracker['sold_strikes']))*lots_per_strike<=max_lots:
+                new_strike=min(orders_tracker['sold_strikes'])-100
+                order_button(new_strike, 'PE_S', lots_per_strike, week)
+                orders_tracker['sold_strikes']+=[new_strike]
 
 
 
