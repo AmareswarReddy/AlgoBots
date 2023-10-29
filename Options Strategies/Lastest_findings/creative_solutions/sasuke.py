@@ -189,10 +189,10 @@ def strategy(x, orders_tracker, max_lots, lots_per_strike, week):
     length=len(orders_tracker['sold_strikes'])
     if length==0:
         if x>exclusive_strike+100:
-            order_button(new_strike, 'CE_S', lots_per_strike, week)
+            order_button(exclusive_strike+100, 'CE_S', lots_per_strike, week)
             orders_tracker['sold_strikes']+=[new_strike]
         elif x<exclusive_strike-100:
-            order_button(new_strike, 'PE_S', lots_per_strike, week)
+            order_button(exclusive_strike-100, 'PE_S', lots_per_strike, week)
             orders_tracker['sold_strikes']+=[new_strike]
     else:
         if x > max(orders_tracker['sold_strikes'])+100 and x>exclusive_strike and len(orders_tracker['sold_strikes'])*(lots_per_strike+1)<=max_lots :
