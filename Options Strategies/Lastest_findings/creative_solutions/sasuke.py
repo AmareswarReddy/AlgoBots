@@ -229,17 +229,17 @@ prime_client = client_login(client=client_name)
 option_chain, x = data(0)
 start=int(input('enter 0 if starting the strategy for the first time'))
 if start==0:
+    ind_time = datetime.now(timezone("Asia/Kolkata")
+                            ).strftime('%Y-%m-%d %H:%M:%S.%f')
+    while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
+        ind_time = datetime.now(timezone("Asia/Kolkata")
+                                ).strftime('%Y-%m-%d %H:%M:%S.%f')
     exclusive_strike = int(np.round(x/100)*100)
     initial_trades(week0,week1,exclusive_strike,max_lots)
     orders_tracker={'exclusive_strike':exclusive_strike,'sold_strikes':[]}
 else:
     orders_tracker=json.load(open(client_name+'_positions.json'))
 
-ind_time = datetime.now(timezone("Asia/Kolkata")
-                        ).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
-    ind_time = datetime.now(timezone("Asia/Kolkata")
-                            ).strftime('%Y-%m-%d %H:%M:%S.%f')
 
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     ind_time = datetime.now(timezone("Asia/Kolkata")
