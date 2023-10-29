@@ -196,24 +196,31 @@ def strategy(x, orders_tracker, max_lots, lots_per_strike, week):
             orders_tracker['sold_strikes']+=[exclusive_strike-100]
     else:
         if x > max(orders_tracker['sold_strikes'])+100 and x>exclusive_strike  :
+            to_drop=[]
             for i in range(0,length):
                 if orders_tracker['sold_strikes'][i]<exclusive_strike:
                     order_button(orders_tracker['sold_strikes'][i], 'PE_B', lots_per_strike, week)
-                    orders_tracker['sold_strikes'].remove(orders_tracker['sold_strikes'][i])
-            if (1+len(orders_tracker['sold_strikes']))*lots_per_strike<=max_lots:
+                    to_drop+=[(orders_tracker['sold_strikes'][i])]
+            for i in to_drop:
+                orders_tracker['sold_strikes'].remove(i)
+            if (1+len(orders_tracker['sold_strikes']))*lots_per_strike<=max_lots and len(orders_tracker['sold_strikes'])!=0 :
                 new_strike=max(orders_tracker['sold_strikes'])+100
                 order_button(new_strike, 'CE_S', lots_per_strike, week)
                 orders_tracker['sold_strikes']+=[new_strike]
 
-        if x < min(orders_tracker['sold_strikes'])-100 and x<exclusive_strike and (1+len(orders_tracker['sold_strikes']))*lots_per_strike<=max_lots :
+        elif x < min(orders_tracker['sold_strikes'])-100 and x<exclusive_strike:
+            to_drop=[]
             for i in range(0,length):
                 if orders_tracker['sold_strikes'][i]>exclusive_strike:
                     order_button(orders_tracker['sold_strikes'][i], 'CE_B', lots_per_strike, week)
-                    orders_tracker['sold_strikes'].remove(orders_tracker['sold_strikes'][i])
-            if (1+len(orders_tracker['sold_strikes']))*lots_per_strike<=max_lots:
+                    to_drop+=[(orders_tracker['sold_strikes'][i])]
+            for i in to_drop:
+                orders_tracker['sold_strikes'].remove(i)
+            if (1+len(orders_tracker['sold_strikes']))*lots_per_strike<=max_lots and len(orders_tracker['sold_strikes'])!=0 :
                 new_strike=min(orders_tracker['sold_strikes'])-100
                 order_button(new_strike, 'PE_S', lots_per_strike, week)
                 orders_tracker['sold_strikes']+=[new_strike]
+    return orders_tracker
 
 
 
@@ -245,7 +252,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(0)
-    strategy(x,orders_tracker,max_lots,lots_per_strike,week0)
+    orders_tracker=strategy(x,orders_tracker,max_lots,lots_per_strike,week0)
 
 out_file = open(client_name+'_positions.json', "w")
 json.dump(orders_tracker, out_file, indent = 6)
