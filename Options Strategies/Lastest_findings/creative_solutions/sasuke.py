@@ -184,9 +184,11 @@ def initial_trades(week0,week1,exclusive_strike,max_lots):
 
 
 #orders_tracker={'exclusive_strike':43000,'sold_strikes':[43100,43200,43300]}
-def strategy(x, orders_tracker, max_lots, lots_per_strike, week):
+def strategy(x,option_chain, orders_tracker, max_lots, lots_per_strike, week):
     exclusive_strike=orders_tracker['exclusive_strike']
     length=len(orders_tracker['sold_strikes'])
+    ce_data = option_chain[option_chain['CPType'] == 'CE']
+    pe_data = option_chain[option_chain['CPType'] == 'PE']
     if length==0:
         if x>exclusive_strike+100:
             order_button(exclusive_strike+100, 'CE_S', lots_per_strike, week)
@@ -220,6 +222,21 @@ def strategy(x, orders_tracker, max_lots, lots_per_strike, week):
                 new_strike=min(orders_tracker['sold_strikes'])-100
                 order_button(new_strike, 'PE_S', lots_per_strike, week)
                 orders_tracker['sold_strikes']+=[new_strike]
+        else :
+            for i in range(0,length):
+                if orders_tracker['sold_strikes'][i]>exclusive_strike:
+                    c_lastrate=float(ce_data[ce_data['StrikeRate']==orders_tracker['sold_strikes'][i]]['LastRate'])
+                    c_lastrate2=float(ce_data[ce_data['StrikeRate']==orders_tracker['sold_strikes'][i]+100]['LastRate'])
+                    if c_lastrate-c_lastrate2<10:
+                        order_button(orders_tracker['sold_strikes'][i], 'CE_B', lots_per_strike, week)
+                        orders_tracker['sold_strikes'].remove(orders_tracker['sold_strikes'][i])
+
+                if orders_tracker['sold_strikes'][i]<exclusive_strike:
+                    p_lastrate=float(pe_data[pe_data['StrikeRate']==orders_tracker['sold_strikes'][i]]['LastRate'])
+                    p_lastrate2=float(pe_data[pe_data['StrikeRate']==orders_tracker['sold_strikes'][i]-100]['LastRate'])
+                    if p_lastrate-p_lastrate2<10:
+                        order_button(orders_tracker['sold_strikes'][i], 'PE_B', lots_per_strike, week)
+                        orders_tracker['sold_strikes'].remove(orders_tracker['sold_strikes'][i])
     return orders_tracker
 
 
@@ -228,14 +245,14 @@ def strategy(x, orders_tracker, max_lots, lots_per_strike, week):
 
 # %%
 client_name = input('enter the client name: ')
-max_lots = int(input('max lots : '))
-lots_per_strike=1
-week0=int(input('enter the selling week'))
-week1=int(input('enter the buying week'))
+start=int(input('enter 0 if starting the strategy for the first time'))
 prime_client = client_login(client=client_name)
 option_chain, x = data(0)
-start=int(input('enter 0 if starting the strategy for the first time'))
 if start==0:
+    max_lots = int(input('max lots : '))
+    lots_per_strike=int(input('lots_per_strike : '))
+    week0=int(input('enter the selling week'))
+    week1=int(input('enter the buying week'))
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
@@ -243,16 +260,24 @@ if start==0:
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
     exclusive_strike = int(np.round(x/100)*100)
     initial_trades(week0,week1,exclusive_strike,max_lots)
-    orders_tracker={'exclusive_strike':exclusive_strike,'sold_strikes':[]}
+    orders_tracker={'exclusive_strike':exclusive_strike,'sold_strikes':[],'max_lots':max_lots,'lots_per_strike':lots_per_strike,'week0':week0,'week1':week1}
 else:
     orders_tracker=json.load(open(client_name+'_positions.json'))
-
+    max_lots = orders_tracker['max_lots']
+    lots_per_strike=orders_tracker['lots_per_strike']
+    week0=orders_tracker['week0']
+    week1=orders_tracker['week1']
+    ind_time = datetime.now(timezone("Asia/Kolkata")
+                            ).strftime('%Y-%m-%d %H:%M:%S.%f')
+    while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
+        ind_time = datetime.now(timezone("Asia/Kolkata")
+                                ).strftime('%Y-%m-%d %H:%M:%S.%f')
 
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(0)
-    orders_tracker=strategy(x,orders_tracker,max_lots,lots_per_strike,week0)
+    orders_tracker=strategy(x,option_chain,orders_tracker,max_lots,lots_per_strike,week0)
 
 out_file = open(client_name+'_positions.json', "w")
 json.dump(orders_tracker, out_file, indent = 6)
