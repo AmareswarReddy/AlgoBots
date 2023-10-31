@@ -223,20 +223,23 @@ def strategy(x,option_chain, orders_tracker, max_lots, lots_per_strike, week):
                 order_button(new_strike, 'PE_S', lots_per_strike, week)
                 orders_tracker['sold_strikes']+=[new_strike]
         else :
+            to_drop=[]
             for i in range(0,length):
                 if orders_tracker['sold_strikes'][i]>exclusive_strike:
                     c_lastrate=float(ce_data[ce_data['StrikeRate']==orders_tracker['sold_strikes'][i]]['LastRate'])
                     c_lastrate2=float(ce_data[ce_data['StrikeRate']==orders_tracker['sold_strikes'][i]+100]['LastRate'])
                     if c_lastrate-c_lastrate2<10:
                         order_button(orders_tracker['sold_strikes'][i], 'CE_B', lots_per_strike, week)
-                        orders_tracker['sold_strikes'].remove(orders_tracker['sold_strikes'][i])
+                        to_drop+=[(orders_tracker['sold_strikes'][i])]
 
-                if orders_tracker['sold_strikes'][i]<exclusive_strike:
+                elif orders_tracker['sold_strikes'][i]<exclusive_strike:
                     p_lastrate=float(pe_data[pe_data['StrikeRate']==orders_tracker['sold_strikes'][i]]['LastRate'])
                     p_lastrate2=float(pe_data[pe_data['StrikeRate']==orders_tracker['sold_strikes'][i]-100]['LastRate'])
                     if p_lastrate-p_lastrate2<10:
                         order_button(orders_tracker['sold_strikes'][i], 'PE_B', lots_per_strike, week)
-                        orders_tracker['sold_strikes'].remove(orders_tracker['sold_strikes'][i])
+                        to_drop+=[(orders_tracker['sold_strikes'][i])]
+            for i in to_drop:
+                orders_tracker['sold_strikes'].remove(i)
     return orders_tracker
 
 
