@@ -315,6 +315,17 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     orders_tracker = strategy(
         x, option_chain, orders_tracker, max_lots, lots_per_strike, week0)
 
+
+if week0 != 0:
+    exchange = 'BANKNIFTY'
+    expiry_timestamps = prime_client['login'].get_expiry(
+        "N", exchange).copy()
+    current_time = time.time()
+    near_expiry_stamp = int(
+        expiry_timestamps['Expiry'][0]['ExpiryDate'][6:16])
+    if current_time-near_expiry_stamp > 0:
+        orders_tracker['week0'] -= 1
+        orders_tracker['week1'] -= 1
 out_file = open(client_name+'_positions.json', "w")
 json.dump(orders_tracker, out_file, indent=6)
 out_file.close()
