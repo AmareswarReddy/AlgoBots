@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import json
+import time
 from time import sleep, strftime
 from py5paisa import FivePaisaClient
 from py5paisa.strategy import *
@@ -177,13 +178,38 @@ def data(week):
 
 
 def initial_trades(week0, week1, exclusive_strike, max_lots):
-    order_button(exclusive_strike, 'PE_B', 2*max_lots, week1)
-    order_button(exclusive_strike, 'CE_B', 2*max_lots, week1)
-    order_button(exclusive_strike, 'PE_S', max_lots, week0)
-    order_button(exclusive_strike, 'CE_S', max_lots, week0)
-
+    exchange = 'BANKNIFTY'
+    expiry_timestamps = prime_client['login'].get_expiry(
+        "N", exchange).copy()
+    current_time = time.time()
+    week0time_stamp = int(
+        expiry_timestamps['Expiry'][week0]['ExpiryDate'][6:16])
+    week1time_stamp = int(
+        expiry_timestamps['Expiry'][week1]['ExpiryDate'][6:16])
+    option_chain_week1, x = data(week1)
+    option_chain_week0, x = data(week0)
+    exclusive_strike = int(np.round(x/100)*100)
+    ce_data = option_chain_week1[option_chain_week1['CPType'] == 'CE']
+    pe_data = option_chain_week1[option_chain_week1['CPType'] == 'PE']
+    p_sum1 = float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) + \
+        float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate'])
+    ce_data = option_chain_week0[option_chain_week0['CPType'] == 'CE']
+    pe_data = option_chain_week0[option_chain_week0['CPType'] == 'PE']
+    p_sum0 = float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) + \
+        float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate'])
+    proportion = ((week0time_stamp-current_time) /
+                  (week1time_stamp-current_time))
+    week1lots = int(max_lots/(1-(proportion*p_sum1/p_sum0)))
+    order_button(exclusive_strike, 'PE_B', week1lots, week1)
+    order_button(exclusive_strike, 'CE_B', week1lots, week1)
+    order_button(exclusive_strike, 'PE_S', week1lots-max_lots, week0)
+    order_button(exclusive_strike, 'CE_S', week1lots-max_lots, week0)
+    lots_per_strike = max(1, int(max_lots/int(p_sum1/100)))
+    return lots_per_strike
 
 # orders_tracker={'exclusive_strike':43000,'sold_strikes':[43100,43200,43300]}
+
+
 def strategy(x, option_chain, orders_tracker, max_lots, lots_per_strike, week):
     exclusive_strike = orders_tracker['exclusive_strike']
     length = len(orders_tracker['sold_strikes'])
@@ -258,7 +284,6 @@ prime_client = client_login(client=client_name)
 
 if start == 0:
     max_lots = int(input('max lots : '))
-    lots_per_strike = int(input('lots_per_strike : '))
     week0 = int(input('enter the selling week'))
     week1 = int(input('enter the buying week'))
     ind_time = datetime.now(timezone("Asia/Kolkata")
@@ -268,7 +293,7 @@ if start == 0:
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week0)
     exclusive_strike = int(np.round(x/100)*100)
-    initial_trades(week0, week1, exclusive_strike, max_lots)
+    lots_per_strike = initial_trades(week0, week1, exclusive_strike, max_lots)
     orders_tracker = {'exclusive_strike': exclusive_strike, 'sold_strikes': [
     ], 'max_lots': max_lots, 'lots_per_strike': lots_per_strike, 'week0': week0, 'week1': week1}
 else:
