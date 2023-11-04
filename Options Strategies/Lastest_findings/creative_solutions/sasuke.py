@@ -200,14 +200,28 @@ def initial_trades(week0, week1, exclusive_strike, max_lots):
     proportion = ((week0time_stamp-current_time) /
                   (week1time_stamp-current_time))
     week1lots = int(max_lots/(1-(proportion*p_sum1/p_sum0)))
+    week0lots = week1lots-max_lots
     order_button(exclusive_strike, 'PE_B', week1lots, week1)
     order_button(exclusive_strike, 'CE_B', week1lots, week1)
-    order_button(exclusive_strike, 'PE_S', week1lots-max_lots, week0)
-    order_button(exclusive_strike, 'CE_S', week1lots-max_lots, week0)
+    order_button(exclusive_strike, 'PE_S', week0lots, week0)
+    order_button(exclusive_strike, 'CE_S', week0lots, week0)
     lots_per_strike = max(1, int(max_lots/int(p_sum1/100)))
-    return lots_per_strike
+    return lots_per_strike, week1lots, week0lots
 
 # orders_tracker={'exclusive_strike':43000,'sold_strikes':[43100,43200,43300]}
+
+
+def expiry_shift(x, Istrike, week0, week1, week0lots, week1lots, max_lots):
+    order_button(Istrike, 'PE_S', week1lots, week1)
+    order_button(Istrike, 'CE_S', week1lots, week1)
+    order_button(Istrike, 'PE_B', week0lots, week0)
+    order_button(Istrike, 'CE_B', week0lots, week0)
+    week0 += 1
+    week1 += 1
+    exclusive_strike = int(np.round(x/100)*100)+100
+    lots_per_strike, week1lots, week0lots = initial_trades(
+        week0, week1, exclusive_strike, max_lots)
+    return week0, week1, lots_per_strike, week1lots, week0lots
 
 
 def strategy(x, option_chain, orders_tracker, max_lots, lots_per_strike, week):
@@ -280,6 +294,7 @@ def strategy(x, option_chain, orders_tracker, max_lots, lots_per_strike, week):
 # %%
 client_name = input('enter the client name: ')
 start = int(input('enter 0 if starting the strategy for the first time'))
+expiry_day = int(input('is expiry day : '))
 prime_client = client_login(client=client_name)
 
 if start == 0:
@@ -293,9 +308,10 @@ if start == 0:
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week0)
     exclusive_strike = int(np.round(x/100)*100)
-    lots_per_strike = initial_trades(week0, week1, exclusive_strike, max_lots)
+    lots_per_strike, week1lots, week0lots = initial_trades(
+        week0, week1, exclusive_strike, max_lots)
     orders_tracker = {'exclusive_strike': exclusive_strike, 'sold_strikes': [
-    ], 'max_lots': max_lots, 'lots_per_strike': lots_per_strike, 'week0': week0, 'week1': week1}
+    ], 'max_lots': max_lots, 'lots_per_strike': lots_per_strike, 'week0': week0, 'week1': week1, 'week0lots': week0lots, 'week1lots': week1lots}
 else:
     orders_tracker = json.load(open(client_name+'_positions.json'))
     max_lots = orders_tracker['max_lots']
@@ -308,15 +324,30 @@ else:
         ind_time = datetime.now(timezone("Asia/Kolkata")
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
 
+
+breaker = 0
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week0)
     orders_tracker = strategy(
         x, option_chain, orders_tracker, max_lots, lots_per_strike, week0)
+    if expiry_day == 1:
+        if len(orders_tracker['sold_strikes']) == 0:
+            Istrike = orders_tracker['exclusive_strike']
+            week0, week1, lots_per_strike, week1lots, week0lots = expiry_shift(
+                x, Istrike, week0, week1, week0lots, week1lots, max_lots)
+            expiry_day = 0
+        elif int(ind_time[11:13])*60+int(ind_time[14:16]) > 927:
+            Istrike = orders_tracker['exclusive_strike']
+            order_button(Istrike, 'PE_S', week1lots, week1)
+            order_button(Istrike, 'CE_S', week1lots, week1)
+            breaker = 1
+    if breaker == 1:
+        break
 
 
-if week0 != 0:
+if week0 != 0 and breaker == 0:
     exchange = 'BANKNIFTY'
     expiry_timestamps = prime_client['login'].get_expiry(
         "N", exchange).copy()
