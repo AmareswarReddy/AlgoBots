@@ -177,6 +177,19 @@ def data(week):
     return option_chain, x
 
 
+def is_expiry(week0):
+    exchange = 'BANKNIFTY'
+    expiry_timestamps = prime_client['login'].get_expiry(
+        "N", exchange).copy()
+    current_time = time.time()
+    week0time_stamp = int(
+        expiry_timestamps['Expiry'][week0]['ExpiryDate'][6:16])
+    if week0time_stamp-current_time < 55800:
+        return 1
+    else:
+        return 0
+
+
 def initial_trades(week0, week1, exclusive_strike, max_lots):
     exchange = 'BANKNIFTY'
     expiry_timestamps = prime_client['login'].get_expiry(
@@ -294,7 +307,6 @@ def strategy(x, option_chain, orders_tracker, max_lots, lots_per_strike, week):
 # %%
 client_name = input('enter the client name: ')
 start = int(input('enter 0 if starting the strategy for the first time'))
-expiry_day = int(input('is expiry day : '))
 prime_client = client_login(client=client_name)
 
 if start == 0:
@@ -307,6 +319,7 @@ if start == 0:
         ind_time = datetime.now(timezone("Asia/Kolkata")
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week0)
+    expiry_day = is_expiry(week0)
     exclusive_strike = int(np.round(x/100)*100)
     lots_per_strike, week1lots, week0lots = initial_trades(
         week0, week1, exclusive_strike, max_lots)
@@ -323,6 +336,7 @@ else:
     while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
         ind_time = datetime.now(timezone("Asia/Kolkata")
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
+    expiry_day = is_expiry(week0)
 
 
 breaker = 0
