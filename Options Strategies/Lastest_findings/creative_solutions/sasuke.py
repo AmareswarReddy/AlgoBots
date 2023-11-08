@@ -242,6 +242,9 @@ def strategy(x, option_chain, orders_tracker, max_lots, lots_per_strike, week):
     length = len(orders_tracker['sold_strikes'])
     ce_data = option_chain[option_chain['CPType'] == 'CE']
     pe_data = option_chain[option_chain['CPType'] == 'PE']
+    at_strike = int(np.round(x/100)*100)
+    lsm = (float(ce_data[ce_data['StrikeRate'] == at_strike]['LastRate']) +
+           float(pe_data[pe_data['StrikeRate'] == at_strike]['LastRate']))
     if length == 0:
         if x > exclusive_strike+100:
             order_button(exclusive_strike+100, 'CE_S', lots_per_strike, week)
@@ -283,9 +286,7 @@ def strategy(x, option_chain, orders_tracker, max_lots, lots_per_strike, week):
                 if orders_tracker['sold_strikes'][i] > exclusive_strike:
                     c_lastrate = float(
                         ce_data[ce_data['StrikeRate'] == orders_tracker['sold_strikes'][i]]['LastRate'])
-                    c_lastrate2 = float(
-                        ce_data[ce_data['StrikeRate'] == orders_tracker['sold_strikes'][i]+100]['LastRate'])
-                    if c_lastrate-c_lastrate2 < 10:
+                    if c_lastrate/lsm < 0.2:
                         order_button(
                             orders_tracker['sold_strikes'][i], 'CE_B', lots_per_strike, week)
                         to_drop += [(orders_tracker['sold_strikes'][i])]
@@ -293,9 +294,7 @@ def strategy(x, option_chain, orders_tracker, max_lots, lots_per_strike, week):
                 elif orders_tracker['sold_strikes'][i] < exclusive_strike:
                     p_lastrate = float(
                         pe_data[pe_data['StrikeRate'] == orders_tracker['sold_strikes'][i]]['LastRate'])
-                    p_lastrate2 = float(
-                        pe_data[pe_data['StrikeRate'] == orders_tracker['sold_strikes'][i]-100]['LastRate'])
-                    if p_lastrate-p_lastrate2 < 10:
+                    if p_lastrate/lsm < 0.2:
                         order_button(
                             orders_tracker['sold_strikes'][i], 'PE_B', lots_per_strike, week)
                         to_drop += [(orders_tracker['sold_strikes'][i])]
