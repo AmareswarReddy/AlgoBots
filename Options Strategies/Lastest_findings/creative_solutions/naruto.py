@@ -210,6 +210,7 @@ def initial_trades(week0, week1, max_lots):
 def strategy(orders_tracker):
     exclusive_strike = orders_tracker['exclusive_strike']
     max_lots = orders_tracker['max_lots']
+    original_max_lots = orders_tracker['original_max_lots']
     p_sumB = orders_tracker['p_sumB']
     p_sumS = orders_tracker['p_sumS']
     week0 = orders_tracker['week0']
@@ -226,15 +227,15 @@ def strategy(orders_tracker):
                              exclusive_strike]['LastRate'])
     net_profit = p_sumS+p_sumB_C-p_sumB-p_sumS_C
     at_strike = int(np.round(x/100)*100)
-    if net_profit > 0 and abs(at_strike-exclusive_strike) >= 300:
+    if net_profit > 0 and abs(x-exclusive_strike) > p_sumS+p_sumB:
         order_button(exclusive_strike, 'PE_B', max_lots, week1)
         order_button(exclusive_strike, 'PE_S', max_lots, week0)
-        order_button(at_strike, 'PE_B', max_lots, week0)
-        order_button(at_strike, 'PE_S', max_lots, week1)
+        order_button(at_strike, 'PE_B', original_max_lots, week0)
+        order_button(at_strike, 'PE_S', original_max_lots, week1)
         orders_tracker['exclusive_strike'] = at_strike
         orders_tracker['p_sumB'] = p_sumB_C
         orders_tracker['p_sumS'] = p_sumS_C
-    elif net_profit/(p_sumS-p_sumB) < -0.35 and at_strike == exclusive_strike:
+    elif net_profit/(p_sumS-p_sumB) < -0.3 and at_strike == exclusive_strike:
         order_button(exclusive_strike, 'PE_B', max_lots, week0)
         order_button(exclusive_strike, 'PE_S', max_lots, week1)
         orders_tracker['max_lots'] = max_lots*2
@@ -261,7 +262,7 @@ if start == 0:
     exclusive_strike = int(np.round(x/100)*100)
     p_sumS, p_sumB = initial_trades(
         week0, week1, max_lots)
-    orders_tracker = {'exclusive_strike': exclusive_strike,
+    orders_tracker = {'exclusive_strike': exclusive_strike, 'original_max_lots': max_lots,
                       'max_lots': max_lots,  'week0': week0, 'week1': week1, 'p_sumS': p_sumS, 'p_sumB': p_sumB}
 else:
     orders_tracker = json.load(open(client_name+'_positions.json'))
