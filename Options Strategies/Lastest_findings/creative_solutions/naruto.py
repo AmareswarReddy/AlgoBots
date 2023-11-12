@@ -207,6 +207,40 @@ def initial_trades(week0, week1, max_lots):
 # orders_tracker={'exclusive_strike':43000,'sold_strikes':[43100,43200,43300]}
 
 
+def double_edge(week0, week1):
+    option_chain0, x = data(week0)
+    option_chain1, x = data(week1)
+    exclusive_strike = int(np.round(x/100)*100)
+    pe_data = option_chain0[option_chain0['CPType'] == 'PE']
+    ce_data = option_chain0[option_chain0['CPType'] == 'CE']
+    p_sum0 = float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate']) + \
+        float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate'])
+
+    pe_data = option_chain1[option_chain1['CPType'] == 'PE']
+    ce_data = option_chain1[option_chain1['CPType'] == 'CE']
+    p_sum1 = float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate']) + \
+        float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate'])
+
+    exchange = 'BANKNIFTY'
+    expiry_timestamps = prime_client['login'].get_expiry(
+        "N", exchange).copy()
+    current_time = time.time()
+    week0time_stamp = int(
+        expiry_timestamps['Expiry'][week0]['ExpiryDate'][6:16])
+    week1time_stamp = int(
+        expiry_timestamps['Expiry'][week1]['ExpiryDate'][6:16])
+    proportion = (week0time_stamp-current_time) / \
+        (week1time_stamp-current_time-172800)
+    proportion2 = (week0time_stamp-current_time) / \
+        (week1time_stamp-current_time)
+    if (p_sum0/p_sum1) > proportion:
+        return ['sasuke', (p_sum0/p_sum1)/proportion]
+    elif (p_sum0/p_sum1) < proportion2:
+        return ['naruto', (p_sum0/p_sum1)/proportion2]
+    else:
+        ['unknown', (p_sum0/p_sum1)/proportion]
+
+
 def strategy(orders_tracker):
     exclusive_strike = orders_tracker['exclusive_strike']
     max_lots = orders_tracker['max_lots']
