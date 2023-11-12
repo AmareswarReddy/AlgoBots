@@ -294,8 +294,11 @@ if start == 0:
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week0)
     exclusive_strike = int(np.round(x/100)*100)
-    p_sumS, p_sumB = initial_trades(
-        week0, week1, max_lots)
+    trigger = double_edge(week0, week1)[0]
+    if trigger == 'naruto':
+        p_sumS, p_sumB = initial_trades(
+            week0, week1, max_lots)
+
     orders_tracker = {'exclusive_strike': exclusive_strike, 'original_max_lots': max_lots,
                       'max_lots': max_lots,  'week0': week0, 'week1': week1, 'p_sumS': p_sumS, 'p_sumB': p_sumB}
 else:
@@ -307,7 +310,7 @@ else:
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
 
 
-while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
+while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931 and trigger == 'naruto':
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     orders_tracker = strategy(orders_tracker)
