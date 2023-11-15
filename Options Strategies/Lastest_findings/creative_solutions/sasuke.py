@@ -191,44 +191,47 @@ def is_expiry(week0):
 
 
 def initial_trades(week0, week1, exclusive_strike, max_lots):
-    exchange = 'BANKNIFTY'
-    expiry_timestamps = prime_client['login'].get_expiry(
-        "N", exchange).copy()
-    current_time = time.time()
-    week0time_stamp = int(
-        expiry_timestamps['Expiry'][week0]['ExpiryDate'][6:16])
-    week1time_stamp = int(
-        expiry_timestamps['Expiry'][week1]['ExpiryDate'][6:16])
-    option_chain_week1, x = data(week1)
-    option_chain_week0, x = data(week0)
-    exclusive_strike = int(np.round(x/100)*100)
-    ce_data = option_chain_week1[option_chain_week1['CPType'] == 'CE']
-    pe_data = option_chain_week1[option_chain_week1['CPType'] == 'PE']
-    p_sum1 = float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) + \
-        float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate'])
-    ce_data = option_chain_week0[option_chain_week0['CPType'] == 'CE']
-    pe_data = option_chain_week0[option_chain_week0['CPType'] == 'PE']
-    p_sum0 = float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) + \
-        float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate'])
-    proportion = ((week0time_stamp-current_time) /
-                  (week1time_stamp-current_time))
-    week1lots = int(max_lots/(1-(proportion*p_sum1/p_sum0)))
-    week0lots = week1lots-max_lots
+    # exchange = 'BANKNIFTY'
+    # expiry_timestamps = prime_client['login'].get_expiry(
+    #    "N", exchange).copy()
+    # current_time = time.time()
+    # week0time_stamp = int(
+    #    expiry_timestamps['Expiry'][week0]['ExpiryDate'][6:16])
+    # week1time_stamp = int(
+    #    expiry_timestamps['Expiry'][week1]['ExpiryDate'][6:16])
+    # option_chain_week1, x = data(week1)
+    # option_chain_week0, x = data(week0)
+    # exclusive_strike = int(np.round(x/100)*100)
+    # ce_data = option_chain_week1[option_chain_week1['CPType'] == 'CE']
+    # pe_data = option_chain_week1[option_chain_week1['CPType'] == 'PE']
+    # p_sum1 = float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) + \
+    #    float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate'])
+    # ce_data = option_chain_week0[option_chain_week0['CPType'] == 'CE']
+    # pe_data = option_chain_week0[option_chain_week0['CPType'] == 'PE']
+    # p_sum0 = float(ce_data[ce_data['StrikeRate'] == exclusive_strike]['LastRate']) + \
+    #    float(pe_data[pe_data['StrikeRate'] == exclusive_strike]['LastRate'])
+    # proportion = ((week0time_stamp-current_time) /
+    #              (week1time_stamp-current_time))
+    # week1lots = int(max_lots/(1-(proportion*p_sum1/p_sum0)))
+    # week0lots = week1lots-max_lots
+    expected_move_per_week = 1000
+    week1lots = max_lots*2
+    week0lots = max_lots
     order_button(exclusive_strike, 'PE_B', week1lots, week1)
     order_button(exclusive_strike, 'CE_B', week1lots, week1)
     order_button(exclusive_strike, 'PE_S', week0lots, week0)
     order_button(exclusive_strike, 'CE_S', week0lots, week0)
-    lots_per_strike = max(1, int(max_lots/int(p_sum1/100)))
+    lots_per_strike = max(1, int(max_lots/int(expected_move_per_week/100)))
     return lots_per_strike, week1lots, week0lots
 
 # orders_tracker={'exclusive_strike':43000,'sold_strikes':[43100,43200,43300]}
 
 
 def expiry_shift(x, Istrike, week0, week1, week0lots, week1lots, max_lots):
-    order_button(Istrike, 'PE_S', week1lots, week1)
-    order_button(Istrike, 'CE_S', week1lots, week1)
     order_button(Istrike, 'PE_B', week0lots, week0)
     order_button(Istrike, 'CE_B', week0lots, week0)
+    order_button(Istrike, 'PE_S', week1lots, week1)
+    order_button(Istrike, 'CE_S', week1lots, week1)
     week0 += 1
     week1 += 1
     exclusive_strike = int(np.round(x/100)*100)+100
