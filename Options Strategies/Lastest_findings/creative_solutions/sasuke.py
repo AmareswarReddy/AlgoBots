@@ -345,7 +345,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     option_chain, x = data(week0)
     orders_tracker = strategy(
         x, option_chain, orders_tracker, max_lots, lots_per_strike, week0)
-    if expiry_day == 1:
+    if expiry_day == 1 and int(ind_time[11:13])*60+int(ind_time[14:16]) > 901:
         if len(orders_tracker['sold_strikes']) == 0:
             Istrike = orders_tracker['exclusive_strike']
             week0, week1, lots_per_strike, week1lots, week0lots = expiry_shift(
