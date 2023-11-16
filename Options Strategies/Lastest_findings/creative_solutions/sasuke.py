@@ -171,7 +171,11 @@ def data(week):
             option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
                 "N", exchange, current_expiry_time_stamp_weekly)['Options'])
             x = expiry_timestamps['lastrate'][0]['LTP']
-            break
+            if option_chain['Name'][0][10:12] == '22':
+                print('yes')
+                break
+            else:
+                print(option_chain['Name'][0][10:12])
         except Exception:
             pass
     return option_chain, x
@@ -227,7 +231,12 @@ def initial_trades(week0, week1, exclusive_strike, max_lots):
 # orders_tracker={'exclusive_strike':43000,'sold_strikes':[43100,43200,43300]}
 
 
-def expiry_shift(x, Istrike, week0, week1, week0lots, week1lots, max_lots):
+def expiry_shift(x, Istrike, orders_tracker):
+    week0 = orders_tracker['week0']
+    week1 = orders_tracker['week1']
+    week0lots = orders_tracker['week0lots']
+    week1lots = orders_tracker['week1lots']
+    max_lots = orders_tracker['max_lots']
     order_button(Istrike, 'PE_B', week0lots, week0)
     order_button(Istrike, 'CE_B', week0lots, week0)
     order_button(Istrike, 'PE_S', week1lots, week1)
@@ -321,7 +330,6 @@ if start == 0:
         ind_time = datetime.now(timezone("Asia/Kolkata")
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week0)
-    expiry_day = is_expiry(week0)
     exclusive_strike = int(np.round(x/100)*100)
     lots_per_strike, week1lots, week0lots = initial_trades(
         week0, week1, exclusive_strike, max_lots)
@@ -338,7 +346,6 @@ else:
     while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
         ind_time = datetime.now(timezone("Asia/Kolkata")
                                 ).strftime('%Y-%m-%d %H:%M:%S.%f')
-    expiry_day = is_expiry(week0)
 
 
 breaker = 0
@@ -348,7 +355,7 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 931:
     option_chain, x = data(week0)
     orders_tracker = strategy(
         x, option_chain, orders_tracker, max_lots, lots_per_strike, week0)
-    if expiry_day == 1 and int(ind_time[11:13])*60+int(ind_time[14:16]) > 901:
+    if is_expiry(week0) == 1 and int(ind_time[11:13])*60+int(ind_time[14:16]) > 901:
         if len(orders_tracker['sold_strikes']) == 0:
             Istrike = orders_tracker['exclusive_strike']
             week0, week1, lots_per_strike, week1lots, week0lots = expiry_shift(
@@ -371,8 +378,8 @@ if week0 != 0 and breaker == 0:
     near_expiry_stamp = int(
         expiry_timestamps['Expiry'][0]['ExpiryDate'][6:16])
     if current_time-near_expiry_stamp > 0:
-        orders_tracker['week0'] -= 1
-        orders_tracker['week1'] -= 1
+        orders_tracker['week0'] = week0-1
+        orders_tracker['week1'] = week1-1
 out_file = open(client_name+'_positions.json', "w")
 json.dump(orders_tracker, out_file, indent=6)
 out_file.close()
