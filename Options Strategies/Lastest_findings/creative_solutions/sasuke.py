@@ -171,11 +171,12 @@ def data(week):
             option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
                 "N", exchange, current_expiry_time_stamp_weekly)['Options'])
             x = expiry_timestamps['lastrate'][0]['LTP']
-            if option_chain['Name'][0][10:12] == '22':
-                print('yes')
-                break
-            else:
-                print(option_chain['Name'][0][10:12])
+            break
+            # if option_chain['Name'][0][10:12] == '22':
+            #    print('yes')
+            #    break
+            # else:
+            #    print(option_chain['Name'][0][10:12])
         except Exception:
             pass
     return option_chain, x
