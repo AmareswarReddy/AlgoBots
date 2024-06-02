@@ -220,7 +220,7 @@ def strategy(orders_tracker, x):
     return orders_tracker
 
 
-    # %%
+# %%
 client_name = input('enter the client name: ')
 prime_client = client_login(client=client_name)
 
@@ -231,14 +231,15 @@ ind_time = datetime.now(timezone("Asia/Kolkata")
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
+# %%
 option_chain, x = data(week0)
 decider = np.random.rand()
-if decider > 0.5:
-    week0 = 0
-    max_lots = 1
-    final_strike = initial_trades(week0, max_lots)
-    orders_tracker = {'final_strike': final_strike,
-                      'max_lots': max_lots,  'week0': week0, 'init_x': x}
+
+week0 = 0
+max_lots = 1
+final_strike = initial_trades(week0, max_lots, decider)
+orders_tracker = {'final_strike': final_strike,
+                  'max_lots': max_lots,  'week0': week0, 'init_x': x}
 
 
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 900:
@@ -247,13 +248,15 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 900:
     option_chain, x = data(week0)
     orders_tracker = strategy(orders_tracker, x)
     if orders_tracker['final_strike'] == 0:
-        final_strike = initial_trades(week0, max_lots)
         decider = np.random.rand()
-        if decider > 0.5:
-            week0 = 0
-            max_lots = 1
-            final_strike = initial_trades(week0, max_lots)
-            orders_tracker = {'final_strike': final_strike,
-                              'max_lots': max_lots,  'week0': week0, 'init_x': x}
+        final_strike = initial_trades(week0, max_lots, decider)
+
+        week0 = 0
+        max_lots = 1
+        final_strike = initial_trades(week0, max_lots, decider)
+        orders_tracker = {'final_strike': final_strike,
+                          'max_lots': max_lots,  'week0': week0, 'init_x': x}
 
 orders_tracker = strategy(orders_tracker, 0)
+
+# %%
