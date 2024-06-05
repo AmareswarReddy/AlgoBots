@@ -177,6 +177,35 @@ def data(week):
     return option_chain, x
 
 
+def data(week):
+    exchange = 'NIFTY'
+    while True:
+        try:
+            week = 0
+            expiry_timestamps = prime_client['login'].get_expiry(
+                "N", exchange).copy()
+            current_expiry_time_stamp_weekly = int(
+                expiry_timestamps['Expiry'][week]['ExpiryDate'][6:19])
+            option_chain = pd.DataFrame(prime_client['login'].get_option_chain(
+                "N", exchange, current_expiry_time_stamp_weekly)['Options'])
+            option_chain = option_chain[option_chain.StrikeRate % 50 == 0]
+            ce_data = option_chain[option_chain['CPType'] == 'CE']
+            pe_data = option_chain[option_chain['CPType'] == 'PE']
+            a = 50
+            strike = 0
+            for i in ce_data['StrikeRate']:
+
+                if abs(float(ce_data[ce_data['StrikeRate'] == i]['LastRate'])-float(pe_data[pe_data['StrikeRate'] == i]['LastRate'])) < a and float(ce_data[ce_data['StrikeRate'] == i]['LastRate']) > 5 and float(pe_data[pe_data['StrikeRate'] == i]['LastRate']) > 5:
+                    a = float(ce_data[ce_data['StrikeRate'] == i]['LastRate']) - \
+                        float(pe_data[pe_data['StrikeRate'] == i]['LastRate'])
+                    strike = i
+            x = strike+a
+            break
+        except Exception:
+            pass
+    return option_chain, x
+
+
 def is_expiry(week0):
     exchange = 'BANKNIFTY'
     expiry_timestamps = prime_client['login'].get_expiry(
@@ -204,7 +233,8 @@ def initial_trades(week0, max_lots, decider):
         (decider > 0.5)*int(np.round(net_sum/100)*100)
     order_button(final_strike, 'PE_B', max_lots, week0)
     order_button(final_strike, 'CE_B', max_lots, week0)
-    return final_strike
+    max_move = abs(exclusive_strike-final_strike)
+    return final_strike, max_move
 
 
 def strategy(orders_tracker, x):
@@ -212,11 +242,12 @@ def strategy(orders_tracker, x):
     final_strike = orders_tracker['final_strike']
     max_lots = orders_tracker['max_lots']
     week0 = orders_tracker['week0']
-    if abs(init_x-x) > 100:
+    max_move = orders_tracker['max_move']
+    if abs(init_x-x) > max_move:
         order_button(final_strike, 'PE_S', max_lots, week0)
         order_button(final_strike, 'CE_S', max_lots, week0)
         orders_tracker = {'final_strike': 0,
-                          'max_lots': 0,  'week0': 0, 'init_x': 0}
+                          'max_lots': max_lots,  'week0': week0, 'init_x': init_x, 'max_move': 0}
     return orders_tracker
 
 
@@ -237,9 +268,9 @@ decider = np.random.rand()
 
 week0 = 0
 max_lots = 1
-final_strike = initial_trades(week0, max_lots, decider)
+final_strike, max_move = initial_trades(week0, max_lots, decider)
 orders_tracker = {'final_strike': final_strike,
-                  'max_lots': max_lots,  'week0': week0, 'init_x': x}
+                  'max_lots': max_lots,  'week0': week0, 'init_x': x, 'max_move': max_move}
 
 
 while int(ind_time[11:13])*60+int(ind_time[14:16]) < 900:
@@ -249,13 +280,9 @@ while int(ind_time[11:13])*60+int(ind_time[14:16]) < 900:
     orders_tracker = strategy(orders_tracker, x)
     if orders_tracker['final_strike'] == 0:
         decider = np.random.rand()
-        final_strike = initial_trades(week0, max_lots, decider)
-
-        week0 = 0
-        max_lots = 1
-        final_strike = initial_trades(week0, max_lots, decider)
-        orders_tracker = {'final_strike': final_strike,
-                          'max_lots': max_lots,  'week0': week0, 'init_x': x}
+        final_strike, max_move = initial_trades(week0, max_lots, decider)
+        orders_tracker['final_strike'] = final_strike
+        orders_tracker['max_move'] = max_move
 
 orders_tracker = strategy(orders_tracker, 0)
 
