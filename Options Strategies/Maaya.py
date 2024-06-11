@@ -30,9 +30,8 @@ def client_login(client):
     dob = creds[client]["dob"]
     client_list[client]['strategy'] = strategies(
         user=user, passw=passw, dob=dob, cred=vinathi_cred)
-    client_list[client]['login'] = FivePaisaClient(
-        email=user, passwd=passw, dob=dob, cred=vinathi_cred)
-    client_list[client]['login'].login()
+    client_list[client]['login'] = FivePaisaClient(cred=vinathi_cred)
+    client_list[client]['login'].get_totp_session('', '', '')
     return client_list[client]
 # client_name=input('enter the client name Eg: vinathi,bhaskar '
 
@@ -181,7 +180,6 @@ def data(week):
     exchange = 'NIFTY'
     while True:
         try:
-            week = 0
             expiry_timestamps = prime_client['login'].get_expiry(
                 "N", exchange).copy()
             current_expiry_time_stamp_weekly = int(
@@ -243,12 +241,30 @@ def strategy(orders_tracker, x):
     max_lots = orders_tracker['max_lots']
     week0 = orders_tracker['week0']
     max_move = orders_tracker['max_move']
+    losses = orders_tracker['losses']
     if abs(init_x-x) > max_move:
         order_button(final_strike, 'PE_S', max_lots, week0)
         order_button(final_strike, 'CE_S', max_lots, week0)
-        orders_tracker = {'final_strike': 0,
-                          'max_lots': max_lots,  'week0': week0, 'init_x': init_x, 'max_move': 0}
+        if final_strike != int(np.round(x/100)*100):
+            orders_tracker = {'final_strike': 0,
+                              'max_lots': max_lots,  'week0': week0, 'init_x': x, 'max_move': 0, 'losses': 0}
+        else:
+            orders_tracker = {'final_strike': 0,
+                              'max_lots': max_lots,  'week0': week0, 'init_x': x, 'max_move': 0, 'losses': losses+1}
     return orders_tracker
+
+
+def premium_decay(premium_sum):
+    option_chain_week0, x = data(week0)
+    exclusive_strike = int(np.round(x/100)*100)
+    pe_data = option_chain_week0[option_chain_week0['CPType'] == 'PE']
+    ce_data = option_chain_week0[option_chain_week0['CPType'] == 'CE']
+    p_sumB = float(pe_data[pe_data['StrikeRate'] ==
+                   exclusive_strike]['LastRate'])
+    c_sumB = float(ce_data[ce_data['StrikeRate'] ==
+                   exclusive_strike]['LastRate'])
+    net_sum = p_sumB+c_sumB
+    return premium_sum-net_sum
 
 
 # %%
@@ -259,30 +275,47 @@ max_lots = int(input('max lots : '))
 week0 = int(input('enter the buying week'))
 ind_time = datetime.now(timezone("Asia/Kolkata")
                         ).strftime('%Y-%m-%d %H:%M:%S.%f')
-while int(ind_time[11:13])*60+int(ind_time[14:16]) < 556 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
+while int(ind_time[11:13])*60+int(ind_time[14:16]) < 600 or int(ind_time[11:13])*60+int(ind_time[14:16]) > 1085:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
 # %%
 option_chain, x = data(week0)
 decider = np.random.rand()
 
-week0 = 0
-max_lots = 1
+# option_chain_week0, x = data(week0)
+# exclusive_strike = int(np.round(x/100)*100)
+# pe_data = option_chain_week0[option_chain_week0['CPType'] == 'PE']
+# ce_data = option_chain_week0[option_chain_week0['CPType'] == 'CE']
+# p_sumB = float(pe_data[pe_data['StrikeRate'] ==
+#               exclusive_strike]['LastRate'])
+# c_sumB = float(ce_data[ce_data['StrikeRate'] ==
+#               exclusive_strike]['LastRate'])
+# premium_sum = p_sumB+c_sumB
+while True:
+    option_chain_week0, x = data(week0)
+    new_strike = int(np.round(x/100)*100)
+    # if premium_decay(premium_sum) > 80 and new_strike == exclusive_strike:
+    #    break
+    break
 final_strike, max_move = initial_trades(week0, max_lots, decider)
 orders_tracker = {'final_strike': final_strike,
-                  'max_lots': max_lots,  'week0': week0, 'init_x': x, 'max_move': max_move}
+                  'max_lots': max_lots,  'week0': week0, 'init_x': x, 'max_move': max_move, 'losses': 0}
 
-
-while int(ind_time[11:13])*60+int(ind_time[14:16]) < 900:
+# %%
+while int(ind_time[11:13])*60+int(ind_time[14:16]) < 899:
     ind_time = datetime.now(timezone("Asia/Kolkata")
                             ).strftime('%Y-%m-%d %H:%M:%S.%f')
     option_chain, x = data(week0)
+    # x = int(input('x= '))
     orders_tracker = strategy(orders_tracker, x)
     if orders_tracker['final_strike'] == 0:
         decider = np.random.rand()
+        losses = orders_tracker['losses']
+        max_lots += losses
         final_strike, max_move = initial_trades(week0, max_lots, decider)
         orders_tracker['final_strike'] = final_strike
         orders_tracker['max_move'] = max_move
+        orders_tracker['max_lots'] = max_lots
 
 orders_tracker = strategy(orders_tracker, 0)
 
