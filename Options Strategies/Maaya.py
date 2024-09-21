@@ -276,3 +276,5 @@ while True:
     d = data(0)
     tron_s, tron_b, c_strike_s, c_strike_b = strategy(
         d, tron_s, tron_b, c_strike_s, c_strike_b, week)
+
+# %%
