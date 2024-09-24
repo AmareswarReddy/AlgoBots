@@ -1,6 +1,6 @@
 Follow the setup for Maximum returns
 
-
+Trading Setups: 
  
 RULES
 
