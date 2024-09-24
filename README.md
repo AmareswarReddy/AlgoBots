@@ -1,6 +1,9 @@
 Follow the setup for Maximum returns
 
-Trading Setups: 
+
+<img width="586" alt="Screenshot 2024-09-24 at 7 10 55 AM" src="https://github.com/user-attachments/assets/f4cf5b77-9e2c-4b38-903f-e5e7464ed82d">
+
+
  
 RULES
 
